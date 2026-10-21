@@ -1,0 +1,30 @@
+{
+  "name": "図面スコープ",
+  "short_name": "図面スコープ",
+  "description": "SFC図面をスマホで開いて、寸法・面積の確認やメモ書きができるビューア",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0f14",
+  "theme_color": "#151c24",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
