@@ -89,7 +89,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 #app[data-tool="pen"] #leftbtns{bottom:calc(var(--dock-h) + 70px)}
 #app[data-tool="draft"] #leftbtns{bottom:calc(var(--dock-h) + 102px)}
 #draftbar{left:max(16px,env(safe-area-inset-left,0px));bottom:calc(var(--dock-h) + 32px);max-width:calc(100% - max(16px,env(safe-area-inset-left,0px)) - max(16px,env(safe-area-inset-right,0px)) - 92px);overflow-x:auto;display:flex;align-items:center;gap:3px;padding:5px;border-radius:999px;background:rgba(21,28,36,.96);border:1px solid var(--rule);box-shadow:0 8px 22px rgba(0,0,0,.4)}
-.dm{height:34px;flex:none;padding:0 10px;border:0;border-radius:999px;background:transparent;color:var(--dim);font-weight:700;font-size:12.5px;touch-action:manipulation}
+.dm{height:34px;flex:none;padding:0 9px;border:0;border-radius:999px;background:transparent;color:var(--dim);font-weight:700;font-size:12.5px;touch-action:manipulation}
 .dm.on{background:var(--text);color:var(--steel)}
 #areabar{right:calc(max(16px,env(safe-area-inset-right,0px)) + 88px);bottom:calc(var(--dock-h) + 30px);display:flex;gap:8px}
 .pill{height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--rule);background:rgba(31,42,53,.96);font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:6px;touch-action:manipulation}
@@ -246,6 +246,7 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
     <button class="dm" data-dm="v" type="button">垂直</button>
     <button class="dm" data-dm="perp" type="button">垂線</button>
     <button class="dm" data-dm="circle" type="button">円</button>
+    <button class="dm" data-dm="hide" type="button">隠す</button>
     <span class="sep"></span>
     <button class="sw" id="draftColor" style="--c:#ff3b30" type="button" aria-label="線の色を切り替え"><i></i></button>
   </div>
@@ -504,7 +505,7 @@ function flatten(M){
   const F=M.feats,NL=M.layers.length;
   const PT=new F64(1<<15);
   const P={off:new I32(),n:new I32(),st:new I32(),L:new I32(),fl:new I32(),rx:new I32(),bb:new F64()};
-  const SN={x:new F64(),y:new F64(),k:new I32(),L:new I32(),rx:new I32()};
+  const SN={x:new F64(),y:new F64(),k:new I32(),L:new I32(),rx:new I32(),p:new I32()};let lastPrim=-1;
   const texts=[],marks=[],arrows=[],fills=[],styles=[],styleMap=new Map(),regions=[];
   const xfs=[{m:[1,0,0,1,0,0],inv:[1,0,0,1,0,0],s:1,kind:0,name:'用紙'}];
   const lcount=new Array(NL).fill(0);const skipped={};
@@ -520,9 +521,9 @@ function flatten(M){
     for(let i=0;i<n;i++){const x=loc[2*i],y=loc[2*i+1];const X=a*x+c*y+e,Y=b*x+d*y+f;PT.push(X);PT.push(Y);if(X<x0)x0=X;if(X>x1)x1=X;if(Y<y0)y0=Y;if(Y>y1)y1=Y}
     if(!isFinite(x0+y0+x1+y1)){PT.n=off*2;return-1}
     P.off.push(off);P.n.push(n);P.st.push(st);P.L.push(L);P.fl.push((closed?1:0)|flags);P.rx.push(rx);P.bb.push(x0);P.bb.push(y0);P.bb.push(x1);P.bb.push(y1);
-    lcount[L]++;grow(x0,y0,x1,y1);return np++;
+    lcount[L]++;grow(x0,y0,x1,y1);lastPrim=np;return np++;
   }
-  function sp(m,x,y,k,L,rx){const X=m[0]*x+m[2]*y+m[4],Y=m[1]*x+m[3]*y+m[5];if(!isFinite(X+Y))return;SN.x.push(X);SN.y.push(Y);SN.k.push(k);SN.L.push(L);SN.rx.push(rx)}
+  function sp(m,x,y,k,L,rx){const X=m[0]*x+m[2]*y+m[4],Y=m[1]*x+m[3]*y+m[5];if(!isFinite(X+Y))return;SN.x.push(X);SN.y.push(Y);SN.k.push(k);SN.L.push(L);SN.rx.push(rx);SN.p.push(lastPrim)}
   function addText(s,x,y,h,w,ang,bp,dir,cc,font,L,m,rx){
     if(!s||!/\S/.test(s))return;
     const a=ang*D2R,ca=Math.cos(a),sa=Math.sin(a);
@@ -574,7 +575,7 @@ function flatten(M){
   function walk(comps,m,Lov,rx,depth,stack){
     const sc=avgScale(m)||1;
     for(let ci=0;ci<comps.length;ci++){
-      const f=F[comps[ci]],p=f.p;
+      const f=F[comps[ci]],p=f.p;lastPrim=-1;
       try{
         switch(f.name){
           case 'line_feature':{const L=lay(int(p[0]),Lov),st=sty(int(p[1]),int(p[2]),int(p[3]));const x1=num(p[4]),y1=num(p[5]),x2=num(p[6]),y2=num(p[7]);prim([x1,y1,x2,y2],false,0,st,L,m,rx);sp(m,x1,y1,1,L,rx);sp(m,x2,y2,1,L,rx);sp(m,(x1+x2)/2,(y1+y2)/2,2,L,rx);break}
@@ -628,7 +629,7 @@ function flatten(M){
   }
   walk(M.sheet.comps,[1,0,0,1,0,0],null,0,0,new Set());
   return{pts:PT.done(),P:{off:P.off.done(),n:P.n.done(),st:P.st.done(),L:P.L.done(),fl:P.fl.done(),rx:P.rx.done(),bb:P.bb.done()},np,
-    snap:{x:SN.x.done(),y:SN.y.done(),k:SN.k.done(),L:SN.L.done(),rx:SN.rx.done()},texts,marks,arrows,fills,styles,xfs,regions,lcount,skipped};
+    snap:{x:SN.x.done(),y:SN.y.done(),k:SN.k.done(),L:SN.L.done(),rx:SN.rx.done(),p:SN.p.done()},texts,marks,arrows,fills,styles,xfs,regions,lcount,skipped};
 }
 
 /* ---------- indexes: render batches + snap grid ---------- */
@@ -670,7 +671,7 @@ function finalize(G,M,meta){
     b.idx.push(i);if(x0<b.bb[0])b.bb[0]=x0;if(y0<b.bb[1])b.bb[1]=y0;if(x1>b.bb[2])b.bb[2]=x1;if(y1>b.bb[3])b.bb[3]=y1;
   }
   const pts=G.pts;const batches=[...bm.values()].sort((a,b)=>a.st-b.st);
-  for(const b of batches){const path=new Path2D();for(const i of b.idx){const o=P.off[i]*2,n=P.n[i];path.moveTo(pts[o],pts[o+1]);for(let j=1;j<n;j++)path.lineTo(pts[o+2*j],pts[o+2*j+1]);if(P.fl[i]&1)path.closePath()}b.path=path;b.idx=null}
+  buildPaths(batches,P,pts,null);
   // snap grid
   const cs=Math.max(world.w,world.h)/160||1;const gx0=world.x0,gy0=world.y0;
   const key=(x,y)=>{const cx=clamp(Math.floor((x-gx0)/cs),-30000,30000),cy=clamp(Math.floor((y-gy0)/cs),-30000,30000);return(cx+32768)*65536+(cy+32768)};
@@ -693,10 +694,13 @@ function finalize(G,M,meta){
   }
   const layers=M.layers.map((l,i)=>({name:l.name,count:G.lcount[i]||0}));
   const vis=new Uint8Array(M.layers.length);M.layers.forEach((l,i)=>vis[i]=l.visible?1:0);
-  return Object.assign({},meta,{M,sheet:{w:sw,h:sh,label:slabel,name:s.name||''},pts,P,np,styles:G.styles,batches,texts:G.texts,marks:G.marks,arrows:G.arrows,fills:G.fills,xfs:G.xfs,regions:G.regions,
+  return Object.assign({},meta,{hid:new Uint8Array(np),M,sheet:{w:sw,h:sh,label:slabel,name:s.name||''},pts,P,np,styles:G.styles,batches,texts:G.texts,marks:G.marks,arrows:G.arrows,fills:G.fills,xfs:G.xfs,regions:G.regions,
     snap:G.snap,grid:{cs,gx0,gy0,key,pts:gp,segs,segP,segA,segB},layers,vis,fit,info:M.info,bg:M.bg,skipped:G.skipped});
 }
 
+function buildPaths(batches,P,pts,hid){
+  for(const b of batches){if(hid&&!b.idx.some(i=>hid[i])&&b.path&&!b.dirty)continue;const path=new Path2D();let any=false;for(const i of b.idx){if(hid&&hid[i])continue;any=true;const o=P.off[i]*2,n=P.n[i];path.moveTo(pts[o],pts[o+1]);for(let j=1;j<n;j++)path.lineTo(pts[o+2*j],pts[o+2*j+1]);if(P.fl[i]&1)path.closePath()}b.path=path;b.empty=!any;b.dirty=!!hid&&b.idx.some(i=>hid[i])}
+}
 /* =========================================================
    sample drawing (fictional), written as real SFC text
    ========================================================= */
@@ -780,7 +784,7 @@ function sampleSFC(){
 let D=null;                       // current drawing
 const V={cx:0,cy:0,z:1};          // view: sheet point at canvas centre, px per mm
 const S={tool:'pan',mA:null,areaPts:[],sel:null,notes:[],undo:[],snap:null,manual:0,penColor:'#ff3b30',penW:2.5,eraser:false,draftMode:'line',dA:null,dBase:null,draftColor:'#ff3b30'};
-const DRAFT_NAMES={line:'直線',h:'水平線',v:'垂直線',perp:'垂線',circle:'円'};
+const DRAFT_NAMES={line:'直線',h:'水平線',v:'垂直線',perp:'垂線',circle:'円',hide:'線を隠す'};
 const DRAFT_COLORS=['#ff3b30','#3d8bff','#3fd28f','auto'];
 const aiming=()=>S.tool==='measure'||S.tool==='area'||S.tool==='draft';
 const inkColor=c=>c==='auto'?(settings.theme==='dark'?'#f2f5f8':'#111111'):c;
@@ -841,7 +845,7 @@ function* renderGen(ctx,Wc,Hc,pr,v,opt){
   const minPx=Math.max(.6,1.15/pr);
   const EMPTY=[];let dashOn=false;
   for(const b of D.batches){
-    if(!vis[b.L]||!hit(b.bb))continue;
+    if(!vis[b.L]||b.empty||!hit(b.bb))continue;
     const s=D.styles[b.st];
     ctx.setTransform(k,0,0,-k,tx,ty);ctx.strokeStyle=themeColor(s.rgb);
     const px=settings.weight?clamp(s.w*z*.8,minPx,4.5):minPx;ctx.lineWidth=px/z;
@@ -1069,9 +1073,9 @@ function snapAt(sx,sy,rpx){
   if(!D)return null;const g=D.grid,z=V.z;const q=toSheet(sx,sy);const x=q[0],y=q[1],r=rpx/z;
   const cx0=Math.floor((x-r-g.gx0)/g.cs)-1,cx1=Math.floor((x+r-g.gx0)/g.cs)+1,cy0=Math.floor((y-r-g.gy0)/g.cs)-1,cy1=Math.floor((y+r-g.gy0)/g.cs)+1;
   const ncell=(cx1-cx0+1)*(cy1-cy0+1);if(ncell>5000)return null;
-  const vis=D.vis,SX=D.snap.x,SY=D.snap.y,SK=D.snap.k,SL=D.snap.L,SR=D.snap.rx;let best=null,bs=Infinity;
+  const vis=D.vis,SX=D.snap.x,SY=D.snap.y,SK=D.snap.k,SL=D.snap.L,SR=D.snap.rx,SPI=D.snap.p,HID=D.hid;let best=null,bs=Infinity;
   const ck=(cx,cy)=>(clamp(cx,-30000,30000)+32768)*65536+(clamp(cy,-30000,30000)+32768);
-  for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const arr=g.pts.get(ck(cx,cy));if(!arr)continue;for(let j=0;j<arr.length;j++){const i=arr[j];if(!vis[SL[i]])continue;const d=Math.hypot(SX[i]-x,SY[i]-y);if(d>r)continue;const s=d*z+KBIAS[SK[i]];if(s<bs){bs=s;best={x:SX[i],y:SY[i],kind:SK[i],rx:SR[i]}}}}
+  for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const arr=g.pts.get(ck(cx,cy));if(!arr)continue;for(let j=0;j<arr.length;j++){const i=arr[j];if(!vis[SL[i]]||(SPI[i]>=0&&HID[SPI[i]]))continue;const d=Math.hypot(SX[i]-x,SY[i]-y);if(d>r)continue;const s=d*z+KBIAS[SK[i]];if(s<bs){bs=s;best={x:SX[i],y:SY[i],kind:SK[i],rx:SR[i]}}}}
   // points of what the viewer has drawn (lines, circles, tapes, areas)
   const tryPt=(px,py,k,rxv)=>{const d=Math.hypot(px-x,py-y);if(d>r)return;const s=d*z+KBIAS[k];if(s<bs){bs=s;best={x:px,y:py,kind:k,rx:rxv}}};
   for(const n of S.notes){
@@ -1101,7 +1105,7 @@ function collectSegs(x,y,r){
   if(g.segs){
     const cx0=Math.floor((x-r-g.gx0)/g.cs)-1,cx1=Math.floor((x+r-g.gx0)/g.cs)+1,cy0=Math.floor((y-r-g.gy0)/g.cs)-1,cy1=Math.floor((y+r-g.gy0)/g.cs)+1;
     if((cx1-cx0+1)*(cy1-cy0+1)<=1200){const seen=new Set();
-      for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const arr=g.segs.get(ck(cx,cy));if(!arr)continue;for(let j=0;j<arr.length;j++){const id=arr[j];if(seen.has(id))continue;seen.add(id);const p=g.segP[id];if(!vis[P.L[p]])continue;const a=g.segA[id],b=g.segB[id];const ax=pts[2*a],ay=pts[2*a+1],bx=pts[2*b],by=pts[2*b+1];const q=near(ax,ay,bx,by);if(q[2]<=r)out.push({d:q[2],px:q[0],py:q[1],p,a,ax,ay,bx,by,rx:P.rx[p]})}}}
+      for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const arr=g.segs.get(ck(cx,cy));if(!arr)continue;for(let j=0;j<arr.length;j++){const id=arr[j];if(seen.has(id))continue;seen.add(id);const p=g.segP[id];if(!vis[P.L[p]]||D.hid[p])continue;const a=g.segA[id],b=g.segB[id];const ax=pts[2*a],ay=pts[2*a+1],bx=pts[2*b],by=pts[2*b+1];const q=near(ax,ay,bx,by);if(q[2]<=r)out.push({d:q[2],px:q[0],py:q[1],p,a,ax,ay,bx,by,rx:P.rx[p]})}}}
   }
   S.notes.forEach((n,i)=>{if(n.t!=='line')return;const q=near(n.a[0],n.a[1],n.b[0],n.b[1]);if(q[2]<=r)out.push({d:q[2],px:q[0],py:q[1],p:-(i+2),a:-(i+2)*10,ax:n.a[0],ay:n.a[1],bx:n.b[0],by:n.b[1],rx:n.rx!=null?n.rx:-1})});
   return out;
@@ -1112,11 +1116,18 @@ function segAt(sx,sy,rpx){const q=toSheet(sx,sy);const c=collectSegs(q[0],q[1],r
 function perpFoot(sg,x,y){const vx=sg.bx-sg.ax,vy=sg.by-sg.ay,l=vx*vx+vy*vy;if(!l)return[sg.ax,sg.ay];const t=((x-sg.ax)*vx+(y-sg.ay)*vy)/l;return[sg.ax+vx*t,sg.ay+vy*t]}
 function draftTarget(){
   const tg=currentTarget();const p={x:tg.x,y:tg.y,kind:tg.kind,rx:tg.rx,t0:tg.t0};
-  if(S.dA){if(S.draftMode==='h')p.y=S.dA.y;else if(S.draftMode==='v')p.x=S.dA.x}
+  if(S.dA){if(S.draftMode==='h')p.y=S.dA.y;else if(S.draftMode==='v')p.x=S.dA.x;else orthoFix(S.dA,p)}
   return p;
 }
+function primAt(sx,sy,rpx){const q=toSheet(sx,sy);const c=collectSegs(q[0],q[1],rpx/V.z).filter(u=>u.p>=0);if(!c.length)return-1;c.sort((u,w)=>u.d-w.d);return c[0].p}
+function setHidden(i,on){D.hid[i]=on?1:0;buildPaths(D.batches,D.P,D.pts,D.hid);invalidateAll();if(aiming())updateSnap()}
+function hiddenCount(){let n=0;for(let i=0;i<D.hid.length;i++)n+=D.hid[i];return n}
+// keep a straight line exactly horizontal/vertical when it is drawn within 3 degrees of it
+function orthoFix(a,p){if(!a||S.draftMode!=='line'||(p.kind&&p.kind!==6))return p;const dx=p.x-a.x,dy=p.y-a.y,t=Math.tan(3*D2R);if(Math.abs(dy)<=Math.abs(dx)*t){p.y=a.y;p.ortho='水平'}else if(Math.abs(dx)<=Math.abs(dy)*t){p.x=a.x;p.ortho='垂直'}return p}
 function draftPlace(p,sx,sy){
   const m=S.draftMode,col=S.draftColor;
+  if(m==='hide'){const i=primAt(sx!=null?sx:RC.x,sy!=null?sy:RC.y,26);if(i<0){toast('隠したい線に照準を合わせてください');return}setHidden(i,true);pushUndo({op:'hide',i});scheduleSave();sfx('erase');buzz(10);toast('線を隠しました（↶で戻せます）');return}
+  orthoFix(S.dA,p);
   if(m==='perp'){
     if(!S.dBase){const sg=segAt(sx!=null?sx:RC.x,sy!=null?sy:RC.y,30);if(!sg){toast('基準にする線に照準を合わせてください');sfx('erase');return}S.dBase=sg;effects.push({x:p.x,y:p.y,t0:now(),c:inkColor(col)});sfx('place');buzz(12);return}
     const f=perpFoot(S.dBase,p.x,p.y);const mm=measure(p,{x:f[0],y:f[1],rx:p.rx});
@@ -1137,6 +1148,7 @@ function draftPlace(p,sx,sy){
 }
 function draftReadout(ro,rv,rs){
   const m=S.draftMode,nm=DRAFT_NAMES[m];
+  if(m==='hide'){rv.className='rv small';rv.textContent='隠したい線に照準を合わせる';const n=hiddenCount();rs.textContent='「置く」かタップで非表示'+(n?' · 隠した線 '+n+'本（メニューのレイヤで戻せます）':'');return}
   if(m==='perp'){
     if(!S.dBase){rv.className='rv small';rv.textContent='基準にする線に照準を合わせる';rs.textContent='「置く」で基準線を決定（図面の線・追記した線）';return}
     const tg=currentTarget();const p={x:tg.x,y:tg.y,rx:resolveRx(tg)};const f=perpFoot(S.dBase,p.x,p.y);const mm=measure(p,{x:f[0],y:f[1],rx:p.rx});
@@ -1147,7 +1159,7 @@ function draftReadout(ro,rv,rs){
   if(!S.dA){rv.className='rv small';rv.textContent=what+'に照準を合わせる';rs.textContent=nm+' · 「置く」で'+what+'を決定';return}
   const t=draftTarget();const mm=measure(S.dA,{x:t.x,y:t.y,rx:S.dA.rx});rv.className='rv';
   if(m==='circle'){rv.textContent='R '+fmtLen(mm.real);rs.textContent='直径 '+fmtLen(mm.real*2)+' · '+mm.sc}
-  else{rv.textContent=fmtLen(mm.real);rs.textContent=nm+' · '+mm.sc}
+  else{rv.textContent=fmtLen(mm.real);rs.textContent=(t.ortho||nm)+' · '+mm.sc}
   if(mm.unscaled&&!S.manual){rs.textContent='図上の長さです（縮尺を指定できます）';ro.classList.add('warn')}
 }
 function rightAngle(ctx,fx,fy,ux,uy,nx,ny,s){ctx.beginPath();ctx.moveTo(fx+ux*s,fy+uy*s);ctx.lineTo(fx+ux*s+nx*s,fy+uy*s+ny*s);ctx.lineTo(fx+nx*s,fy+ny*s);ctx.stroke()}
@@ -1155,6 +1167,7 @@ function drawDraftLive(ctx,tp){
   const col=inkColor(S.draftColor);ctx.lineCap='round';
   const dot=(x,y)=>{ctx.fillStyle='rgba(0,0,0,.6)';ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,3.4,0,Math.PI*2);ctx.fill()};
   const extLine=(sg,alpha)=>{const a=toScreen(sg.ax,sg.ay),b=toScreen(sg.bx,sg.by);const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,E=Math.hypot(W,H);ctx.globalAlpha=alpha;ctx.setLineDash([8,6]);ctx.lineWidth=1.6;ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(a[0]-ux*E,a[1]-uy*E);ctx.lineTo(b[0]+ux*E,b[1]+uy*E);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()};
+  if(S.draftMode==='hide'){const i=primAt(RC.x,RC.y,26);if(i<0)return;const P=D.P,o=P.off[i]*2,n=P.n[i];ctx.beginPath();for(let j=0;j<n;j++){const q=toScreen(D.pts[o+2*j],D.pts[o+2*j+1]);j?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])}if(P.fl[i]&1)ctx.closePath();ctx.strokeStyle='rgba(255,59,48,.85)';ctx.lineWidth=6;ctx.setLineDash([6,5]);ctx.stroke();ctx.setLineDash([]);return}
   if(S.draftMode==='perp'){
     if(!S.dBase){const sg=segAt(RC.x,RC.y,30);if(sg)extLine(sg,.45);return}
     extLine(S.dBase,.7);const tg=currentTarget();const f=perpFoot(S.dBase,tg.x,tg.y);const fp=toScreen(f[0],f[1]),pp=toScreen(tg.x,tg.y);
@@ -1258,6 +1271,8 @@ function undo(){
   else if(u.op==='del'){S.notes.splice(Math.min(u.index,S.notes.length),0,u.note)}
   else if(u.op==='edit'){const i=S.notes.findIndex(n=>n.id===u.id);if(i>=0)S.notes[i]=u.before}
   else if(u.op==='clear'){S.notes=u.notes}
+  else if(u.op==='hide'){setHidden(u.i,false)}
+  else if(u.op==='unhideAll'){u.list.forEach(i=>D.hid[i]=1);buildPaths(D.batches,D.P,D.pts,D.hid);invalidateAll()}
   if(S.sel)select(S.notes.find(n=>n.id===S.sel)||null);
   sfx('undo');toast('元に戻しました');notesChanged();
 }
@@ -1297,7 +1312,7 @@ let saveTimer=0,saving=false,saveAgain=false,saveState='idle';
 function scheduleSave(){if(!D||D.noSave)return;clearTimeout(saveTimer);saveTimer=setTimeout(flushSave,650)}
 async function flushSave(){
   if(!D)return;if(saving){saveAgain=true;return}saving=true;
-  const body={kind:'drawing',name:D.name,hash:D.hash,size:D.size,updatedAt:Date.now(),manual:S.manual||0,notes:cleanNotes()};
+  const body={kind:'drawing',name:D.name,hash:D.hash,size:D.size,updatedAt:Date.now(),manual:S.manual||0,notes:cleanNotes(),hidden:D.hid?Array.from(D.hid.reduce((a,v,i)=>(v&&a.push(i),a),[])):[]};
   try{
     const bytes=new TextEncoder().encode(JSON.stringify(body)).length;
     if(bytes>250000){toast('書き込みが多すぎて保存できません。古い手書きを消してください',3500);saveState='error'}
@@ -1340,7 +1355,7 @@ async function openBuffer(buf,name,opt={}){
     if(!opt.sample)Cache.put(hash,name,buf);
     const saved=await Store.load(hash);
     if(D&&D.hash===hash){
-      if(saved&&Array.isArray(saved.notes)){S.notes=saved.notes;S.manual=saved.manual||0}
+      if(saved&&Array.isArray(saved.notes)){S.notes=saved.notes;S.manual=saved.manual||0;if(Array.isArray(saved.hidden)&&saved.hidden.length){saved.hidden.forEach(i=>{if(i>=0&&i<D.hid.length)D.hid[i]=1});buildPaths(D.batches,D.P,D.pts,D.hid);invalidateAll()}}
       else if(opt.sample){S.notes=exampleNotes()}
       renderChip();requestFrame();
     }
@@ -1539,10 +1554,12 @@ function renderMenu(){
     $$('.item[data-id]',b).forEach(el=>el.onclick=()=>{const n=S.notes.find(x=>x.id===el.dataset.id);if(!n)return;closeSheets();focusNote(n)});
   }else if(menuTab==='layers'){
     const ls=D.layers.map((l,i)=>({...l,i})).filter(l=>l.count>0||l.i>0);
-    let h='<div class="row"><button class="btn small" id="lAll" type="button">すべて表示</button><button class="btn small" id="lNone" type="button">すべて非表示</button></div><div class="list">';
+    const hc=hiddenCount();
+    let h=(hc?'<div class="setrow">隠した線 '+hc+'本<button class="btn small" id="lUnhide" type="button">すべて戻す</button></div>':'')+'<div class="row"><button class="btn small" id="lAll" type="button">すべて表示</button><button class="btn small" id="lNone" type="button">すべて非表示</button></div><div class="list">';
     ls.forEach(l=>{h+='<button class="lay'+(D.vis[l.i]?' on':'')+'" data-i="'+l.i+'" type="button"><span class="tog"></span><span class="ln">'+esc(l.name)+'</span><span class="lc">'+l.count+'</span></button>'});
     h+='</div>';b.innerHTML=h;
     $$('.lay',b).forEach(el=>el.onclick=()=>{const i=+el.dataset.i;D.vis[i]=D.vis[i]?0:1;el.classList.toggle('on',!!D.vis[i]);invalidateAll();if(aiming())updateSnap()});
+    if(hc)$('#lUnhide').onclick=()=>{const list=[];D.hid.forEach((v,i)=>v&&list.push(i));D.hid.fill(0);buildPaths(D.batches,D.P,D.pts,D.hid);invalidateAll();pushUndo({op:'unhideAll',list});scheduleSave();renderMenu();toast('隠した線を戻しました')};
     $('#lAll').onclick=()=>{D.vis.fill(1);renderMenu();invalidateAll()};$('#lNone').onclick=()=>{D.vis.fill(0);renderMenu();invalidateAll()};
   }else if(menuTab==='info'){
     const i=D.info||{};const kv=(k,v,n)=>v?'<dt>'+k+'</dt><dd'+(n?' class="n"':'')+'>'+esc(v)+'</dd>':'';
