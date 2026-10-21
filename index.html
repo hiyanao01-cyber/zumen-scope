@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#151c24">
-<meta name="description" content="SXFのSFC図面をスマホで開き、照準で寸法・面積を測り、メモや赤ペンを書き込める図面ビューア">
+<meta name="description" content="SXFのSFC図面をスマホで開き、照準で寸法・面積を測り、メモや赤ペン・作図線を書き込める図面ビューア">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -87,6 +87,10 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 #leftbtns{left:max(16px,env(safe-area-inset-left,0px));bottom:calc(var(--dock-h) + 16px);display:flex;flex-direction:column;gap:10px}
 #leftbtns .ibtn{width:46px;height:46px;border-radius:14px;background:rgba(31,42,53,.94)}
 #app[data-tool="pen"] #leftbtns{bottom:calc(var(--dock-h) + 70px)}
+#app[data-tool="draft"] #leftbtns{bottom:calc(var(--dock-h) + 102px)}
+#draftbar{left:max(16px,env(safe-area-inset-left,0px));bottom:calc(var(--dock-h) + 32px);max-width:calc(100% - max(16px,env(safe-area-inset-left,0px)) - max(16px,env(safe-area-inset-right,0px)) - 92px);overflow-x:auto;display:flex;align-items:center;gap:3px;padding:5px;border-radius:999px;background:rgba(21,28,36,.96);border:1px solid var(--rule);box-shadow:0 8px 22px rgba(0,0,0,.4)}
+.dm{height:34px;flex:none;padding:0 10px;border:0;border-radius:999px;background:transparent;color:var(--dim);font-weight:700;font-size:12.5px;touch-action:manipulation}
+.dm.on{background:var(--text);color:var(--steel)}
 #areabar{right:calc(max(16px,env(safe-area-inset-right,0px)) + 88px);bottom:calc(var(--dock-h) + 30px);display:flex;gap:8px}
 .pill{height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--rule);background:rgba(31,42,53,.96);font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:6px;touch-action:manipulation}
 .pill.go{background:var(--ok);color:#03200f;border-color:transparent}
@@ -100,8 +104,8 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .sep{width:1px;height:22px;background:var(--rule)}
 
 /* ---- dock ---- */
-#dock{position:absolute;z-index:5;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,minmax(0,112px));justify-content:center;gap:6px;padding-block:8px 10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--steel);border-top:1px solid var(--rule)}
-.tool{height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0;border-radius:14px;background:transparent;color:var(--dim);font:700 11.5px/1 var(--f-ui);letter-spacing:.06em;touch-action:manipulation;transition:transform .18s cubic-bezier(.3,1.7,.5,1),background .15s,color .15s,box-shadow .15s}
+#dock{position:absolute;z-index:5;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(6,minmax(0,100px));justify-content:center;gap:4px;padding-block:8px 10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--steel);border-top:1px solid var(--rule)}
+.tool{height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0;border-radius:14px;background:transparent;color:var(--dim);font:700 11px/1 var(--f-ui);letter-spacing:.04em;touch-action:manipulation;transition:transform .18s cubic-bezier(.3,1.7,.5,1),background .15s,color .15s,box-shadow .15s}
 .tool svg{width:25px;height:25px}
 .tool.on{background:var(--tape);color:var(--tape-ink);transform:translateY(-5px);box-shadow:0 8px 18px rgba(255,198,26,.25)}
 .tool.on svg{animation:wiggle .35s ease}
@@ -147,6 +151,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .item .ib{flex:none;min-width:44px;height:24px;padding:0 6px;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--tape-ink);background:var(--tape)}
 .item .ib.memo{background:var(--stake);color:#fff}
 .item .ib.ink{background:#3d8bff;color:#fff}
+.item .ib.draft{background:#e9eef3;color:#151c24}
 .item .it{min-width:0;flex:1;font-size:13.5px;line-height:1.45;overflow-wrap:anywhere}
 .item .it .num{font:700 15px/1.3 var(--f-num);font-variant-numeric:tabular-nums}
 .item .it small{display:block;color:var(--dim);font-size:11px}
@@ -235,12 +240,23 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
     <button class="penw" id="eraserBtn" type="button">消しゴム</button>
   </div>
 
+  <div id="draftbar" class="fl" hidden>
+    <button class="dm on" data-dm="line" type="button">直線</button>
+    <button class="dm" data-dm="h" type="button">水平</button>
+    <button class="dm" data-dm="v" type="button">垂直</button>
+    <button class="dm" data-dm="perp" type="button">垂線</button>
+    <button class="dm" data-dm="circle" type="button">円</button>
+    <span class="sep"></span>
+    <button class="sw" id="draftColor" style="--c:#ff3b30" type="button" aria-label="線の色を切り替え"><i></i></button>
+  </div>
+
   <button id="fab" class="fl" type="button" hidden aria-label="照準の位置に点を置く"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg><span>置く</span></button>
 
   <nav id="dock" aria-label="ツール">
     <button class="tool on" data-tool="pan" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/><path d="m9 6 3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg>移動</button>
     <button class="tool" data-tool="measure" type="button"><svg class="i" viewBox="0 0 24 24"><rect x="2.5" y="8" width="19" height="8" rx="1.5"/><path d="M6 8v3M9.5 8v4.5M13 8v3M16.5 8v4.5"/></svg>寸法</button>
     <button class="tool" data-tool="area" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M5 18 4 8l8-4 8 6-3 9z"/><circle cx="4" cy="8" r="1.4" fill="currentColor"/><circle cx="12" cy="4" r="1.4" fill="currentColor"/><circle cx="20" cy="10" r="1.4" fill="currentColor"/><circle cx="17" cy="19" r="1.4" fill="currentColor"/><circle cx="5" cy="18" r="1.4" fill="currentColor"/></svg>面積</button>
+    <button class="tool" data-tool="draft" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M4 20 20 4"/><circle cx="4" cy="20" r="1.6" fill="currentColor"/><circle cx="20" cy="4" r="1.6" fill="currentColor"/><path d="M4 11a7 7 0 0 1 7-7"/></svg>作図</button>
     <button class="tool" data-tool="memo" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>メモ</button>
     <button class="tool" data-tool="pen" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M4 20l1.2-4.6L15.6 5a2.1 2.1 0 0 1 3 0l.4.4a2.1 2.1 0 0 1 0 3L8.6 18.8z"/><path d="M13.5 7l3.5 3.5"/></svg>ペン</button>
   </nav>
@@ -763,7 +779,11 @@ function sampleSFC(){
    ========================================================= */
 let D=null;                       // current drawing
 const V={cx:0,cy:0,z:1};          // view: sheet point at canvas centre, px per mm
-const S={tool:'pan',mA:null,areaPts:[],sel:null,notes:[],undo:[],snap:null,manual:0,penColor:'#ff3b30',penW:2.5,eraser:false};
+const S={tool:'pan',mA:null,areaPts:[],sel:null,notes:[],undo:[],snap:null,manual:0,penColor:'#ff3b30',penW:2.5,eraser:false,draftMode:'line',dA:null,dBase:null,draftColor:'#ff3b30'};
+const DRAFT_NAMES={line:'直線',h:'水平線',v:'垂直線',perp:'垂線',circle:'円'};
+const DRAFT_COLORS=['#ff3b30','#3d8bff','#3fd28f','auto'];
+const aiming=()=>S.tool==='measure'||S.tool==='area'||S.tool==='draft';
+const inkColor=c=>c==='auto'?(settings.theme==='dark'?'#f2f5f8':'#111111'):c;
 let W=1,H=1,dpr=1,TOPH=60,DOCKH=78;const RC={x:0,y:0};
 const cv=$('#cv'),mctx=cv.getContext('2d');let base=document.createElement('canvas'),bctx=base.getContext('2d');let nbuf=document.createElement('canvas'),nctx=nbuf.getContext('2d');let job=null;
 let needBase=true,rafId=0,lastBaseMs=0,snapView=null,fitZ=1;
@@ -912,6 +932,21 @@ function drawNotes(ctx,Wc,Hc,pr,v,exp){
   const sel=exp?null:S.sel;const T=(x,y)=>toScreen(x,y,v);
   for(const n of S.notes){if(n.t!=='ink')continue;drawInk(ctx,n.pts,n.w*v.z,n.c,v,n.id===sel)}
   for(const n of S.notes){
+    if(n.t==='line'){
+      const a=T(n.a[0],n.a[1]),b=T(n.b[0],n.b[1]),col=inkColor(n.c);ctx.lineCap='round';
+      if(n.id===sel){ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()}
+      ctx.strokeStyle=col;ctx.lineWidth=2.4;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();
+      const dx=a[0]-b[0],dy=a[1]-b[1],L=Math.hypot(dx,dy);
+      if(n.k==='perp'&&L>12){const nx=dx/L,ny=dy/L;ctx.lineWidth=1.5;rightAngle(ctx,b[0],b[1],-ny,nx,nx,ny,8)}
+      ctx.fillStyle=col;[a,b].forEach(p=>{ctx.beginPath();ctx.arc(p[0],p[1],2.6,0,Math.PI*2);ctx.fill()});
+    }else if(n.t==='circle'){
+      const c=T(n.c[0],n.c[1]),R=n.r*v.z,col=inkColor(n.col);
+      if(n.id===sel){ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=10;ctx.beginPath();ctx.arc(c[0],c[1],R,0,Math.PI*2);ctx.stroke()}
+      ctx.strokeStyle=col;ctx.lineWidth=2.4;ctx.beginPath();ctx.arc(c[0],c[1],R,0,Math.PI*2);ctx.stroke();
+      ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(c[0]-5,c[1]);ctx.lineTo(c[0]+5,c[1]);ctx.moveTo(c[0],c[1]-5);ctx.lineTo(c[0],c[1]+5);ctx.stroke();
+    }
+  }
+  for(const n of S.notes){
     if(n.t!=='area')continue;const q=n.pts;ctx.beginPath();for(let i=0;i<q.length;i+=2){const p=T(q[i],q[i+1]);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])}ctx.closePath();
     ctx.fillStyle='rgba(255,198,26,.17)';ctx.fill();ctx.setLineDash([7,5]);ctx.strokeStyle=TAPE;ctx.lineWidth=n.id===sel?3:2;ctx.stroke();ctx.setLineDash([]);
     const c=centroid(q);const p=T(c[0],c[1]);const r=pill(ctx,p[0],p[1],fmtArea(n.v),{sel:n.id===sel,pop:popScale(n,t)});if(!exp)labelHits.push({r,id:n.id});
@@ -954,8 +989,9 @@ const effects=[];
 const KBIAS=[0,0,5,3,6,2,16],KNAME=['','端点','中点','中心','四半円点','交点','線上'];
 function drawLive(ctx){
   ctx.setTransform(dpr,0,0,dpr,0,0);const t=now();
-  if(S.tool==='measure'||S.tool==='area'){
-    const tg=currentTarget();const tp=toScreen(tg.x,tg.y);
+  if(aiming()){
+    const tg=S.tool==='draft'?draftTarget():currentTarget();const tp=toScreen(tg.x,tg.y);
+    if(S.tool==='draft')drawDraftLive(ctx,tp);
     if(S.tool==='measure'&&S.mA){const a=toScreen(S.mA.x,S.mA.y);tape(ctx,a[0],a[1],tp[0],tp[1],true)}
     if(S.tool==='area'&&S.areaPts.length){
       const q=S.areaPts;ctx.beginPath();q.forEach((p,i)=>{const s=toScreen(p.x,p.y);i?ctx.lineTo(s[0],s[1]):ctx.moveTo(s[0],s[1])});ctx.lineTo(tp[0],tp[1]);ctx.closePath();
@@ -963,14 +999,14 @@ function drawLive(ctx){
       q.forEach(p=>{const s=toScreen(p.x,p.y);ctx.fillStyle=TAPE_INK;ctx.beginPath();ctx.arc(s[0],s[1],4.5,0,Math.PI*2);ctx.fill();ctx.fillStyle=TAPE;ctx.beginPath();ctx.arc(s[0],s[1],3,0,Math.PI*2);ctx.fill()});
     }
     // reticle
-    const cx=RC.x,cy=RC.y,sn=S.snap;
-    if(sn&&Math.hypot(tp[0]-cx,tp[1]-cy)>2){ctx.strokeStyle='rgba(255,198,26,.85)';ctx.lineWidth=1.3;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(tp[0],tp[1]);ctx.stroke();ctx.setLineDash([])}
+    const cx=RC.x,cy=RC.y,sn=S.snap;const gp=sn?toScreen(sn.x,sn.y):tp;
+    if(sn&&Math.hypot(gp[0]-cx,gp[1]-cy)>2){ctx.strokeStyle='rgba(255,198,26,.85)';ctx.lineWidth=1.3;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(gp[0],gp[1]);ctx.stroke();ctx.setLineDash([])}
     const pulse=1;
     [[ 'rgba(0,0,0,.6)',3.4],[sn?TAPE:'#ffffff',1.6]].forEach(([c,w])=>{ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();const g=7*pulse,l=20*pulse;ctx.moveTo(cx-l,cy);ctx.lineTo(cx-g,cy);ctx.moveTo(cx+g,cy);ctx.lineTo(cx+l,cy);ctx.moveTo(cx,cy-l);ctx.lineTo(cx,cy-g);ctx.moveTo(cx,cy+g);ctx.lineTo(cx,cy+l);ctx.stroke();ctx.beginPath();ctx.arc(cx,cy,13*pulse,0,Math.PI*2);ctx.stroke()});
     if(sn){
-      const age=clamp((t-(sn.t0||0))/160,0,1),pop=1+(1-age)*.6;ctx.save();ctx.translate(tp[0],tp[1]);ctx.scale(pop,pop);
+      const age=clamp((t-(sn.t0||0))/160,0,1),pop=1+(1-age)*.6;ctx.save();ctx.translate(gp[0],gp[1]);ctx.scale(pop,pop);
       ctx.lineWidth=3.6;ctx.strokeStyle='rgba(0,0,0,.65)';snapGlyph(ctx,sn.kind);ctx.stroke();ctx.lineWidth=2;ctx.strokeStyle=TAPE;snapGlyph(ctx,sn.kind);ctx.stroke();ctx.restore();
-      ctx.font='700 11px "BIZ UDPGothic",sans-serif';const lb=KNAME[sn.kind];const w=ctx.measureText(lb).width+12;ctx.fillStyle='rgba(15,21,28,.9)';rr(ctx,tp[0]+12,tp[1]+10,w,19,6);ctx.fill();ctx.fillStyle=TAPE;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(lb,tp[0]+18,tp[1]+20);
+      ctx.font='700 11px "BIZ UDPGothic",sans-serif';const lb=KNAME[sn.kind];const w=ctx.measureText(lb).width+12;ctx.fillStyle='rgba(15,21,28,.9)';rr(ctx,gp[0]+12,gp[1]+10,w,19,6);ctx.fill();ctx.fillStyle=TAPE;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(lb,gp[0]+18,gp[1]+20);
       if(age<1)requestFrame();
     }
   }
@@ -1015,7 +1051,7 @@ function frame(){
   if(busy||needBase)requestFrame();
 }
 function invalidateAll(){needBase=true;job=null;snapView=null;requestFrame()}
-function viewChanged(){needBase=true;if(S.tool==='measure'||S.tool==='area')updateSnap();requestFrame();chipSoon()}
+function viewChanged(){needBase=true;if(aiming())updateSnap();requestFrame();chipSoon()}
 
 /* ---------- animation: fly + inertia ---------- */
 const fly={on:false},inertia={on:false};
@@ -1036,19 +1072,99 @@ function snapAt(sx,sy,rpx){
   const vis=D.vis,SX=D.snap.x,SY=D.snap.y,SK=D.snap.k,SL=D.snap.L,SR=D.snap.rx;let best=null,bs=Infinity;
   const ck=(cx,cy)=>(clamp(cx,-30000,30000)+32768)*65536+(clamp(cy,-30000,30000)+32768);
   for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const arr=g.pts.get(ck(cx,cy));if(!arr)continue;for(let j=0;j<arr.length;j++){const i=arr[j];if(!vis[SL[i]])continue;const d=Math.hypot(SX[i]-x,SY[i]-y);if(d>r)continue;const s=d*z+KBIAS[SK[i]];if(s<bs){bs=s;best={x:SX[i],y:SY[i],kind:SK[i],rx:SR[i]}}}}
-  if(g.segs&&ncell<=1200){
-    const P=D.P,pts=D.pts,seen=new Set(),cand=[];
-    for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const arr=g.segs.get(ck(cx,cy));if(!arr)continue;for(let j=0;j<arr.length;j++){const id=arr[j];if(seen.has(id))continue;seen.add(id);const p=g.segP[id];if(!vis[P.L[p]])continue;const a=g.segA[id],b=g.segB[id];const ax=pts[2*a],ay=pts[2*a+1],bx=pts[2*b],by=pts[2*b+1];const vx=bx-ax,vy=by-ay,ll=vx*vx+vy*vy;let t=ll?((x-ax)*vx+(y-ay)*vy)/ll:0;t=clamp(t,0,1);const px=ax+vx*t,py=ay+vy*t;const d=Math.hypot(px-x,py-y);if(d<=r)cand.push({id,d,px,py,p,a,ax,ay,bx,by})}}
-    for(const c of cand){const s=c.d*z+KBIAS[6];if(s<bs){bs=s;best={x:c.px,y:c.py,kind:6,rx:P.rx[c.p]}}}
+  // points of what the viewer has drawn (lines, circles, tapes, areas)
+  const tryPt=(px,py,k,rxv)=>{const d=Math.hypot(px-x,py-y);if(d>r)return;const s=d*z+KBIAS[k];if(s<bs){bs=s;best={x:px,y:py,kind:k,rx:rxv}}};
+  for(const n of S.notes){
+    if(n.t==='line'||n.t==='dist'){const rxv=n.rx!=null?n.rx:-1;tryPt(n.a[0],n.a[1],1,rxv);tryPt(n.b[0],n.b[1],1,rxv);tryPt((n.a[0]+n.b[0])/2,(n.a[1]+n.b[1])/2,2,rxv)}
+    else if(n.t==='circle'){const rxv=n.rx!=null?n.rx:-1;tryPt(n.c[0],n.c[1],3,rxv);[[1,0],[-1,0],[0,1],[0,-1]].forEach(([u,w])=>tryPt(n.c[0]+u*n.r,n.c[1]+w*n.r,4,rxv));
+      const dc=Math.hypot(x-n.c[0],y-n.c[1]);if(dc>1e-9&&Math.abs(dc-n.r)<=r){const k=n.r/dc;const s=Math.abs(dc-n.r)*z+KBIAS[6];if(s<bs){bs=s;best={x:n.c[0]+(x-n.c[0])*k,y:n.c[1]+(y-n.c[1])*k,kind:6,rx:rxv}}}}
+    else if(n.t==='area'){const q=n.pts;for(let i=0;i<q.length;i+=2)tryPt(q[i],q[i+1],1,-1)}
+  }
+  if(ncell<=1200){
+    const P=D.P,cand=collectSegs(x,y,r);
+    for(const c of cand){const s=c.d*z+KBIAS[6];if(s<bs){bs=s;best={x:c.px,y:c.py,kind:6,rx:c.rx}}}
     cand.sort((u,w)=>u.d-w.d);const m=Math.min(cand.length,48);
     for(let i=0;i<m;i++)for(let j=0;j<i;j++){
-      const A=cand[i],B=cand[j];if(A.p===B.p&&((P.fl[A.p]&2)||Math.abs(A.a-B.a)<=1||Math.abs(A.a-B.a)===P.n[A.p]-1))continue;
+      const A=cand[i],B=cand[j];if(A.p===B.p&&A.p>=0&&((P.fl[A.p]&2)||Math.abs(A.a-B.a)<=1||Math.abs(A.a-B.a)===P.n[A.p]-1))continue;
       const rx=A.bx-A.ax,ry=A.by-A.ay,sx2=B.bx-B.ax,sy2=B.by-B.ay,den=rx*sy2-ry*sx2;if(Math.abs(den)<1e-12)continue;
       const t=((B.ax-A.ax)*sy2-(B.ay-A.ay)*sx2)/den,u=((B.ax-A.ax)*ry-(B.ay-A.ay)*rx)/den;if(t<-1e-9||t>1+1e-9||u<-1e-9||u>1+1e-9)continue;
-      const ix=A.ax+t*rx,iy=A.ay+t*ry,d=Math.hypot(ix-x,iy-y);if(d>r)continue;const s=d*z+KBIAS[5];if(s<bs){bs=s;best={x:ix,y:iy,kind:5,rx:P.rx[A.p]}}
+      const ix=A.ax+t*rx,iy=A.ay+t*ry,d=Math.hypot(ix-x,iy-y);if(d>r)continue;const s=d*z+KBIAS[5];if(s<bs){bs=s;best={x:ix,y:iy,kind:5,rx:A.rx>=0?A.rx:B.rx}}
     }
   }
   return best;
+}
+// segments near (x,y) in sheet mm: drawing lines plus lines the viewer has drawn
+function collectSegs(x,y,r){
+  const out=[];if(!D)return out;const g=D.grid,P=D.P,pts=D.pts,vis=D.vis;
+  const ck=(cx,cy)=>(clamp(cx,-30000,30000)+32768)*65536+(clamp(cy,-30000,30000)+32768);
+  const near=(ax,ay,bx,by)=>{const vx=bx-ax,vy=by-ay,ll=vx*vx+vy*vy;let t=ll?((x-ax)*vx+(y-ay)*vy)/ll:0;t=clamp(t,0,1);const px=ax+vx*t,py=ay+vy*t;return[px,py,Math.hypot(px-x,py-y)]};
+  if(g.segs){
+    const cx0=Math.floor((x-r-g.gx0)/g.cs)-1,cx1=Math.floor((x+r-g.gx0)/g.cs)+1,cy0=Math.floor((y-r-g.gy0)/g.cs)-1,cy1=Math.floor((y+r-g.gy0)/g.cs)+1;
+    if((cx1-cx0+1)*(cy1-cy0+1)<=1200){const seen=new Set();
+      for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const arr=g.segs.get(ck(cx,cy));if(!arr)continue;for(let j=0;j<arr.length;j++){const id=arr[j];if(seen.has(id))continue;seen.add(id);const p=g.segP[id];if(!vis[P.L[p]])continue;const a=g.segA[id],b=g.segB[id];const ax=pts[2*a],ay=pts[2*a+1],bx=pts[2*b],by=pts[2*b+1];const q=near(ax,ay,bx,by);if(q[2]<=r)out.push({d:q[2],px:q[0],py:q[1],p,a,ax,ay,bx,by,rx:P.rx[p]})}}}
+  }
+  S.notes.forEach((n,i)=>{if(n.t!=='line')return;const q=near(n.a[0],n.a[1],n.b[0],n.b[1]);if(q[2]<=r)out.push({d:q[2],px:q[0],py:q[1],p:-(i+2),a:-(i+2)*10,ax:n.a[0],ay:n.a[1],bx:n.b[0],by:n.b[1],rx:n.rx!=null?n.rx:-1})});
+  return out;
+}
+function segAt(sx,sy,rpx){const q=toSheet(sx,sy);const c=collectSegs(q[0],q[1],rpx/V.z);if(!c.length)return null;c.sort((u,w)=>u.d-w.d);const s=c[0];return{ax:s.ax,ay:s.ay,bx:s.bx,by:s.by,rx:s.rx}}
+
+/* ---------- drafting: line / horizontal / vertical / perpendicular / circle ---------- */
+function perpFoot(sg,x,y){const vx=sg.bx-sg.ax,vy=sg.by-sg.ay,l=vx*vx+vy*vy;if(!l)return[sg.ax,sg.ay];const t=((x-sg.ax)*vx+(y-sg.ay)*vy)/l;return[sg.ax+vx*t,sg.ay+vy*t]}
+function draftTarget(){
+  const tg=currentTarget();const p={x:tg.x,y:tg.y,kind:tg.kind,rx:tg.rx,t0:tg.t0};
+  if(S.dA){if(S.draftMode==='h')p.y=S.dA.y;else if(S.draftMode==='v')p.x=S.dA.x}
+  return p;
+}
+function draftPlace(p,sx,sy){
+  const m=S.draftMode,col=S.draftColor;
+  if(m==='perp'){
+    if(!S.dBase){const sg=segAt(sx!=null?sx:RC.x,sy!=null?sy:RC.y,30);if(!sg){toast('基準にする線に照準を合わせてください');sfx('erase');return}S.dBase=sg;effects.push({x:p.x,y:p.y,t0:now(),c:inkColor(col)});sfx('place');buzz(12);return}
+    const f=perpFoot(S.dBase,p.x,p.y);const mm=measure(p,{x:f[0],y:f[1],rx:p.rx});
+    if(mm.paper*V.z<1.5){toast('基準線の上の点です');return}
+    addNote({id:uid(),t:'line',k:'perp',a:[p.x,p.y],b:f,v:mm.real,sc:mm.sc,rx:p.rx,c:col,ts:Date.now()});sfx('done');buzz([10,40,16]);return;
+  }
+  if(m!=='line'||!S.dA)effects.push({x:p.x,y:p.y,t0:now(),c:inkColor(col)});
+  if(!S.dA){S.dA=p;sfx('place');buzz(12);return}
+  if(m==='circle'){
+    const r=Math.hypot(p.x-S.dA.x,p.y-S.dA.y);if(r*V.z<2){toast('中心と同じ位置です');return}
+    const mm=measure(S.dA,{x:p.x,y:p.y,rx:S.dA.rx});
+    addNote({id:uid(),t:'circle',c:[S.dA.x,S.dA.y],r,v:mm.real,sc:mm.sc,rx:S.dA.rx,col:col,ts:Date.now()});S.dA=null;sfx('done');buzz([10,40,16]);return;
+  }
+  const b={x:p.x,y:p.y,rx:S.dA.rx};if(m==='h')b.y=S.dA.y;else if(m==='v')b.x=S.dA.x;
+  const mm=measure(S.dA,b);if(mm.paper*V.z<1.5){toast('始点と同じ位置です');return}
+  addNote({id:uid(),t:'line',k:m,a:[S.dA.x,S.dA.y],b:[b.x,b.y],v:mm.real,sc:mm.sc,rx:S.dA.rx,c:col,ts:Date.now()});
+  effects.push({x:b.x,y:b.y,t0:now(),c:inkColor(col)});S.dA=null;sfx('done');buzz([10,40,16]);
+}
+function draftReadout(ro,rv,rs){
+  const m=S.draftMode,nm=DRAFT_NAMES[m];
+  if(m==='perp'){
+    if(!S.dBase){rv.className='rv small';rv.textContent='基準にする線に照準を合わせる';rs.textContent='「置く」で基準線を決定（図面の線・追記した線）';return}
+    const tg=currentTarget();const p={x:tg.x,y:tg.y,rx:resolveRx(tg)};const f=perpFoot(S.dBase,p.x,p.y);const mm=measure(p,{x:f[0],y:f[1],rx:p.rx});
+    rv.className='rv';rv.textContent=fmtLen(mm.real);rs.textContent='基準線までの距離 · '+mm.sc+' · 続けて点を選べます';
+    if(mm.unscaled&&!S.manual){rs.textContent='図上の距離です（縮尺を指定できます）';ro.classList.add('warn')}return;
+  }
+  const what=m==='circle'?'中心':'始点';
+  if(!S.dA){rv.className='rv small';rv.textContent=what+'に照準を合わせる';rs.textContent=nm+' · 「置く」で'+what+'を決定';return}
+  const t=draftTarget();const mm=measure(S.dA,{x:t.x,y:t.y,rx:S.dA.rx});rv.className='rv';
+  if(m==='circle'){rv.textContent='R '+fmtLen(mm.real);rs.textContent='直径 '+fmtLen(mm.real*2)+' · '+mm.sc}
+  else{rv.textContent=fmtLen(mm.real);rs.textContent=nm+' · '+mm.sc}
+  if(mm.unscaled&&!S.manual){rs.textContent='図上の長さです（縮尺を指定できます）';ro.classList.add('warn')}
+}
+function rightAngle(ctx,fx,fy,ux,uy,nx,ny,s){ctx.beginPath();ctx.moveTo(fx+ux*s,fy+uy*s);ctx.lineTo(fx+ux*s+nx*s,fy+uy*s+ny*s);ctx.lineTo(fx+nx*s,fy+ny*s);ctx.stroke()}
+function drawDraftLive(ctx,tp){
+  const col=inkColor(S.draftColor);ctx.lineCap='round';
+  const dot=(x,y)=>{ctx.fillStyle='rgba(0,0,0,.6)';ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,3.4,0,Math.PI*2);ctx.fill()};
+  const extLine=(sg,alpha)=>{const a=toScreen(sg.ax,sg.ay),b=toScreen(sg.bx,sg.by);const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L,E=Math.hypot(W,H);ctx.globalAlpha=alpha;ctx.setLineDash([8,6]);ctx.lineWidth=1.6;ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(a[0]-ux*E,a[1]-uy*E);ctx.lineTo(b[0]+ux*E,b[1]+uy*E);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()};
+  if(S.draftMode==='perp'){
+    if(!S.dBase){const sg=segAt(RC.x,RC.y,30);if(sg)extLine(sg,.45);return}
+    extLine(S.dBase,.7);const tg=currentTarget();const f=perpFoot(S.dBase,tg.x,tg.y);const fp=toScreen(f[0],f[1]),pp=toScreen(tg.x,tg.y);
+    const dx=pp[0]-fp[0],dy=pp[1]-fp[1],L=Math.hypot(dx,dy);
+    if(L>1){const nx=dx/L,ny=dy/L;ctx.strokeStyle='rgba(0,0,0,.55)';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(pp[0],pp[1]);ctx.lineTo(fp[0],fp[1]);ctx.stroke();ctx.strokeStyle=col;ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(pp[0],pp[1]);ctx.lineTo(fp[0],fp[1]);ctx.stroke();ctx.lineWidth=1.6;rightAngle(ctx,fp[0],fp[1],-ny,nx,nx,ny,9)}
+    dot(fp[0],fp[1]);return;
+  }
+  if(!S.dA)return;const a=toScreen(S.dA.x,S.dA.y);
+  if(S.draftMode==='circle'){const R=Math.hypot(tp[0]-a[0],tp[1]-a[1]);ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=5;ctx.beginPath();ctx.arc(a[0],a[1],R,0,Math.PI*2);ctx.stroke();ctx.strokeStyle=col;ctx.lineWidth=2.4;ctx.beginPath();ctx.arc(a[0],a[1],R,0,Math.PI*2);ctx.stroke();ctx.setLineDash([5,4]);ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(tp[0],tp[1]);ctx.stroke();ctx.setLineDash([]);dot(a[0],a[1]);return}
+  ctx.strokeStyle='rgba(0,0,0,.55)';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(tp[0],tp[1]);ctx.stroke();ctx.strokeStyle=col;ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(tp[0],tp[1]);ctx.stroke();dot(a[0],a[1]);
 }
 function regionRx(x,y){
   if(!D)return 0;const inside=[];for(const r of D.regions){const b=r.bb;if(x>=b[0]&&x<=b[2]&&y>=b[1]&&y<=b[3])inside.push(r)}
@@ -1095,8 +1211,9 @@ let roPending=false;
 function readoutSoon(){if(!roPending){roPending=true;requestAnimationFrame(()=>{roPending=false;renderReadout()})}}
 function renderReadout(){
   const ro=$('#readout'),rv=$('#rv'),rs=$('#rs');
-  if(!D||S.sel||!(S.tool==='measure'||S.tool==='area')){ro.hidden=true;return}
+  if(!D||S.sel||!aiming()){ro.hidden=true;return}
   ro.hidden=false;ro.classList.remove('warn');const tg=currentTarget();
+  if(S.tool==='draft'){draftReadout(ro,rv,rs);return}
   if(S.tool==='measure'){
     if(!S.mA){rv.className='rv small';rv.textContent=S.snap?KNAME[S.snap.kind]+'に吸着中':'照準を点に合わせる';const tg2={...tg,rx:resolveRx(tg)};rs.textContent=S.snap?(localCoord(tg2)||'「置く」で始点を決定'):'近くの端点・交点に吸い付きます';return}
     const tgr={...tg,rx:resolveRx(tg)};const m=measure(S.mA,tgr);rv.className='rv';rv.textContent=fmtLen(m.real);
@@ -1115,7 +1232,7 @@ let chipT=0;function chipSoon(){if(!chipT)chipT=setTimeout(()=>{chipT=0;renderCh
 function renderChip(){
   const el=$('#scaleTxt'),md=$('#scaleMode');if(!D){el.textContent='—';md.textContent='縮尺';return}
   if(S.manual>0){md.textContent='手動';el.textContent='1:'+S.manual;return}
-  let rx=0;if(S.tool==='measure'||S.tool==='area'){const tg=currentTarget();rx=resolveRx(tg)}else{const q=toSheet(RC.x,RC.y);for(const r of D.regions){const b=r.bb;if(q[0]>=b[0]&&q[0]<=b[2]&&q[1]>=b[1]&&q[1]<=b[3]){rx=r.rx;break}}}
+  let rx=0;if(aiming()){const tg=currentTarget();rx=resolveRx(tg)}else{const q=toSheet(RC.x,RC.y);for(const r of D.regions){const b=r.bb;if(q[0]>=b[0]&&q[0]<=b[2]&&q[1]>=b[1]&&q[1]<=b[3]){rx=r.rx;break}}}
   if(rx>0){md.textContent='自動';el.textContent=ratioText(D.xfs[rx].s)}else{md.textContent='縮尺';el.textContent='自動'}
 }
 function setHint(html){const h=$('#hint');if(!html||S.sel){h.hidden=true;return}h.innerHTML=html;h.hidden=false}
@@ -1301,11 +1418,11 @@ function onTap(x,y){
   if(!D)return;const t=now();
   if(S.tool==='pan'&&lastTap&&t-lastTap.t<320&&Math.hypot(x-lastTap.x,y-lastTap.y)<30){lastTap=null;zoomAt(x,y,2.2);return}
   lastTap={x,y,t};
-  const measuring=S.tool==='measure'||S.tool==='area';
+  const measuring=aiming();
   const h=hitTest(x,y,measuring);
   if(h){select(h);sfx('tap');return}
   if(S.sel){select(null);if(S.tool==='pan'||S.tool==='pen')return}
-  if(measuring){const sn=snapAt(x,y,34);const q=toSheet(x,y);placePoint(sn||{x:q[0],y:q[1],kind:0,rx:-1})}
+  if(measuring){const sn=snapAt(x,y,34);const q=toSheet(x,y);placePoint(sn||{x:q[0],y:q[1],kind:0,rx:-1},x,y)}
   else if(S.tool==='memo'){const q=toSheet(x,y);openMemo({id:uid(),t:'pin',x:q[0],y:q[1],text:'',c:'#ff5b3a',ts:Date.now()},true)}
 }
 function hitTest(x,y,labelsOnly){
@@ -1313,7 +1430,8 @@ function hitTest(x,y,labelsOnly){
   for(const l of labelHits){const r=l.r;if(x>=r[0]-6&&x<=r[0]+r[2]+6&&y>=r[1]-6&&y<=r[1]+r[3]+6)return S.notes.find(n=>n.id===l.id)||null}
   if(labelsOnly)return null;
   for(const n of [...S.notes].reverse()){
-    if(n.t==='dist'){const a=toScreen(n.a[0],n.a[1]),b=toScreen(n.b[0],n.b[1]);if(distSeg(x,y,a,b)<11)return n}
+    if(n.t==='dist'||n.t==='line'){const a=toScreen(n.a[0],n.a[1]),b=toScreen(n.b[0],n.b[1]);if(distSeg(x,y,a,b)<11)return n}
+    else if(n.t==='circle'){const c=toScreen(n.c[0],n.c[1]),d=Math.hypot(x-c[0],y-c[1]);if(Math.abs(d-n.r*V.z)<11||d<9)return n}
     else if(n.t==='ink'){const q=n.pts,tol=Math.max(11,n.w*V.z/2+6);let prev=toScreen(q[0],q[1]);for(let i=2;i<q.length;i+=2){const c=toScreen(q[i],q[i+1]);if(distSeg(x,y,prev,c)<tol)return n;prev=c}}
     else if(n.t==='area'){const s=toSheet(x,y);if(inPoly(s[0],s[1],n.pts))return n}
   }
@@ -1323,8 +1441,9 @@ function distSeg(x,y,a,b){const vx=b[0]-a[0],vy=b[1]-a[1],l=vx*vx+vy*vy;let t=l?
 function inPoly(x,y,q){let c=false;const n=q.length/2;for(let i=0,j=n-1;i<n;j=i++){const xi=q[2*i],yi=q[2*i+1],xj=q[2*j],yj=q[2*j+1];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
 
 /* ---------- tools ---------- */
-function placePoint(tg){
+function placePoint(tg,sx,sy){
   if(!D)return;const p={x:tg.x,y:tg.y,kind:tg.kind||0,rx:resolveRx(tg)};
+  if(S.tool==='draft'){draftPlace(p,sx,sy);readoutSoon();requestFrame();return}
   effects.push({x:p.x,y:p.y,t0:now()});buzz(12);
   if(S.tool==='measure'){
     if(!S.mA){S.mA=p;sfx('place')}
@@ -1347,12 +1466,12 @@ function eraseAt(x,y){
   for(const n of [...S.notes].reverse()){if(n.t!=='ink')continue;const q=n.pts;let prev=toScreen(q[0],q[1]);for(let i=2;i<q.length;i+=2){const c=toScreen(q[i],q[i+1]);if(distSeg(x,y,prev,c)<16){deleteNote(n.id);sfx('erase');buzz(8);return}prev=c}}
 }
 function setTool(t){
-  if(t===S.tool&&t!=='pan'){if(t==='measure'&&S.mA){S.mA=null;readoutSoon();requestFrame();toast('始点を取り消しました')}return}
-  S.tool=t;$('#app').dataset.tool=t;S.mA=null;S.areaPts=[];S.snap=null;lastSnapKey='';if(S.sel)select(null);
+  if(t===S.tool&&t!=='pan'){if(t==='measure'&&S.mA){S.mA=null;readoutSoon();requestFrame();toast('始点を取り消しました')}if(t==='draft'&&(S.dA||S.dBase)){S.dA=null;S.dBase=null;readoutSoon();requestFrame();toast('作図を取り消しました')}return}
+  S.tool=t;$('#app').dataset.tool=t;S.mA=null;S.areaPts=[];S.dA=null;S.dBase=null;S.snap=null;lastSnapKey='';if(S.sel)select(null);
   $$('.tool').forEach(b=>b.classList.toggle('on',b.dataset.tool===t));
-  $('#fab').hidden=!(t==='measure'||t==='area');$('#areabar').hidden=t!=='area';$('#penbar').hidden=t!=='pen';
+  $('#fab').hidden=!aiming();$('#areabar').hidden=t!=='area';$('#penbar').hidden=t!=='pen';$('#draftbar').hidden=t!=='draft';
   if(t!=='pen'){S.eraser=false;$('#eraserBtn').classList.remove('on')}
-  updateAreaBar();if(t==='measure'||t==='area')updateSnap();toolHint();readoutSoon();renderChip();requestFrame();sfx('tool');
+  updateAreaBar();if(aiming())updateSnap();toolHint();readoutSoon();renderChip();requestFrame();sfx('tool');
 }
 
 /* ---------- selection card ---------- */
@@ -1364,6 +1483,8 @@ function select(n){
   if(n.t==='pin'){title='メモ '+pinIdx;val='<div class="sval memo">'+(esc(n.text)||'<span style="color:var(--dim)">（文字なし）</span>')+'</div>';acts='<button class="btn small" data-act="edit" type="button">編集</button>'}
   else if(n.t==='dist'){title='寸法';val='<div class="sval">'+fmtLen(n.v)+'</div>';sub=esc(n.sc==='図上'?'図上の寸法':n.sc+'で換算');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else if(n.t==='area'){title='面積';val='<div class="sval">'+fmtArea(n.v)+'</div>';sub='周長 '+fmtLen(n.per||0)+' · '+esc(n.sc);acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
+  else if(n.t==='line'){title=DRAFT_NAMES[n.k]||'直線';val='<div class="sval">'+fmtLen(n.v)+'</div>';sub=(n.k==='perp'?'基準線までの距離 · ':'')+esc(n.sc==='図上'?'図上の長さ':n.sc+'で換算');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
+  else if(n.t==='circle'){title='円';val='<div class="sval">R '+fmtLen(n.v)+'</div>';sub='直径 '+fmtLen(n.v*2)+' · '+esc(n.sc);acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else{title='手書き';val='<div class="sval memo">赤ペンの書き込み</div>'}
   c.innerHTML='<div class="sbody"><div class="stitle">'+title+'</div>'+val+(sub?'<div class="ssub">'+sub+'</div>':'')+'</div><div class="sacts">'+acts+'<button class="btn small danger" data-act="del" type="button">削除</button><button class="ibtn" data-act="close" type="button" aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>';
   c.hidden=false;$('#readout').hidden=true;$('#hint').hidden=true;requestFrame();
@@ -1374,7 +1495,7 @@ $('#selcard').addEventListener('click',e=>{
   if(a==='close')select(null);
   else if(a==='del'){deleteNote(n.id);sfx('erase');toast('削除しました（↶で戻せます）')}
   else if(a==='edit')openMemo(n,false);
-  else if(a==='copy')copyText(n.t==='dist'?fmtLen(n.v):fmtArea(n.v));
+  else if(a==='copy')copyText(n.t==='dist'||n.t==='line'?fmtLen(n.v):n.t==='circle'?'R '+fmtLen(n.v):fmtArea(n.v));
 });
 
 /* ---------- memo editor ---------- */
@@ -1410,7 +1531,7 @@ function renderMenu(){
   if(menuTab==='notes'){
     const pins=S.notes.filter(n=>n.t==='pin');let h='<div class="row"><button class="btn small" id="mCopy" type="button">テキストでコピー</button><button class="btn small" id="mImg" type="button">画像で保存</button><span style="flex:1"></span><button class="btn small danger" id="mClear" type="button">'+(clearArmed?'もう一度押すと全部削除':'すべて削除')+'</button></div>';
     if(!S.notes.length)h+='<div class="empty">まだメモはありません。<br>下のツールで寸法・面積・メモ・ペンを使うと、ここに一覧が出ます。</div>';
-    else{h+='<div class="list">';S.notes.forEach(n=>{let ib='',it='';if(n.t==='pin'){ib='<span class="ib memo">メモ'+(pins.indexOf(n)+1)+'</span>';it=esc(n.text)||'（文字なし）'}else if(n.t==='dist'){ib='<span class="ib">寸法</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+esc(n.sc)+'</small>'}else if(n.t==='area'){ib='<span class="ib">面積</span>';it='<span class="num">'+fmtArea(n.v)+'</span><small>周長 '+fmtLen(n.per||0)+' · '+esc(n.sc)+'</small>'}else{ib='<span class="ib ink">ペン</span>';it='手書きの書き込み'}h+='<button class="item" data-id="'+n.id+'" type="button">'+ib+'<span class="it">'+it+'</span></button>'});h+='</div>'}
+    else{h+='<div class="list">';S.notes.forEach(n=>{let ib='',it='';if(n.t==='pin'){ib='<span class="ib memo">メモ'+(pins.indexOf(n)+1)+'</span>';it=esc(n.text)||'（文字なし）'}else if(n.t==='dist'){ib='<span class="ib">寸法</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+esc(n.sc)+'</small>'}else if(n.t==='area'){ib='<span class="ib">面積</span>';it='<span class="num">'+fmtArea(n.v)+'</span><small>周長 '+fmtLen(n.per||0)+' · '+esc(n.sc)+'</small>'}else if(n.t==='line'){ib='<span class="ib draft">作図</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+(DRAFT_NAMES[n.k]||'直線')+' · '+esc(n.sc)+'</small>'}else if(n.t==='circle'){ib='<span class="ib draft">作図</span>';it='<span class="num">R '+fmtLen(n.v)+'</span><small>円 · 直径 '+fmtLen(n.v*2)+' · '+esc(n.sc)+'</small>'}else{ib='<span class="ib ink">ペン</span>';it='手書きの書き込み'}h+='<button class="item" data-id="'+n.id+'" type="button">'+ib+'<span class="it">'+it+'</span></button>'});h+='</div>'}
     h+='<p class="note">'+storeText()+'</p>';
     b.innerHTML=h;
     $('#mCopy').onclick=()=>copyText(notesText());$('#mImg').onclick=()=>{closeSheets();exportImage()};
@@ -1421,7 +1542,7 @@ function renderMenu(){
     let h='<div class="row"><button class="btn small" id="lAll" type="button">すべて表示</button><button class="btn small" id="lNone" type="button">すべて非表示</button></div><div class="list">';
     ls.forEach(l=>{h+='<button class="lay'+(D.vis[l.i]?' on':'')+'" data-i="'+l.i+'" type="button"><span class="tog"></span><span class="ln">'+esc(l.name)+'</span><span class="lc">'+l.count+'</span></button>'});
     h+='</div>';b.innerHTML=h;
-    $$('.lay',b).forEach(el=>el.onclick=()=>{const i=+el.dataset.i;D.vis[i]=D.vis[i]?0:1;el.classList.toggle('on',!!D.vis[i]);invalidateAll();if(S.tool==='measure'||S.tool==='area')updateSnap()});
+    $$('.lay',b).forEach(el=>el.onclick=()=>{const i=+el.dataset.i;D.vis[i]=D.vis[i]?0:1;el.classList.toggle('on',!!D.vis[i]);invalidateAll();if(aiming())updateSnap()});
     $('#lAll').onclick=()=>{D.vis.fill(1);renderMenu();invalidateAll()};$('#lNone').onclick=()=>{D.vis.fill(0);renderMenu();invalidateAll()};
   }else if(menuTab==='info'){
     const i=D.info||{};const kv=(k,v,n)=>v?'<dt>'+k+'</dt><dd'+(n?' class="n"':'')+'>'+esc(v)+'</dd>':'';
@@ -1441,11 +1562,11 @@ let clearArmed=false;
 function storeText(){return Store.mode==='cloud'?'メモと書き込みは、あなたのアカウントに図面ごとに保存されます（他の人からは見えません）。':Store.mode==='local'?'メモと書き込みは、この端末のブラウザに保存されます（他の人からは見えません）。ブラウザのデータを消すと消えるので、大事なメモは「画像で保存」か「テキストでコピー」でも残してください。':Store.mode==='none'?'この画面ではメモを保存できません。画像やテキストで書き出してください。':'保存先を確認しています…'}
 function notesText(){
   const pins=S.notes.filter(n=>n.t==='pin');const lines=['【図面】'+D.name];let k=0;
-  S.notes.forEach(n=>{if(n.t==='pin')lines.push('・メモ'+(pins.indexOf(n)+1)+'：'+(n.text||'（文字なし）').replace(/\n/g,' '));else if(n.t==='dist')lines.push('・寸法：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='area')lines.push('・面積：'+fmtArea(n.v)+'　周長 '+fmtLen(n.per||0)+'（'+n.sc+'）');else k++});
+  S.notes.forEach(n=>{if(n.t==='pin')lines.push('・メモ'+(pins.indexOf(n)+1)+'：'+(n.text||'（文字なし）').replace(/\n/g,' '));else if(n.t==='dist')lines.push('・寸法：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='area')lines.push('・面積：'+fmtArea(n.v)+'　周長 '+fmtLen(n.per||0)+'（'+n.sc+'）');else if(n.t==='line')lines.push('・'+(DRAFT_NAMES[n.k]||'直線')+'：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='circle')lines.push('・円：R '+fmtLen(n.v)+'　直径 '+fmtLen(n.v*2)+'（'+n.sc+'）');else k++});
   if(k)lines.push('・手書き '+k+'件');return lines.join('\n');
 }
 function focusNote(n){
-  let bb;if(n.t==='pin')bb=[n.x,n.y,n.x,n.y];else if(n.t==='dist')bb=[Math.min(n.a[0],n.b[0]),Math.min(n.a[1],n.b[1]),Math.max(n.a[0],n.b[0]),Math.max(n.a[1],n.b[1])];else{const q=n.pts;bb=[Infinity,Infinity,-Infinity,-Infinity];for(let i=0;i<q.length;i+=2){bb[0]=Math.min(bb[0],q[i]);bb[1]=Math.min(bb[1],q[i+1]);bb[2]=Math.max(bb[2],q[i]);bb[3]=Math.max(bb[3],q[i+1])}}
+  let bb;if(n.t==='pin')bb=[n.x,n.y,n.x,n.y];else if(n.t==='dist'||n.t==='line')bb=[Math.min(n.a[0],n.b[0]),Math.min(n.a[1],n.b[1]),Math.max(n.a[0],n.b[0]),Math.max(n.a[1],n.b[1])];else if(n.t==='circle')bb=[n.c[0]-n.r,n.c[1]-n.r,n.c[0]+n.r,n.c[1]+n.r];else{const q=n.pts;bb=[Infinity,Infinity,-Infinity,-Infinity];for(let i=0;i<q.length;i+=2){bb[0]=Math.min(bb[0],q[i]);bb[1]=Math.min(bb[1],q[i+1]);bb[2]=Math.max(bb[2],q[i]);bb[3]=Math.max(bb[3],q[i+1])}}
   const sw=bb[2]-bb[0],sh=bb[3]-bb[1],avail=Math.max(80,H-TOPH-DOCKH);
   let z=(sw>0||sh>0)?Math.min(W*.6/Math.max(sw,1e-9),avail*.5/Math.max(sh,1e-9)):Math.max(V.z,fitZ*3);
   z=clamp(z,zMin(),Z_MAX);const cx=(bb[0]+bb[2])/2,cy=(bb[1]+bb[3])/2;
@@ -1531,7 +1652,7 @@ $('#file').addEventListener('change',async e=>{const f=e.target.files&&e.target.
 
 /* ---------- wiring ---------- */
 $$('.tool').forEach(b=>b.addEventListener('click',()=>{audioWake();setTool(b.dataset.tool);$('#welcome').hidden=true}));
-$('#fab').addEventListener('click',()=>{audioWake();const f=$('#fab');f.classList.add('hit');setTimeout(()=>f.classList.remove('hit'),110);updateSnap();placePoint(currentTarget())});
+$('#fab').addEventListener('click',()=>{audioWake();const f=$('#fab');f.classList.add('hit');setTimeout(()=>f.classList.remove('hit'),110);updateSnap();placePoint(currentTarget(),RC.x,RC.y)});
 $('#areaBack').addEventListener('click',()=>{S.areaPts.pop();updateAreaBar();readoutSoon();requestFrame();sfx('undo')});
 $('#areaDone').addEventListener('click',finishArea);
 $('#undoBtn').addEventListener('click',()=>{audioWake();undo()});
@@ -1546,6 +1667,8 @@ $('#scaleChip').addEventListener('click',()=>{audioWake();if(D)openScale()});
 $$('#penbar .sw').forEach(b=>b.addEventListener('click',()=>{S.penColor=b.dataset.ink;S.eraser=false;$('#eraserBtn').classList.remove('on');$$('#penbar .sw').forEach(x=>x.classList.toggle('on',x===b));toolHint();sfx('tap')}));
 $$('#penbar .penw[data-w]').forEach(b=>b.addEventListener('click',()=>{S.penW=+b.dataset.w;$$('#penbar .penw[data-w]').forEach(x=>x.classList.toggle('on',x===b));sfx('tap')}));
 $('#eraserBtn').addEventListener('click',()=>{S.eraser=!S.eraser;$('#eraserBtn').classList.toggle('on',S.eraser);toolHint();sfx('tap')});
+$$('#draftbar .dm').forEach(b=>b.addEventListener('click',()=>{S.draftMode=b.dataset.dm;S.dA=null;S.dBase=null;$$('#draftbar .dm').forEach(x=>x.classList.toggle('on',x===b));readoutSoon();requestFrame();sfx('tap')}));
+$('#draftColor').addEventListener('click',()=>{const i=(DRAFT_COLORS.indexOf(S.draftColor)+1)%DRAFT_COLORS.length;S.draftColor=DRAFT_COLORS[i];$('#draftColor').style.setProperty('--c',S.draftColor==='auto'?'linear-gradient(135deg,#fff 50%,#111 50%)':S.draftColor);requestFrame();sfx('tap')});
 
 function resize(){
   const r=cv.getBoundingClientRect();const oldW=W,oldH=H;W=Math.max(1,r.width);H=Math.max(1,r.height);dpr=Math.min(window.devicePixelRatio||1,2.5);
@@ -1553,11 +1676,11 @@ function resize(){
   const app=$('#app').getBoundingClientRect(),top=$('#top').getBoundingClientRect(),dock=$('#dock').getBoundingClientRect();
   TOPH=Math.max(0,top.bottom-app.top-8);DOCKH=Math.max(0,app.bottom-dock.top);RC.x=W/2;RC.y=(TOPH+(H-DOCKH))/2;
   document.documentElement.style.setProperty('--dock-h',DOCKH+'px');document.documentElement.style.setProperty('--top-h',(TOPH+6)+'px');
-  needBase=true;snapView=null;if(D&&(S.tool==='measure'||S.tool==='area'))updateSnap();requestFrame();
+  needBase=true;snapView=null;if(D&&aiming())updateSnap();requestFrame();
 }
 window.addEventListener('resize',resize);
 if(window.visualViewport){const vv=window.visualViewport;const kb=()=>{const k=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);document.documentElement.style.setProperty('--kb',k+'px')};vv.addEventListener('resize',kb);vv.addEventListener('scroll',kb)}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#dialog').hidden)$('#dialog').hidden=true;else if(!$('#imgview').hidden)$('#imgview').hidden=true;else if(!$('#backdrop').hidden)closeSheets();else if(S.sel)select(null)}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#dialog').hidden)$('#dialog').hidden=true;else if(!$('#imgview').hidden)$('#imgview').hidden=true;else if(!$('#backdrop').hidden)closeSheets();else if(S.sel)select(null);else if(S.dA||S.dBase||S.mA){S.dA=null;S.dBase=null;S.mA=null;readoutSoon();requestFrame()}}});
 
 /* ---------- boot ---------- */
 async function boot(){
