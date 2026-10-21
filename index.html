@@ -92,6 +92,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 #readout{position:absolute;z-index:4;left:50%;top:calc(var(--top-h) - 4px);transform:translateX(-50%);min-width:196px;max-width:calc(100% - 32px);padding:12px 16px 9px;border-radius:12px;text-align:center;color:var(--tape-ink);background-color:var(--tape);background-image:repeating-linear-gradient(90deg,rgba(26,19,0,.7) 0 1px,transparent 1px 7px),repeating-linear-gradient(90deg,rgba(26,19,0,.7) 0 1px,transparent 1px 35px);background-size:100% 5px,100% 9px;background-repeat:no-repeat;box-shadow:0 8px 24px rgba(0,0,0,.45),inset 0 -2px 0 rgba(0,0,0,.18);pointer-events:none}
 #readout .rv{font:700 27px/1.1 var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:.01em;white-space:nowrap}
 #readout .rv.small{font:700 16px/1.35 var(--f-ui);letter-spacing:.02em}
+#readout .rv.coord{display:inline-block;text-align:left;font:700 22px/1.22 var(--f-num);white-space:pre}
 #readout .rs{margin-top:2px;font:700 11.5px/1.35 var(--f-ui);opacity:.82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #readout.warn .rs{color:#7a1500;opacity:1}
 #hint{position:absolute;z-index:4;left:50%;top:calc(var(--top-h) + 2px);transform:translateX(-50%);max-width:calc(100% - 32px);padding:8px 14px;border-radius:999px;background:rgba(21,28,36,.92);border:1px solid var(--rule);font-size:12.5px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
@@ -115,8 +116,8 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 #leftbtns{left:max(16px,env(safe-area-inset-left,0px));bottom:calc(var(--dock-h) + 16px);display:flex;flex-direction:column;gap:10px}
 #leftbtns .ibtn{width:46px;height:46px;border-radius:14px;background:rgba(31,42,53,.94)}
 #app[data-tool="pen"] #leftbtns{bottom:calc(var(--dock-h) + 70px)}
-#app[data-tool="draft"] #leftbtns{bottom:calc(var(--dock-h) + 102px)}
-#draftbar{left:max(16px,env(safe-area-inset-left,0px));bottom:calc(var(--dock-h) + 32px);max-width:calc(100% - max(16px,env(safe-area-inset-left,0px)) - max(16px,env(safe-area-inset-right,0px)) - 92px);overflow-x:auto;display:flex;align-items:center;gap:3px;padding:5px;border-radius:999px;background:rgba(21,28,36,.96);border:1px solid var(--rule);box-shadow:0 8px 22px rgba(0,0,0,.4)}
+#app[data-tool="draft"] #leftbtns,#app[data-tool="coord"] #leftbtns{bottom:calc(var(--dock-h) + 102px)}
+#draftbar,#coordbar{left:max(16px,env(safe-area-inset-left,0px));bottom:calc(var(--dock-h) + 32px);max-width:calc(100% - max(16px,env(safe-area-inset-left,0px)) - max(16px,env(safe-area-inset-right,0px)) - 92px);overflow-x:auto;display:flex;align-items:center;gap:3px;padding:5px;border-radius:999px;background:rgba(21,28,36,.96);border:1px solid var(--rule);box-shadow:0 8px 22px rgba(0,0,0,.4)}
 .dm{height:34px;flex:none;padding:0 9px;border:0;border-radius:999px;background:transparent;color:var(--dim);font-weight:700;font-size:12.5px;touch-action:manipulation}
 .dm.on{background:var(--text);color:var(--steel)}
 #areabar{right:calc(max(16px,env(safe-area-inset-right,0px)) + 88px);bottom:calc(var(--dock-h) + 30px);display:flex;gap:8px}
@@ -132,7 +133,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .sep{width:1px;height:22px;background:var(--rule)}
 
 /* ---- dock ---- */
-#dock{position:absolute;z-index:5;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(6,minmax(0,100px));justify-content:center;gap:4px;padding-block:8px 10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--steel);border-top:1px solid var(--rule)}
+#dock{position:absolute;z-index:5;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(7,minmax(0,92px));justify-content:center;gap:4px;padding-block:8px 10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--steel);border-top:1px solid var(--rule)}
 .tool{height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0;border-radius:14px;background:transparent;color:var(--dim);font:700 11px/1 var(--f-ui);letter-spacing:.04em;touch-action:manipulation;transition:transform .18s cubic-bezier(.3,1.7,.5,1),background .15s,color .15s,box-shadow .15s}
 .tool svg{width:25px;height:25px}
 .tool.on{background:var(--tape);color:var(--tape-ink);transform:translateY(-5px);box-shadow:0 8px 18px rgba(255,198,26,.25)}
@@ -182,6 +183,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .item .ib.memo{background:var(--stake);color:#fff}
 .item .ib.ink{background:#3d8bff;color:#fff}
 .item .ib.draft{background:#e9eef3;color:#151c24}
+.item .ib.coord{background:#4dd2ff;color:#04202b}
 .item .it{min-width:0;flex:1;font-size:13.5px;line-height:1.45;overflow-wrap:anywhere}
 .item .it .num{font:700 15px/1.3 var(--f-num);font-variant-numeric:tabular-nums}
 .item .it small{display:block;color:var(--dim);font-size:11px}
@@ -210,6 +212,10 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
 .scales button{height:42px;border-radius:11px;border:1px solid var(--rule);background:var(--steel-2);font:600 13.5px/1 var(--f-num);touch-action:manipulation}
 .scales button.on{background:var(--tape);color:var(--tape-ink);border-color:transparent}
 .scales button.auto{grid-column:1/-1;font-family:var(--f-ui);font-weight:700}
+.cin{display:flex;align-items:center;gap:8px}
+.cin label{flex:none;width:62px;font:700 17px/1 var(--f-num)}
+.cin label small{font:700 11px/1 var(--f-ui);color:var(--dim);margin-left:3px}
+.pm{flex:none;width:46px;height:44px;border-radius:12px;border:1px solid var(--rule);background:var(--steel-2);font:700 17px/1 var(--f-num);touch-action:manipulation}
 
 /* ---- overlays ---- */
 #toast{position:absolute;z-index:20;left:50%;top:calc(var(--top-h) + 8px);transform:translate(-50%,-6px);max-width:calc(100% - 32px);padding:10px 16px;border-radius:999px;background:var(--text);color:var(--steel);font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -285,12 +291,20 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
     <button class="sw" id="draftColor" style="--c:#ff3b30" type="button" aria-label="線の色を切り替え"><i></i></button>
   </div>
 
+  <div id="coordbar" class="fl" hidden>
+    <button class="dm on" data-cm="read" type="button">座標を読む</button>
+    <button class="dm" data-cm="set" type="button">2点で設定</button>
+    <span class="sep"></span>
+    <button class="dm" data-cm="find" type="button">座標で探す</button>
+  </div>
+
   <button id="fab" class="fl" type="button" hidden aria-label="照準の位置に点を置く"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg><span>置く</span></button>
 
   <nav id="dock" aria-label="ツール">
     <button class="tool on" data-tool="pan" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/><path d="m9 6 3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg>移動</button>
     <button class="tool" data-tool="measure" type="button"><svg class="i" viewBox="0 0 24 24"><rect x="2.5" y="8" width="19" height="8" rx="1.5"/><path d="M6 8v3M9.5 8v4.5M13 8v3M16.5 8v4.5"/></svg>寸法</button>
     <button class="tool" data-tool="area" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M5 18 4 8l8-4 8 6-3 9z"/><circle cx="4" cy="8" r="1.4" fill="currentColor"/><circle cx="12" cy="4" r="1.4" fill="currentColor"/><circle cx="20" cy="10" r="1.4" fill="currentColor"/><circle cx="17" cy="19" r="1.4" fill="currentColor"/><circle cx="5" cy="18" r="1.4" fill="currentColor"/></svg>面積</button>
+    <button class="tool" data-tool="coord" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M4 3.5V20h16.5"/><circle cx="14" cy="10" r="2.6"/><path d="M14 4.4v2.6M14 13v2.6M8.4 10H11M17 10h2.6"/></svg>座標</button>
     <button class="tool" data-tool="draft" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M4 20 20 4"/><circle cx="4" cy="20" r="1.6" fill="currentColor"/><circle cx="20" cy="4" r="1.6" fill="currentColor"/><path d="M4 11a7 7 0 0 1 7-7"/></svg>作図</button>
     <button class="tool" data-tool="memo" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>メモ</button>
     <button class="tool" data-tool="pen" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M4 20l1.2-4.6L15.6 5a2.1 2.1 0 0 1 3 0l.4.4a2.1 2.1 0 0 1 0 3L8.6 18.8z"/><path d="M13.5 7l3.5 3.5"/></svg>ペン</button>
@@ -358,6 +372,17 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
     <div class="grab"></div>
     <div class="shead"><h2>計測の縮尺</h2><button class="ibtn" type="button" data-close aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="sbody" id="scaleBody"></div>
+  </section>
+
+  <section class="sheet" id="coordSheet" hidden aria-label="座標の入力">
+    <div class="grab"></div>
+    <div class="shead"><h2 id="cTitle">座標を入力</h2><button class="ibtn" type="button" data-close aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="sbody">
+      <p class="note" id="cHint" style="margin:0"></p>
+      <div class="cin"><label for="cX">X<small>北</small></label><button class="pm" type="button" data-for="cX" aria-label="Xの符号を切り替え">±</button><input type="text" id="cX" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="例 -12345.678"></div>
+      <div class="cin"><label for="cY">Y<small>東</small></label><button class="pm" type="button" data-for="cY" aria-label="Yの符号を切り替え">±</button><input type="text" id="cY" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="例 23456.789"></div>
+      <div class="row"><button class="btn" id="cCancel" type="button">やめる</button><button class="btn primary" id="cOk" type="button">決定</button></div>
+    </div>
   </section>
 
   <div id="loading" hidden><div class="load"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="16" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="22 8"/><path d="M24 2v8M24 38v8M2 24h8M38 24h8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg><div id="loadTxt">図面を解析しています…</div><small id="loadSub"></small></div></div>
@@ -804,7 +829,7 @@ const PW={
       const job={res,s,timer:setTimeout(()=>{if(!this.cb.has(id))return;this.cb.delete(id);this.kill(s);res({ok:false,err:'TIMEOUT'})},Math.max(20000,buf.byteLength/250))};
       this.cb.set(id,job);s.busy++;
       try{const copy=buf.slice(0);s.w.postMessage({id,buf:copy,hash:kind==='hash'},[copy])}catch(e){clearTimeout(job.timer);this.cb.delete(id);s.busy--;res({fallback:true});return}
-      if(this.ok!==true)setTimeout(()=>{if(this.ok!==true&&this.cb.has(id))this.fail()},4000);
+      if(this.ok!==true)setTimeout(()=>{if(this.ok!==true&&this.cb.has(id))this.fail()},10000);
     });
   }
 };
@@ -840,18 +865,20 @@ function sampleSFC(){
   [.13,.25,.35,.5,.7].forEach(w=>F('width_feature',n(w)));
   F('text_font_feature',s('ＭＳ ゴシック'));
   // colour codes: white 8, red 2, yellow 5, cyan 7, green 3, lightblue 13, darkgray 16 / types 1,2,8 / widths 1=.13 3=.25 4=.35 5=.5 6=.7
-  const pl=(L,col,lt,w,pts)=>{const xs=[],ys=[];for(let i=0;i<pts.length;i+=2){xs.push(pts[i]);ys.push(pts[i+1])}F('polyline_feature',c(L),c(col),c(lt),c(w),c(xs.length),ls(xs),ls(ys))};
-  const line=(L,col,lt,w,x1,y1,x2,y2)=>F('line_feature',c(L),c(col),c(lt),c(w),n(x1),n(y1),n(x2),n(y2));
-  const arc=(L,col,lt,w,cx,cy,r,a0,a1)=>F('arc_feature',c(L),c(col),c(lt),c(w),n(cx),n(cy),n(r),c(0),n(a0),n(a1));
-  const circ=(L,col,w,cx,cy,r)=>F('circle_feature',c(L),c(col),c(1),c(w),n(cx),n(cy),n(r));
-  const txt=(L,col,t,x,y,h,ang,bp)=>F('text_string_feature',c(L),c(col),c(1),s(t),n(x),n(y),n(h),n(tw(t,h)),n(0),n(ang||0),n(0),c(bp||1),c(1));
-  const E=e=>e?[c(1)].concat(e.map(n)):[c(0),n(0),n(0),n(0),n(0),n(0),n(0)];
-  const ldim=(L,col,x1,y1,x2,y2,e1,e2,t,tx,ty,th,ta,tb)=>F('linear_dim_feature',c(L),c(col),c(1),c(1),n(x1),n(y1),n(x2),n(y2),...E(e1),...E(e2),c(1),c(1),n(x1),n(y1),n(.25),c(1),c(1),n(x2),n(y2),n(.25),c(1),c(1),s(t),n(tx),n(ty),n(th),n(tw(t,th)),n(0),n(ta),n(0),c(tb),c(1));
+  let ox=0,oy=0;   // offset added to coordinates (the plan sits at survey coordinates)
+  const pl=(L,col,lt,w,pts)=>{const xs=[],ys=[];for(let i=0;i<pts.length;i+=2){xs.push(pts[i]+ox);ys.push(pts[i+1]+oy)}F('polyline_feature',c(L),c(col),c(lt),c(w),c(xs.length),ls(xs),ls(ys))};
+  const line=(L,col,lt,w,x1,y1,x2,y2)=>F('line_feature',c(L),c(col),c(lt),c(w),n(x1+ox),n(y1+oy),n(x2+ox),n(y2+oy));
+  const arc=(L,col,lt,w,cx,cy,r,a0,a1)=>F('arc_feature',c(L),c(col),c(lt),c(w),n(cx+ox),n(cy+oy),n(r),c(0),n(a0),n(a1));
+  const circ=(L,col,w,cx,cy,r)=>F('circle_feature',c(L),c(col),c(1),c(w),n(cx+ox),n(cy+oy),n(r));
+  const txt=(L,col,t,x,y,h,ang,bp)=>F('text_string_feature',c(L),c(col),c(1),s(t),n(x+ox),n(y+oy),n(h),n(tw(t,h)),n(0),n(ang||0),n(0),c(bp||1),c(1));
+  const E=e=>e?[c(1)].concat(e.map((v,k)=>n(v+(k%2?oy:ox)))):[c(0),n(0),n(0),n(0),n(0),n(0),n(0)];
+  const ldim=(L,col,x1,y1,x2,y2,e1,e2,t,tx,ty,th,ta,tb)=>F('linear_dim_feature',c(L),c(col),c(1),c(1),n(x1+ox),n(y1+oy),n(x2+ox),n(y2+oy),...E(e1),...E(e2),c(1),c(1),n(x1+ox),n(y1+oy),n(.25),c(1),c(1),n(x2+ox),n(y2+oy),n(.25),c(1),c(1),s(t),n(tx+ox),n(ty+oy),n(th),n(tw(t,th)),n(0),n(ta),n(0),c(tb),c(1));
   const label=(L,col,pts,t,tx,ty,th,tb)=>{const xs=[],ys=[];for(let i=0;i<pts.length;i+=2){xs.push(pts[i]);ys.push(pts[i+1])}F('label_feature',c(L),c(col),c(1),c(1),c(xs.length),ls(xs),ls(ys),c(1),n(.25),c(1),c(1),s(t),n(tx),n(ty),n(th),n(tw(t,th)),n(0),n(0),n(0),c(tb),c(1))};
   // composite curves (cross-section, local mm) for hatch/fill
   pl(0,0,0,0,[-3000,-310,0,-250,3000,-310,3000,-510,0,-450,-3000,-510,-3000,-310]);F('composite_curve_org_feature',c(16),c(1),c(1),c(0));
   pl(0,0,0,0,[-3000,-60,0,0,3000,-60,3000,-110,0,-50,-3000,-110,-3000,-60]);F('composite_curve_org_feature',c(16),c(1),c(1),c(0));
   // ---- 平面図 (1:500, local real mm) ----
+  ox=26300000;oy=-176500000;   // BP at X -176500.000 / Y 26300.000 (fictional)
   const R=150000,th=50000/R,thD=th/D2R,CX=60000,CY=R;const EX=CX+R*Math.sin(th),EY=CY-R*Math.cos(th);
   const Pp=st=>{if(st<=60000)return[st,0,0];if(st<=110000){const f=(st-60000)/R;return[CX+R*Math.sin(f),CY-R*Math.cos(f),f]}const d=st-110000;return[EX+d*Math.cos(th),EY+d*Math.sin(th),th]};
   const O=(st,o)=>{const q=Pp(st);return[q[0]-o*Math.sin(q[2]),q[1]+o*Math.cos(q[2])]};
@@ -869,7 +896,9 @@ function sampleSFC(){
   pl(4,2,1,4,[29000,-5000,31000,-5000,31000,5000,29000,5000,29000,-5000]);pl(4,2,2,1,[29300,-5000,30700,-5000,30700,5000,29300,5000,29300,-5000]);
   txt(4,2,'BOX 2.0×1.5',30000,5700,1250,0,2);
   ldim(6,7,10000,-3000,10000,3000,null,null,'6.000',9300,0,1250,90,2);
-  F('sfig_org_feature',s('平面図'),c(1));
+  txt(7,7,'BP',0,7300,1250,0,2);txt(7,7,'X=-176500.000',0,5850,950,0,2);txt(7,7,'Y= 26300.000',0,4500,950,0,2);
+  F('sfig_org_feature',s('平面図'),c(2));
+  ox=0;oy=0;
   // ---- 標準横断図 (1:50, local real mm) ----
   const ys=x=>-.02*Math.abs(x);
   [0,50,100,250,450].forEach((t,i)=>pl(4,8,1,i===0?4:1,[-3000,ys(-3000)-t,0,-t,3000,ys(3000)-t]));
@@ -894,7 +923,7 @@ function sampleSFC(){
   txt(1,16,'※ アプリ動作確認用の架空の図面です',14,13,3,0,1);
   txt(7,8,'平面図　S=1:500',205,160,5,0,8);txt(7,8,'標準横断図　S=1:50',110,72,5,0,8);
   circ(2,8,1,388,262,7);line(2,8,1,3,388,252,388,272);line(2,8,1,3,388,272,384.5,265);line(2,8,1,3,388,272,391.5,265);txt(2,8,'N',388,274,4,0,2);
-  F('sfig_locate_feature',c(0),s('平面図'),n(60),n(205),n(0),n(.002),n(.002));
+  F('sfig_locate_feature',c(0),s('平面図'),n(60-26300000*.002),n(205+176500000*.002),n(0),n(.002),n(.002));
   F('sfig_locate_feature',c(0),s('標準横断図'),n(110),n(95),n(0),n(.02),n(.02));
   F3('drawing_attribute_feature',s('サンプル事業'),s('サンプル線 道路改良工事（例）'),s('道路改良'),s('平面図・標準横断図'),s('1'),s('平面図'),s('1:500'),c(2026),c(10),c(21),s('図面スコープ'),s('（架空）'));
   F('drawing_sheet_feature',s('平面図・標準横断図'),c(3),c(1),c(420),c(297));
@@ -907,10 +936,10 @@ function sampleSFC(){
    ========================================================= */
 let D=null;                       // current drawing
 const V={cx:0,cy:0,z:1};          // view: sheet point at canvas centre, px per mm
-const S={tool:'pan',mA:null,areaPts:[],sel:null,notes:[],undo:[],snap:null,manual:0,penColor:'#ff3b30',penW:2.5,eraser:false,draftMode:'line',dA:null,dBase:null,draftColor:'#ff3b30'};
+const S={tool:'pan',mA:null,areaPts:[],sel:null,notes:[],undo:[],snap:null,manual:0,penColor:'#ff3b30',penW:2.5,eraser:false,draftMode:'line',dA:null,dBase:null,draftColor:'#ff3b30',coordMode:'read',gA:null,geo:null};
 const DRAFT_NAMES={line:'直線',h:'水平線',v:'垂直線',perp:'垂線',circle:'円',hide:'線を隠す'};
 const DRAFT_COLORS=['#ff3b30','#3d8bff','#3fd28f','auto'];
-const aiming=()=>S.tool==='measure'||S.tool==='area'||S.tool==='draft';
+const aiming=()=>S.tool==='measure'||S.tool==='area'||S.tool==='draft'||S.tool==='coord';
 const inkColor=c=>c==='auto'?(settings.theme==='dark'?'#f2f5f8':'#111111'):c;
 let W=1,H=1,dpr=1,TOPH=60,DOCKH=78;const RC={x:0,y:0};
 const cv=$('#cv'),mctx=cv.getContext('2d');let base=document.createElement('canvas'),bctx=base.getContext('2d');let nbuf=document.createElement('canvas'),nctx=nbuf.getContext('2d');let job=null;
@@ -1087,6 +1116,7 @@ function drawNotes(ctx,Wc,Hc,pr,v,exp){
     if(n.id===sel){ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=12;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()}
     tape(ctx,a[0],a[1],b[0],b[1]);const lp=labelPos(a[0],a[1],b[0],b[1]);const r=pill(ctx,lp[0],lp[1],fmtLen(n.v),{sel:n.id===sel,pop:popScale(n,t)});if(!exp)labelHits.push({r,id:n.id});
   }
+  let ci=0;for(const n of S.notes){if(n.t!=='coord')continue;ci++;const p=T(n.x,n.y);const r=drawCoordMark(ctx,p[0],p[1],n,ci,n.id===sel,popScale(n,t));if(!exp)labelHits.push({r,id:n.id})}
   let idx=0;const pins=S.notes.filter(n=>n.t==='pin');const showLabels=pins.length<=40;
   for(const n of pins){idx++;const p=T(n.x,n.y);drawPin(ctx,p[0],p[1],n.c,idx,n.id===sel,showLabels?n.text:'',popScale(n,t))}
 }
@@ -1123,6 +1153,7 @@ function drawLive(ctx){
   if(aiming()){
     const tg=S.tool==='draft'?draftTarget():currentTarget();const tp=toScreen(tg.x,tg.y);
     if(S.tool==='draft')drawDraftLive(ctx,tp);
+    if(S.tool==='coord')drawGeoPts(ctx);
     if(S.tool==='measure'&&S.mA){const a=toScreen(S.mA.x,S.mA.y);tape(ctx,a[0],a[1],tp[0],tp[1],true)}
     if(S.tool==='area'&&S.areaPts.length){
       const q=S.areaPts;ctx.beginPath();q.forEach((p,i)=>{const s=toScreen(p.x,p.y);i?ctx.lineTo(s[0],s[1]):ctx.moveTo(s[0],s[1])});ctx.lineTo(tp[0],tp[1]);ctx.closePath();
@@ -1211,6 +1242,7 @@ function snapAt(sx,sy,rpx){
     else if(n.t==='circle'){const rxv=n.rx!=null?n.rx:-1;tryPt(n.c[0],n.c[1],3,rxv);[[1,0],[-1,0],[0,1],[0,-1]].forEach(([u,w])=>tryPt(n.c[0]+u*n.r,n.c[1]+w*n.r,4,rxv));
       const dc=Math.hypot(x-n.c[0],y-n.c[1]);if(dc>1e-9&&Math.abs(dc-n.r)<=r){const k=n.r/dc;const s=Math.abs(dc-n.r)*z+KBIAS[6];if(s<bs){bs=s;best={x:n.c[0]+(x-n.c[0])*k,y:n.c[1]+(y-n.c[1])*k,kind:6,rx:rxv}}}}
     else if(n.t==='area'){const q=n.pts;for(let i=0;i<q.length;i+=2)tryPt(q[i],q[i+1],1,-1)}
+    else if(n.t==='coord')tryPt(n.x,n.y,1,n.rx!=null?n.rx:-1);
   }
   if(ncell<=1200){
     const P=D.P,cand=collectSegs(x,y,r);
@@ -1339,10 +1371,143 @@ function areaOf(pts,rx){
   const x=D.xfs[rx]||D.xfs[0];const iv=x.inv;const det=Math.abs(iv[0]*iv[3]-iv[1]*iv[2]);
   return{real:paper*det,per:per*Math.sqrt(det),sc:rx>0?ratioText(x.s):'図上',unscaled:!(rx>0)};
 }
-function localCoord(tg){
-  const rx=tg.rx;if(!(rx>0)||!D.xfs[rx])return'';const x=D.xfs[rx];const iv=x.inv;
-  const lx=iv[0]*tg.x+iv[2]*tg.y+iv[4],ly=iv[1]*tg.x+iv[3]*tg.y+iv[5];const f=v=>(v/1000).toFixed(3);
-  return x.kind===2?'X '+f(ly)+'  Y '+f(lx)+' m':'x '+f(lx)+'  y '+f(ly)+' m';
+function localCoord(tg){const c=coordAt(tg.x,tg.y,tg.rx);return c?'X '+fmtC(c.X)+'  Y '+fmtC(c.Y)+' m':''}
+
+/* ---------- coordinates: the drawing's own (geodetic part drawings) or set from two known points ---------- */
+// survey style: X = north, Y = east, in metres
+const COORD_COL='#4dd2ff',GEO_COL='#ff9f1a';
+const fmtC=v=>(Math.abs(v)<5e-4?0:v).toFixed(3);
+// similarity map sheet (mm) → (east, north) (m) through two control points
+function geoFit(g){
+  if(!g||!g.a||!g.b||!g.A||!g.B)return null;
+  const dx=g.b[0]-g.a[0],dy=g.b[1]-g.a[1],dE=g.B[1]-g.A[1],dN=g.B[0]-g.A[0],den=dx*dx+dy*dy;if(!(den>0))return null;
+  const cr=(dE*dx+dN*dy)/den,ci=(dN*dx-dE*dy)/den;
+  return{cr,ci,tE:g.A[1]-(cr*g.a[0]-ci*g.a[1]),tN:g.A[0]-(ci*g.a[0]+cr*g.a[1]),s:Math.hypot(cr,ci)};
+}
+function coordAt(x,y,rx){
+  if(!D)return null;
+  const g=S.geo;
+  if(g&&g.rx===rx){const T=geoFit(g);if(T)return{X:T.ci*x+T.cr*y+T.tN,Y:T.cr*x-T.ci*y+T.tE,src:'user'}}
+  const xf=rx>0&&D.xfs[rx];
+  if(xf&&xf.kind===2){const iv=xf.inv;const lx=iv[0]*x+iv[2]*y+iv[4],ly=iv[1]*x+iv[3]*y+iv[5];return{X:ly/1000,Y:lx/1000,src:'sfc',name:xf.name}}
+  return null;
+}
+// where a coordinate lies on the sheet (mpp: metres per sheet mm); prefers a system whose part of the sheet contains it
+function sheetPointAt(X,Y){
+  const cand=[],inReg=(p,rx)=>{const bb=rx>0?(D.regions.find(q=>q.rx===rx)||{}).bb:D.fit;return!!bb&&p.x>=bb[0]&&p.x<=bb[2]&&p.y>=bb[1]&&p.y<=bb[3]};
+  const g=S.geo,T=geoFit(g);
+  if(T){const u=Y-T.tE,v=X-T.tN,d=T.cr*T.cr+T.ci*T.ci;const p={x:(u*T.cr+v*T.ci)/d,y:(v*T.cr-u*T.ci)/d,rx:g.rx,src:'user',mpp:T.s};p.inside=inReg(p,g.rx);cand.push(p)}
+  D.xfs.forEach((xf,i)=>{
+    if(!(i>0&&xf.kind===2)||(g&&g.rx===i))return;const m=xf.m,lx=Y*1000,ly=X*1000;
+    const p={x:m[0]*lx+m[2]*ly+m[4],y:m[1]*lx+m[3]*ly+m[5],rx:i,src:'sfc',mpp:1/(xf.s*1000)};p.inside=inReg(p,i);cand.push(p);
+  });
+  return cand.find(p=>p.inside)||cand[0]||null;
+}
+const hasCoords=()=>!!(S.geo||(D&&D.xfs.some((x,i)=>i>0&&x.kind===2)));
+const coordSrc=c=>c.src==='user'?'2点で合わせた座標':'図面の座標'+(c.name?'（'+c.name+'）':'');
+function coordReadout(ro,rv,rs){
+  const tg=currentTarget(),rx=resolveRx(tg);
+  if(S.coordMode==='set'){
+    rv.className='rv small';rv.textContent=S.gA?'基準点2に照準を合わせる':'基準点1に照準を合わせる';
+    rs.textContent=S.gA?'基準点1 X '+fmtC(S.gA.X)+'  Y '+fmtC(S.gA.Y)+' · 「置く」で座標を入力':'座標のわかる点（杭・IPなど）で「置く」';return;
+  }
+  const c=coordAt(tg.x,tg.y,rx);
+  if(!c){rv.className='rv small';rv.textContent='座標が未設定です';rs.textContent=hasCoords()?'この図には座標がありません · 「2点で設定」で合わせられます':'「2点で設定」で、座標のわかる2点から合わせます';ro.classList.add('warn');return}
+  rv.className='rv coord';rv.textContent='X '+fmtC(c.X)+'\nY '+fmtC(c.Y);
+  rs.textContent=(S.snap?KNAME[S.snap.kind]+' · ':'')+coordSrc(c);
+}
+function coordPlace(p){
+  if(S.coordMode==='set'){
+    if(S.gA&&S.gA.rx!==p.rx){toast('2点は同じ図（部分図）の中で選んでください',2600);return}
+    if(S.gA&&Math.hypot(p.x-S.gA.x,p.y-S.gA.y)*V.z<12){toast('基準点1と同じ位置です');return}
+    effects.push({x:p.x,y:p.y,t0:now(),c:GEO_COL});sfx('place');buzz(12);
+    const k=S.gA?2:1;
+    openCoordInput('基準点'+k+'の座標',k===1?'この点の座標を入れてください（X：北方向、Y：東方向、単位 m）。':'2点目を入れると、図面の座標が決まります。',coordAt(p.x,p.y,p.rx),(X,Y)=>{
+      if(k===1){S.gA={x:p.x,y:p.y,rx:p.rx,X,Y};readoutSoon();requestFrame();return}
+      applyGeo({rx:p.rx,a:[S.gA.x,S.gA.y],b:[p.x,p.y],A:[S.gA.X,S.gA.Y],B:[X,Y]});
+    });
+    return;
+  }
+  const c=coordAt(p.x,p.y,p.rx);
+  if(!c){toast('座標が未設定です。2点を指定して合わせてください',2600);setCoordMode('set');return}
+  effects.push({x:p.x,y:p.y,t0:now(),c:COORD_COL});buzz([10,40,16]);
+  addNote({id:uid(),t:'coord',x:p.x,y:p.y,rx:p.rx,X:c.X,Y:c.Y,src:c.src,ts:Date.now()});sfx('done');
+}
+// points that were read from the 2-point setting follow it when it changes
+function refreshCoordNotes(){for(const q of S.notes){if(q.t!=='coord'||q.src!=='user')continue;const c=coordAt(q.x,q.y,q.rx);if(c&&c.src==='user'){q.X=c.X;q.Y=c.Y}}}
+const coordSnapshot=()=>S.notes.filter(n=>n.t==='coord'&&n.src==='user').map(n=>[n.id,n.X,n.Y]);
+function applyGeo(g){
+  const T=geoFit(g),dW=Math.hypot(g.B[0]-g.A[0],g.B[1]-g.A[1]);
+  if(!T||!(dW>0)){toast('2点の座標が同じです。入力を確かめてください',2800);S.gA=null;readoutSoon();return}
+  pushUndo({op:'geo',before:S.geo,prev:coordSnapshot()});
+  S.geo=g;S.gA=null;refreshCoordNotes();setCoordMode('read');notesChanged();
+  // check against the drawing's own scale
+  const m=measure({x:g.a[0],y:g.a[1],rx:g.rx},{x:g.b[0],y:g.b[1],rx:g.rx});
+  if(m.unscaled&&!S.manual){toast('座標を合わせました（縮尺 1:'+Math.round(T.s*1000)+' 相当）',3200);sfx('done');return}
+  const real=m.real/1000,diff=Math.abs(dW-real)/Math.max(real,1e-9);
+  if(diff>.01){dialog('2点の距離が図面と合いません','入力した座標の2点間：'+dW.toFixed(3)+' m\n図面上の2点間：'+real.toFixed(3)+' m（差 '+(diff*100).toFixed(1)+'%）\n\n座標の打ち間違いがないか確かめてください。違っていたら ↶ で戻して、もう一度設定できます。');sfx('erase');return}
+  toast('座標を合わせました（図面との差 '+(diff*100).toFixed(2)+'%）',2600);sfx('done');buzz([10,40,16]);
+}
+function setCoordMode(m){
+  if(m==='find'){findCoord();return}
+  S.coordMode=m;S.gA=null;$$('#coordbar .dm[data-cm]').forEach(b=>b.classList.toggle('on',b.dataset.cm===m));readoutSoon();requestFrame();
+}
+function findCoord(){
+  if(!D)return;
+  if(!hasCoords()){toast('座標が未設定です。先に2点で合わせてください',2600);setCoordMode('set');return}
+  const tg=currentTarget();
+  openCoordInput('座標で探す','X（北）とY（東）を入れると、その位置へ移動して印をつけます。',coordAt(tg.x,tg.y,resolveRx(tg)),(X,Y)=>{
+    const p=sheetPointAt(X,Y);if(!p){toast('座標が未設定です');return}
+    const z=clamp(W*.8/Math.max(1e-9,30/p.mpp),zMin(),Z_MAX);   // about 30 m across the screen
+    flyTo({cx:p.x,cy:p.y-(H/2-RC.y)/z,z},420);
+    const f=D.fit,out=p.x<f[0]||p.x>f[2]||p.y<f[1]||p.y>f[3];
+    addNote({id:uid(),t:'coord',x:p.x,y:p.y,rx:p.rx,X,Y,src:p.src,ts:Date.now()});sfx('done');
+    toast(out?'図面の範囲の外です（印をつけました）':'その位置に印をつけました',2400);
+  },'この座標へ移動');
+}
+// coordinate entry sheet: full-width digits, other dashes and a pasted "X=… Y=…" pair are all accepted
+let coordCb=null;
+const normNum=v=>String(v||'').replace(/[０-９．－＋，]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0xFEE0)).replace(/[ー−‐―–]/g,'-');
+const parseNum=v=>{const t=normNum(v).replace(/[,\s]/g,'').replace(/^[XxYy][=:：]?/,'');return t===''?NaN:Number(t)};
+function openCoordInput(title,hint,pre,cb,ok){
+  coordCb=cb;$('#cTitle').textContent=title;$('#cHint').textContent=hint||'';$('#cOk').textContent=ok||'決定';
+  $('#cX').value=pre?fmtC(pre.X):'';$('#cY').value=pre?fmtC(pre.Y):'';
+  openSheet('coordSheet');setTimeout(()=>{try{const i=$('#cX');i.focus({preventScroll:true});i.select()}catch(e){}},280);
+}
+$('#cX').addEventListener('input',e=>{const v=normNum(e.target.value);const m=v.match(/[-+]?\d+(?:\.\d+)?/g);if(m&&m.length===2&&/[\sYy\/／、;]/.test(v)){$('#cX').value=m[0];$('#cY').value=m[1]}});
+$('#cX').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#cY').focus()}});
+$('#cY').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#cOk').click()}});
+$$('#coordSheet .pm').forEach(b=>b.addEventListener('click',()=>{const i=$('#'+b.dataset.for);const v=normNum(i.value).trim();i.value=v.startsWith('-')?v.slice(1):'-'+v;sfx('tap')}));
+$('#cOk').addEventListener('click',()=>{
+  const X=parseNum($('#cX').value),Y=parseNum($('#cY').value);
+  if(!isFinite(X)||!isFinite(Y)){toast('X と Y の数字を入れてください');return}
+  const cb=coordCb;coordCb=null;closeSheets();if(cb)cb(X,Y);
+});
+$('#cCancel').addEventListener('click',()=>{coordCb=null;closeSheets()});
+function drawCoordMark(ctx,x,y,n,idx,sel,pop){
+  ctx.save();ctx.translate(x,y);ctx.scale(pop,pop);ctx.lineCap='round';
+  const mark=()=>{ctx.beginPath();ctx.arc(0,0,6,0,Math.PI*2);ctx.moveTo(-11,0);ctx.lineTo(-3,0);ctx.moveTo(3,0);ctx.lineTo(11,0);ctx.moveTo(0,-11);ctx.lineTo(0,-3);ctx.moveTo(0,3);ctx.lineTo(0,11)};
+  ctx.lineWidth=4.5;ctx.strokeStyle='rgba(0,0,0,.6)';mark();ctx.stroke();ctx.lineWidth=2;ctx.strokeStyle=COORD_COL;mark();ctx.stroke();
+  ctx.font='600 11.5px "Chakra Petch","BIZ UDPGothic",sans-serif';
+  const l1='X '+fmtC(n.X),l2='Y '+fmtC(n.Y),tag='P'+idx;
+  const tw=ctx.measureText(tag).width+12,w=Math.max(ctx.measureText(l1).width,ctx.measureText(l2).width)+tw+16,h=34,lx=13,ly=-h-6;
+  ctx.fillStyle='rgba(12,17,23,.93)';rr(ctx,lx,ly,w,h,7);ctx.fill();
+  ctx.save();rr(ctx,lx,ly,w,h,7);ctx.clip();ctx.fillStyle=COORD_COL;ctx.fillRect(lx,ly,tw,h);ctx.restore();
+  ctx.lineWidth=sel?2.5:1.2;ctx.strokeStyle=sel?'#fff':COORD_COL;rr(ctx,lx,ly,w,h,7);ctx.stroke();
+  ctx.fillStyle='#04202b';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(tag,lx+tw/2,ly+h/2+.5);
+  ctx.fillStyle='#e9f6fb';ctx.textAlign='left';ctx.fillText(l1,lx+tw+8,ly+10);ctx.fillText(l2,lx+tw+8,ly+h-9.5);
+  ctx.restore();
+  return[x+lx*pop,y+ly*pop,w*pop,h*pop];
+}
+// the two known points behind a 2-point setting (shown while the coordinate tool is in use)
+function drawGeoPts(ctx){
+  const L=[];if(S.gA)L.push([S.gA.x,S.gA.y,'基準1']);else if(S.geo)L.push([S.geo.a[0],S.geo.a[1],'基準1'],[S.geo.b[0],S.geo.b[1],'基準2']);
+  for(const[x,y,t]of L){
+    const p=toScreen(x,y);ctx.save();ctx.translate(p[0],p[1]);
+    ctx.beginPath();ctx.moveTo(0,-9);ctx.lineTo(8,5);ctx.lineTo(-8,5);ctx.closePath();ctx.lineWidth=4;ctx.strokeStyle='rgba(0,0,0,.6)';ctx.stroke();ctx.lineWidth=2;ctx.strokeStyle=GEO_COL;ctx.stroke();
+    ctx.font='700 11px "BIZ UDPGothic",sans-serif';const w=ctx.measureText(t).width+10;ctx.fillStyle=GEO_COL;rr(ctx,-w/2,9,w,17,5);ctx.fill();
+    ctx.fillStyle='#1a1300';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,0,17.5);ctx.restore();
+  }
 }
 
 /* =========================================================
@@ -1355,6 +1520,7 @@ function renderReadout(){
   if(!D||S.sel||!aiming()){ro.hidden=true;return}
   ro.hidden=false;ro.classList.remove('warn');const tg=currentTarget();
   if(S.tool==='draft'){draftReadout(ro,rv,rs);return}
+  if(S.tool==='coord'){coordReadout(ro,rv,rs);return}
   if(S.tool==='measure'){
     if(!S.mA){rv.className='rv small';rv.textContent=S.snap?KNAME[S.snap.kind]+'に吸着中':'照準を点に合わせる';const tg2={...tg,rx:resolveRx(tg)};rs.textContent=S.snap?(localCoord(tg2)||'「置く」で始点を決定'):'近くの端点・交点に吸い付きます';return}
     const tgr={...tg,rx:resolveRx(tg)};const m=measure(S.mA,tgr);rv.className='rv';rv.textContent=fmtLen(m.real);
@@ -1401,6 +1567,7 @@ function undo(){
   else if(u.op==='clear'){S.notes=u.notes}
   else if(u.op==='hide'){setHidden(u.i,false)}
   else if(u.op==='unhideAll'){u.list.forEach(i=>{D.hid[i]=1;dirtyPrim(D,i)});invalidateAll()}
+  else if(u.op==='geo'){S.geo=u.before;S.gA=null;u.prev.forEach(([id,X,Y])=>{const q=S.notes.find(n=>n.id===id);if(q){q.X=X;q.Y=Y}});readoutSoon()}
   if(S.sel)select(S.notes.find(n=>n.id===S.sel)||null);
   sfx('undo');toast('元に戻しました');notesChanged();
 }
@@ -1442,7 +1609,7 @@ function scheduleSave(){if(!D||D.noSave)return;clearTimeout(saveTimer);saveTimer
 function flushSave(){
   clearTimeout(saveTimer);saveTimer=0;if(!D||D.noSave)return;
   const hidden=[];for(let i=0;i<D.hid.length;i++)if(D.hid[i])hidden.push(i);
-  saveQ.set(D.hash,{kind:'drawing',name:D.name,hash:D.hash,size:D.size,updatedAt:Date.now(),manual:S.manual||0,notes:cleanNotes(S.notes),hidden});
+  saveQ.set(D.hash,{kind:'drawing',name:D.name,hash:D.hash,size:D.size,updatedAt:Date.now(),manual:S.manual||0,notes:cleanNotes(S.notes),hidden,geo:S.geo?{rx:S.geo.rx,a:S.geo.a,b:S.geo.b,A:S.geo.A,B:S.geo.B}:null});
   pumpSave();
 }
 async function pumpSave(){
@@ -1511,7 +1678,7 @@ async function hashBytes(buf){
    ========================================================= */
 const DOCS=[];let CUR=null;
 const PARSE_BUDGET=650000,MAX_PARSED=10,SNAP_KEEP=3;
-function newDoc(o){return{id:uid(),name:o.name||'図面',hash:o.hash,size:o.size||0,sample:!!o.sample,buf:o.buf||null,cached:o.cached,D:null,job:null,err:null,notes:[],undo:[],manual:0,view:null,hidden:null,vis:null,loaded:false,loadP:null,used:0,snap:null,shown:false,title:''}}
+function newDoc(o){return{id:uid(),name:o.name||'図面',hash:o.hash,size:o.size||0,sample:!!o.sample,buf:o.buf||null,cached:o.cached,D:null,job:null,err:null,notes:[],undo:[],manual:0,geo:null,view:null,hidden:null,vis:null,loaded:false,loadP:null,used:0,snap:null,shown:false,title:''}}
 function estCost(x){const d=x.D;return d?d.np+d.texts.length*2+(d.pts.length>>3):Math.max(500,(x.size||0)/80)}
 function ensureParsed(doc){
   if(doc.D)return Promise.resolve(true);
@@ -1581,14 +1748,14 @@ function clearSnaps(){DOCS.forEach(x=>x.snap=null)}
 function stash(){
   const c=CUR;if(!c)return;
   if(saveTimer)flushSave();
-  c.notes=S.notes;c.undo=S.undo;c.manual=S.manual;
+  c.notes=S.notes;c.undo=S.undo;c.manual=S.manual;c.geo=S.geo;
   if(D&&c.D===D){
     c.view={cx:V.cx,cy:V.cy,z:V.z,fitZ};
     if(snapView&&lastBaseMs>=26){const fresh=!needBase&&!job&&snapView.cx===V.cx&&snapView.cy===V.cy&&snapView.z===V.z;c.snap={canvas:base,view:snapView,fresh,theme:settings.theme,w:base.width,h:base.height,ms:lastBaseMs};base=freshBase();bctx=base.getContext('2d');trimSnaps()}
     else c.snap=null;
   }
 }
-function resetTransient(){S.mA=null;S.areaPts=[];S.snap=null;S.dA=null;S.dBase=null;lastSnapKey='';effects.length=0;fly.on=false;inertia.on=false;updateAreaBar();select(null)}
+function resetTransient(){S.mA=null;S.areaPts=[];S.snap=null;S.dA=null;S.dBase=null;S.gA=null;lastSnapKey='';effects.length=0;fly.on=false;inertia.on=false;updateAreaBar();select(null)}
 let actSeq=0;
 async function activate(doc,opt={}){
   if(!doc||DOCS.indexOf(doc)<0)return false;
@@ -1597,7 +1764,7 @@ async function activate(doc,opt={}){
   stash();
   CUR=doc;doc.used=now();saveTabs();renderTabs();
   if(!doc.D){
-    D=null;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;resetTransient();updateUndo();renderTitle();invalidateAll();
+    D=null;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;S.geo=doc.geo||null;resetTransient();updateUndo();renderTitle();invalidateAll();
     const lt=setTimeout(()=>{if(CUR===doc&&!doc.D)showLoading(doc.name)},140);
     const ok=await ensureParsed(doc);clearTimeout(lt);
     if(seq!==actSeq)return ok;
@@ -1610,7 +1777,7 @@ async function activate(doc,opt={}){
   show(doc);return true;
 }
 function show(doc){
-  D=doc.D;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;resetTransient();updateUndo();hideLoading();
+  D=doc.D;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;S.geo=doc.geo||null;resetTransient();updateUndo();hideLoading();
   if(!doc.shown){doc.shown=true;if(D.bg&&!LS.get('themeChosen',false)){const th=(.2126*D.bg[0]+.7152*D.bg[1]+.0722*D.bg[2])>128?'light':'dark';if(th!==settings.theme){settings.theme=th;colCache.clear();clearSnaps()}}}
   renderTitle();
   if(doc.view){V.cx=doc.view.cx;V.cy=doc.view.cy;V.z=doc.view.z;fitZ=doc.view.fitZ}else fitView();
@@ -1632,6 +1799,7 @@ function loadNotes(doc){
     if(saved&&Array.isArray(saved.notes)){
       const ids=new Set(have.map(n=>n.id));notes=saved.notes.filter(n=>n&&!ids.has(n.id)).concat(have);
       if(!(cur?S.manual:doc.manual)&&saved.manual>0){doc.manual=saved.manual;if(cur)S.manual=saved.manual}
+      if(saved.geo&&saved.geo.a&&saved.geo.B&&!(cur?S.geo:doc.geo)){doc.geo=saved.geo;if(cur)S.geo=saved.geo}
       if(Array.isArray(saved.hidden)&&saved.hidden.length){
         if(doc.D){const d=doc.D;saved.hidden.forEach(i=>{if(i>=0&&i<d.np&&!d.hid[i]){d.hid[i]=1;dirtyPrim(d,i)}});if(cur)invalidateAll()}
         else doc.hidden=(doc.hidden||[]).concat(saved.hidden);
@@ -1654,7 +1822,7 @@ function errText(c){
 function closeDoc(doc,o={}){
   const i=DOCS.indexOf(doc);if(i<0)return;
   const wasCur=doc===CUR;
-  if(wasCur){if(saveTimer)flushSave();CUR=null;D=null;S.notes=[];S.undo=[];resetTransient();updateUndo()}
+  if(wasCur){if(saveTimer)flushSave();CUR=null;D=null;S.notes=[];S.undo=[];S.geo=null;resetTransient();updateUndo()}
   DOCS.splice(i,1);doc.D=null;doc.snap=null;doc.buf=null;
   saveTabs();renderTabs();
   if(wasCur){
@@ -1665,7 +1833,7 @@ function closeDoc(doc,o={}){
 }
 function closeAll(){
   if(saveTimer)flushSave();DOCS.splice(0).forEach(x=>{x.D=null;x.snap=null;x.buf=null});preRun++;
-  CUR=null;D=null;S.notes=[];S.undo=[];resetTransient();updateUndo();saveTabs();renderTabs();renderTitle();invalidateAll();showWelcome();
+  CUR=null;D=null;S.notes=[];S.undo=[];S.geo=null;resetTransient();updateUndo();saveTabs();renderTabs();renderTitle();invalidateAll();showWelcome();
 }
 function saveTabs(){LS.set('tabs',DOCS.filter(x=>!x.sample&&x.cached!==false).map(x=>({hash:x.hash,name:x.name,size:x.size})));LS.set('activeTab',CUR&&!CUR.sample?CUR.hash:'')}
 function addDoc(o){
@@ -1846,6 +2014,7 @@ function inPoly(x,y,q){let c=false;const n=q.length/2;for(let i=0,j=n-1;i<n;j=i+
 function placePoint(tg,sx,sy){
   if(!D)return;const p={x:tg.x,y:tg.y,kind:tg.kind||0,rx:resolveRx(tg)};
   if(S.tool==='draft'){draftPlace(p,sx,sy);readoutSoon();requestFrame();return}
+  if(S.tool==='coord'){coordPlace(p);readoutSoon();requestFrame();return}
   effects.push({x:p.x,y:p.y,t0:now()});buzz(12);
   if(S.tool==='measure'){
     if(!S.mA){S.mA=p;sfx('place')}
@@ -1868,10 +2037,10 @@ function eraseAt(x,y){
   for(const n of [...S.notes].reverse()){if(n.t!=='ink')continue;const q=n.pts;let prev=toScreen(q[0],q[1]);for(let i=2;i<q.length;i+=2){const c=toScreen(q[i],q[i+1]);if(distSeg(x,y,prev,c)<16){deleteNote(n.id);sfx('erase');buzz(8);return}prev=c}}
 }
 function setTool(t){
-  if(t===S.tool&&t!=='pan'){if(t==='measure'&&S.mA){S.mA=null;readoutSoon();requestFrame();toast('始点を取り消しました')}if(t==='draft'&&(S.dA||S.dBase)){S.dA=null;S.dBase=null;readoutSoon();requestFrame();toast('作図を取り消しました')}return}
+  if(t===S.tool&&t!=='pan'){if(t==='measure'&&S.mA){S.mA=null;readoutSoon();requestFrame();toast('始点を取り消しました')}if(t==='draft'&&(S.dA||S.dBase)){S.dA=null;S.dBase=null;readoutSoon();requestFrame();toast('作図を取り消しました')}if(t==='coord'&&S.gA){S.gA=null;readoutSoon();requestFrame();toast('基準点を取り消しました')}return}
   S.tool=t;$('#app').dataset.tool=t;S.mA=null;S.areaPts=[];S.dA=null;S.dBase=null;S.snap=null;lastSnapKey='';if(S.sel)select(null);
   $$('.tool').forEach(b=>b.classList.toggle('on',b.dataset.tool===t));
-  $('#fab').hidden=!aiming();$('#areabar').hidden=t!=='area';$('#penbar').hidden=t!=='pen';$('#draftbar').hidden=t!=='draft';
+  $('#fab').hidden=!aiming();$('#areabar').hidden=t!=='area';$('#penbar').hidden=t!=='pen';$('#draftbar').hidden=t!=='draft';$('#coordbar').hidden=t!=='coord';if(t==='coord')setCoordMode('read');
   if(t!=='pen'){S.eraser=false;$('#eraserBtn').classList.remove('on')}
   updateAreaBar();if(aiming())updateSnap();toolHint();readoutSoon();renderChip();requestFrame();sfx('tool');
 }
@@ -1887,6 +2056,7 @@ function select(n){
   else if(n.t==='area'){title='面積';val='<div class="sval">'+fmtArea(n.v)+'</div>';sub='周長 '+fmtLen(n.per||0)+' · '+esc(n.sc);acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else if(n.t==='line'){title=DRAFT_NAMES[n.k]||'直線';val='<div class="sval">'+fmtLen(n.v)+'</div>';sub=(n.k==='perp'?'基準線までの距離 · ':'')+esc(n.sc==='図上'?'図上の長さ':n.sc+'で換算');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else if(n.t==='circle'){title='円';val='<div class="sval">R '+fmtLen(n.v)+'</div>';sub='直径 '+fmtLen(n.v*2)+' · '+esc(n.sc);acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
+  else if(n.t==='coord'){title='座標 P'+(S.notes.filter(x=>x.t==='coord').indexOf(n)+1);val='<div class="sval memo" style="font-family:var(--f-num)">X '+fmtC(n.X)+'\nY '+fmtC(n.Y)+'</div>';sub=esc(n.src==='user'?'2点で合わせた座標':'図面の座標');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else{title='手書き';val='<div class="sval memo">赤ペンの書き込み</div>'}
   c.innerHTML='<div class="sbody"><div class="stitle">'+title+'</div>'+val+(sub?'<div class="ssub">'+sub+'</div>':'')+'</div><div class="sacts">'+acts+'<button class="btn small danger" data-act="del" type="button">削除</button><button class="ibtn" data-act="close" type="button" aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>';
   c.hidden=false;$('#readout').hidden=true;$('#hint').hidden=true;requestFrame();
@@ -1897,7 +2067,7 @@ $('#selcard').addEventListener('click',e=>{
   if(a==='close')select(null);
   else if(a==='del'){deleteNote(n.id);sfx('erase');toast('削除しました（↶で戻せます）')}
   else if(a==='edit')openMemo(n,false);
-  else if(a==='copy')copyText(n.t==='dist'||n.t==='line'?fmtLen(n.v):n.t==='circle'?'R '+fmtLen(n.v):fmtArea(n.v));
+  else if(a==='copy')copyText(n.t==='coord'?'X='+fmtC(n.X)+' Y='+fmtC(n.Y):n.t==='dist'||n.t==='line'?fmtLen(n.v):n.t==='circle'?'R '+fmtLen(n.v):fmtArea(n.v));
 });
 
 /* ---------- memo editor ---------- */
@@ -1931,9 +2101,9 @@ function renderMenu(){
   const b=$('#menuBody');
   if(!D){b.innerHTML='<div class="empty">図面を開くと使えます</div>';return}
   if(menuTab==='notes'){
-    const pins=S.notes.filter(n=>n.t==='pin');let h='<div class="row"><button class="btn small" id="mCopy" type="button">テキストでコピー</button><button class="btn small" id="mImg" type="button">画像で保存</button><span style="flex:1"></span><button class="btn small danger" id="mClear" type="button">'+(clearArmed?'もう一度押すと全部削除':'すべて削除')+'</button></div>';
+    const pins=S.notes.filter(n=>n.t==='pin'),coords=S.notes.filter(n=>n.t==='coord');let h='<div class="row"><button class="btn small" id="mCopy" type="button">テキストでコピー</button><button class="btn small" id="mImg" type="button">画像で保存</button><span style="flex:1"></span><button class="btn small danger" id="mClear" type="button">'+(clearArmed?'もう一度押すと全部削除':'すべて削除')+'</button></div>';
     if(!S.notes.length)h+='<div class="empty">まだメモはありません。<br>下のツールで寸法・面積・メモ・ペンを使うと、ここに一覧が出ます。</div>';
-    else{h+='<div class="list">';S.notes.forEach(n=>{let ib='',it='';if(n.t==='pin'){ib='<span class="ib memo">メモ'+(pins.indexOf(n)+1)+'</span>';it=esc(n.text)||'（文字なし）'}else if(n.t==='dist'){ib='<span class="ib">寸法</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+esc(n.sc)+'</small>'}else if(n.t==='area'){ib='<span class="ib">面積</span>';it='<span class="num">'+fmtArea(n.v)+'</span><small>周長 '+fmtLen(n.per||0)+' · '+esc(n.sc)+'</small>'}else if(n.t==='line'){ib='<span class="ib draft">作図</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+(DRAFT_NAMES[n.k]||'直線')+' · '+esc(n.sc)+'</small>'}else if(n.t==='circle'){ib='<span class="ib draft">作図</span>';it='<span class="num">R '+fmtLen(n.v)+'</span><small>円 · 直径 '+fmtLen(n.v*2)+' · '+esc(n.sc)+'</small>'}else{ib='<span class="ib ink">ペン</span>';it='手書きの書き込み'}h+='<button class="item" data-id="'+n.id+'" type="button">'+ib+'<span class="it">'+it+'</span></button>'});h+='</div>'}
+    else{h+='<div class="list">';S.notes.forEach(n=>{let ib='',it='';if(n.t==='pin'){ib='<span class="ib memo">メモ'+(pins.indexOf(n)+1)+'</span>';it=esc(n.text)||'（文字なし）'}else if(n.t==='dist'){ib='<span class="ib">寸法</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+esc(n.sc)+'</small>'}else if(n.t==='area'){ib='<span class="ib">面積</span>';it='<span class="num">'+fmtArea(n.v)+'</span><small>周長 '+fmtLen(n.per||0)+' · '+esc(n.sc)+'</small>'}else if(n.t==='line'){ib='<span class="ib draft">作図</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+(DRAFT_NAMES[n.k]||'直線')+' · '+esc(n.sc)+'</small>'}else if(n.t==='circle'){ib='<span class="ib draft">作図</span>';it='<span class="num">R '+fmtLen(n.v)+'</span><small>円 · 直径 '+fmtLen(n.v*2)+' · '+esc(n.sc)+'</small>'}else if(n.t==='coord'){ib='<span class="ib coord">座標P'+(coords.indexOf(n)+1)+'</span>';it='<span class="num">X '+fmtC(n.X)+'<br>Y '+fmtC(n.Y)+'</span><small>'+(n.src==='user'?'2点で合わせた座標':'図面の座標')+'</small>'}else{ib='<span class="ib ink">ペン</span>';it='手書きの書き込み'}h+='<button class="item" data-id="'+n.id+'" type="button">'+ib+'<span class="it">'+it+'</span></button>'});h+='</div>'}
     h+='<p class="note">'+storeText()+'</p>';
     b.innerHTML=h;
     $('#mCopy').onclick=()=>copyText(notesText());$('#mImg').onclick=()=>{closeSheets();exportImage()};
@@ -1953,9 +2123,13 @@ function renderMenu(){
     let h='<dl class="kv">'+kv('ファイル',D.name)+kv('用紙',D.sheet.w?D.sheet.label+'（'+D.sheet.w+'×'+D.sheet.h+' mm）':'指定なし',true)+kv('工事名',(i.work||'').trim())+kv('図面名',(i.drawing||D.sheet.name||'').trim())+kv('縮尺（表題）',(i.scale||'').trim())+kv('受注者',(i.contractor||'').trim())+kv('発注者',(i.owner||'').trim())+'</dl>';
     const parts=D.xfs.slice(1);h+='<div class="sect">部分図と縮尺</div>';
     h+=parts.length?'<dl class="kv">'+parts.map(x=>'<dt>'+esc(x.name)+'</dt><dd class="n">'+ratioText(x.s)+(x.kind===2?'（測地座標）':'')+'</dd>').join('')+'</dl>':'<p class="note">部分図がないため、計測は図上の寸法になります。縮尺は右上の「縮尺」から指定できます。</p>';
+    const gp=D.xfs.filter((x,i)=>i>0&&x.kind===2).map(x=>x.name);
+    const gs=S.geo?'2点で合わせた座標を使っています。\n基準点1  X '+fmtC(S.geo.A[0])+'  Y '+fmtC(S.geo.A[1])+'\n基準点2  X '+fmtC(S.geo.B[0])+'  Y '+fmtC(S.geo.B[1]):gp.length?'図面に入っている座標（測地座標系：'+gp.join('、')+'）を使っています。':'座標は入っていません。下の「座標」ツールの「2点で設定」で、座標のわかる2点から合わせられます。';
+    h+='<div class="sect">座標</div><p class="note" style="margin:0;white-space:pre-line">'+esc(gs)+'</p>'+(S.geo?'<div class="row"><button class="btn small" id="gClear" type="button">2点の座標設定を消す</button></div>':'');
     const sk=Object.entries(D.skipped||{});
     h+='<div class="sect">内容</div><dl class="kv">'+kv('線・図形',D.np.toLocaleString('ja-JP')+' 本',true)+kv('文字',D.texts.length.toLocaleString('ja-JP')+' 件',true)+kv('読み込み',Math.round(D.parseMs)+' ms',true)+kv('未対応',sk.map(([k,v])=>k.replace('_feature','')+' ×'+v).join(', '))+'</dl>';
     b.innerHTML=h;
+    if(S.geo)$('#gClear').onclick=()=>{pushUndo({op:'geo',before:S.geo,prev:coordSnapshot()});S.geo=null;S.gA=null;notesChanged();renderMenu();readoutSoon();toast('座標の設定を消しました（↶で戻せます）')};
   }else{
     const seg=(key,opts)=>'<div class="seg">'+opts.map(([v,l])=>'<button class="'+(settings[key]===v?'on':'')+'" data-k="'+key+'" data-v="'+v+'" type="button">'+l+'</button>').join('')+'</div>';
     b.innerHTML='<div class="setrow">背景'+seg('theme',[['dark','黒'],['light','白']])+'</div><div class="setrow">文字の表示'+seg('text',[[true,'表示'],[false,'隠す']])+'</div><div class="setrow">線の太さ'+seg('weight',[[true,'図面どおり'],[false,'細線']])+'</div><div class="setrow">効果音'+seg('sound',[[true,'ON'],[false,'OFF']])+'</div><div class="setrow">振動'+seg('haptic',[[true,'ON'],[false,'OFF']])+'</div><p class="note">'+storeText()+'</p><p class="note">対応形式：SXF Ver.2〜3.1 のSFC（.sfc）。P21形式はCADでSFCに書き出してから開いてください。</p>';
@@ -1965,12 +2139,12 @@ function renderMenu(){
 let clearArmed=false;
 function storeText(){return Store.mode==='cloud'?'メモと書き込みは、あなたのアカウントに図面ごとに保存されます（他の人からは見えません）。':Store.mode==='local'?'メモと書き込みは、この端末のブラウザに保存されます（他の人からは見えません）。ブラウザのデータを消すと消えるので、大事なメモは「画像で保存」か「テキストでコピー」でも残してください。':Store.mode==='none'?'この画面ではメモを保存できません。画像やテキストで書き出してください。':'保存先を確認しています…'}
 function notesText(){
-  const pins=S.notes.filter(n=>n.t==='pin');const lines=['【図面】'+D.name];let k=0;
-  S.notes.forEach(n=>{if(n.t==='pin')lines.push('・メモ'+(pins.indexOf(n)+1)+'：'+(n.text||'（文字なし）').replace(/\n/g,' '));else if(n.t==='dist')lines.push('・寸法：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='area')lines.push('・面積：'+fmtArea(n.v)+'　周長 '+fmtLen(n.per||0)+'（'+n.sc+'）');else if(n.t==='line')lines.push('・'+(DRAFT_NAMES[n.k]||'直線')+'：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='circle')lines.push('・円：R '+fmtLen(n.v)+'　直径 '+fmtLen(n.v*2)+'（'+n.sc+'）');else k++});
+  const pins=S.notes.filter(n=>n.t==='pin'),coords=S.notes.filter(n=>n.t==='coord');const lines=['【図面】'+D.name];let k=0;
+  S.notes.forEach(n=>{if(n.t==='pin')lines.push('・メモ'+(pins.indexOf(n)+1)+'：'+(n.text||'（文字なし）').replace(/\n/g,' '));else if(n.t==='dist')lines.push('・寸法：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='area')lines.push('・面積：'+fmtArea(n.v)+'　周長 '+fmtLen(n.per||0)+'（'+n.sc+'）');else if(n.t==='line')lines.push('・'+(DRAFT_NAMES[n.k]||'直線')+'：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='circle')lines.push('・円：R '+fmtLen(n.v)+'　直径 '+fmtLen(n.v*2)+'（'+n.sc+'）');else if(n.t==='coord')lines.push('・座標P'+(coords.indexOf(n)+1)+'：X='+fmtC(n.X)+' Y='+fmtC(n.Y)+'（'+(n.src==='user'?'2点で合わせた座標':'図面の座標')+'）');else k++});
   if(k)lines.push('・手書き '+k+'件');return lines.join('\n');
 }
 function focusNote(n){
-  let bb;if(n.t==='pin')bb=[n.x,n.y,n.x,n.y];else if(n.t==='dist'||n.t==='line')bb=[Math.min(n.a[0],n.b[0]),Math.min(n.a[1],n.b[1]),Math.max(n.a[0],n.b[0]),Math.max(n.a[1],n.b[1])];else if(n.t==='circle')bb=[n.c[0]-n.r,n.c[1]-n.r,n.c[0]+n.r,n.c[1]+n.r];else{const q=n.pts;bb=[Infinity,Infinity,-Infinity,-Infinity];for(let i=0;i<q.length;i+=2){bb[0]=Math.min(bb[0],q[i]);bb[1]=Math.min(bb[1],q[i+1]);bb[2]=Math.max(bb[2],q[i]);bb[3]=Math.max(bb[3],q[i+1])}}
+  let bb;if(n.t==='pin'||n.t==='coord')bb=[n.x,n.y,n.x,n.y];else if(n.t==='dist'||n.t==='line')bb=[Math.min(n.a[0],n.b[0]),Math.min(n.a[1],n.b[1]),Math.max(n.a[0],n.b[0]),Math.max(n.a[1],n.b[1])];else if(n.t==='circle')bb=[n.c[0]-n.r,n.c[1]-n.r,n.c[0]+n.r,n.c[1]+n.r];else{const q=n.pts;bb=[Infinity,Infinity,-Infinity,-Infinity];for(let i=0;i<q.length;i+=2){bb[0]=Math.min(bb[0],q[i]);bb[1]=Math.min(bb[1],q[i+1]);bb[2]=Math.max(bb[2],q[i]);bb[3]=Math.max(bb[3],q[i+1])}}
   const sw=bb[2]-bb[0],sh=bb[3]-bb[1],avail=Math.max(80,H-TOPH-DOCKH);
   let z=(sw>0||sh>0)?Math.min(W*.6/Math.max(sw,1e-9),avail*.5/Math.max(sh,1e-9)):Math.max(V.z,fitZ*3);
   z=clamp(z,zMin(),Z_MAX);const cx=(bb[0]+bb[2])/2,cy=(bb[1]+bb[3])/2;
@@ -2082,6 +2256,7 @@ $$('#penbar .sw').forEach(b=>b.addEventListener('click',()=>{S.penColor=b.datase
 $$('#penbar .penw[data-w]').forEach(b=>b.addEventListener('click',()=>{S.penW=+b.dataset.w;$$('#penbar .penw[data-w]').forEach(x=>x.classList.toggle('on',x===b));sfx('tap')}));
 $('#eraserBtn').addEventListener('click',()=>{S.eraser=!S.eraser;$('#eraserBtn').classList.toggle('on',S.eraser);toolHint();sfx('tap')});
 $$('#draftbar .dm').forEach(b=>b.addEventListener('click',()=>{S.draftMode=b.dataset.dm;S.dA=null;S.dBase=null;$$('#draftbar .dm').forEach(x=>x.classList.toggle('on',x===b));readoutSoon();requestFrame();sfx('tap')}));
+$$('#coordbar .dm').forEach(b=>b.addEventListener('click',()=>{audioWake();setCoordMode(b.dataset.cm);sfx('tap')}));
 $('#draftColor').addEventListener('click',()=>{const i=(DRAFT_COLORS.indexOf(S.draftColor)+1)%DRAFT_COLORS.length;S.draftColor=DRAFT_COLORS[i];$('#draftColor').style.setProperty('--c',S.draftColor==='auto'?'linear-gradient(135deg,#fff 50%,#111 50%)':S.draftColor);requestFrame();sfx('tap')});
 
 // HUD sizes decide where the reticle sits; re-run when the tab strip appears or goes
@@ -2099,7 +2274,7 @@ function resize(){
 }
 window.addEventListener('resize',resize);
 if(window.visualViewport){const vv=window.visualViewport;const kb=()=>{const k=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);document.documentElement.style.setProperty('--kb',k+'px')};vv.addEventListener('resize',kb);vv.addEventListener('scroll',kb)}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#dialog').hidden)$('#dialog').hidden=true;else if(!$('#imgview').hidden)$('#imgview').hidden=true;else if(!$('#backdrop').hidden)closeSheets();else if(S.sel)select(null);else if(S.dA||S.dBase||S.mA){S.dA=null;S.dBase=null;S.mA=null;readoutSoon();requestFrame()}}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#dialog').hidden)$('#dialog').hidden=true;else if(!$('#imgview').hidden)$('#imgview').hidden=true;else if(!$('#backdrop').hidden)closeSheets();else if(S.sel)select(null);else if(S.dA||S.dBase||S.mA||S.gA){S.dA=null;S.dBase=null;S.mA=null;S.gA=null;readoutSoon();requestFrame()}}});
 
 /* ---------- boot ---------- */
 async function boot(){
