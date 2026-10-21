@@ -215,6 +215,13 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
 .cin{display:flex;align-items:center;gap:8px}
 .cin label{flex:none;width:62px;font:700 17px/1 var(--f-num)}
 .cin label small{font:700 11px/1 var(--f-ui);color:var(--dim);margin-left:3px}
+.srow{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:12px;background:var(--steel-2)}
+.srow.off{opacity:.45}
+.srow .l1{display:flex;align-items:center;gap:8px}
+.srow input[type=checkbox]{flex:none;width:22px;height:22px;margin:0;accent-color:var(--tape)}
+.srow .sn{flex:1;min-width:0;height:40px}
+.srow .sh{flex:none;width:96px;height:40px}
+.srow .sxy{font:600 12.5px/1.4 var(--f-num);color:var(--dim);padding-left:30px;font-variant-numeric:tabular-nums}
 .pm{flex:none;width:46px;height:44px;border-radius:12px;border:1px solid var(--rule);background:var(--steel-2);font:700 17px/1 var(--f-num);touch-action:manipulation}
 
 /* ---- overlays ---- */
@@ -292,10 +299,11 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
   </div>
 
   <div id="coordbar" class="fl" hidden>
-    <button class="dm on" data-cm="read" type="button">座標を読む</button>
+    <button class="dm on" data-cm="read" type="button">読む</button>
     <button class="dm" data-cm="set" type="button">2点で設定</button>
     <span class="sep"></span>
-    <button class="dm" data-cm="find" type="button">座標で探す</button>
+    <button class="dm" data-cm="find" type="button">探す</button>
+    <button class="dm" data-cm="sima" type="button">SIMA出力</button>
   </div>
 
   <button id="fab" class="fl" type="button" hidden aria-label="照準の位置に点を置く"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg><span>置く</span></button>
@@ -383,6 +391,12 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
       <div class="cin"><label for="cY">Y<small>東</small></label><button class="pm" type="button" data-for="cY" aria-label="Yの符号を切り替え">±</button><input type="text" id="cY" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="例 23456.789"></div>
       <div class="row"><button class="btn" id="cCancel" type="button">やめる</button><button class="btn primary" id="cOk" type="button">決定</button></div>
     </div>
+  </section>
+
+  <section class="sheet" id="simaSheet" hidden aria-label="SIMAで書き出す">
+    <div class="grab"></div>
+    <div class="shead"><h2>SIMAで書き出す</h2><button class="ibtn" type="button" data-close aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="sbody" id="simaBody"></div>
   </section>
 
   <div id="loading" hidden><div class="load"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="16" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="22 8"/><path d="M24 2v8M24 38v8M2 24h8M38 24h8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg><div id="loadTxt">図面を解析しています…</div><small id="loadSub"></small></div></div>
@@ -1450,6 +1464,7 @@ function applyGeo(g){
 }
 function setCoordMode(m){
   if(m==='find'){findCoord();return}
+  if(m==='sima'){openSima();return}
   S.coordMode=m;S.gA=null;$$('#coordbar .dm[data-cm]').forEach(b=>b.classList.toggle('on',b.dataset.cm===m));readoutSoon();requestFrame();
 }
 function findCoord(){
@@ -1489,7 +1504,7 @@ function drawCoordMark(ctx,x,y,n,idx,sel,pop){
   const mark=()=>{ctx.beginPath();ctx.arc(0,0,6,0,Math.PI*2);ctx.moveTo(-11,0);ctx.lineTo(-3,0);ctx.moveTo(3,0);ctx.lineTo(11,0);ctx.moveTo(0,-11);ctx.lineTo(0,-3);ctx.moveTo(0,3);ctx.lineTo(0,11)};
   ctx.lineWidth=4.5;ctx.strokeStyle='rgba(0,0,0,.6)';mark();ctx.stroke();ctx.lineWidth=2;ctx.strokeStyle=COORD_COL;mark();ctx.stroke();
   ctx.font='600 11.5px "Chakra Petch","BIZ UDPGothic",sans-serif';
-  const l1='X '+fmtC(n.X),l2='Y '+fmtC(n.Y),tag='P'+idx;
+  const l1='X '+fmtC(n.X),l2='Y '+fmtC(n.Y),tag=n.name||('P'+idx);
   const tw=ctx.measureText(tag).width+12,w=Math.max(ctx.measureText(l1).width,ctx.measureText(l2).width)+tw+16,h=34,lx=13,ly=-h-6;
   ctx.fillStyle='rgba(12,17,23,.93)';rr(ctx,lx,ly,w,h,7);ctx.fill();
   ctx.save();rr(ctx,lx,ly,w,h,7);ctx.clip();ctx.fillStyle=COORD_COL;ctx.fillRect(lx,ly,tw,h);ctx.restore();
@@ -1498,6 +1513,86 @@ function drawCoordMark(ctx,x,y,n,idx,sel,pop){
   ctx.fillStyle='#e9f6fb';ctx.textAlign='left';ctx.fillText(l1,lx+tw+8,ly+10);ctx.fillText(l2,lx+tw+8,ly+h-9.5);
   ctx.restore();
   return[x+lx*pop,y+ly*pop,w*pop,h*pop];
+}
+/* ---------- SIMA export: coordinate points → .sim (Shift_JIS) for 杭ナビ and other layout / survey software ---------- */
+let SJ=null;
+// Shift_JIS encoder built from the browser's own decoder (only when first needed)
+function sjisEncode(str){
+  if(!SJ){
+    SJ=new Map();const dec=new TextDecoder('shift_jis');const leads=[];
+    for(let a=0x81;a<=0xFC;a++)if((a<=0x9F||a>=0xE0)&&a!==0xED&&a!==0xEE)leads.push(a);leads.push(0xED,0xEE);   // prefer the codes Windows writes
+    for(const a of leads)for(let b=0x40;b<=0xFC;b++){if(b===0x7F)continue;const ch=dec.decode(new Uint8Array([a,b]));if(ch.length===1&&ch.charCodeAt(0)!==65533&&!SJ.has(ch))SJ.set(ch,(a<<8)|b)}
+    for(let k=0xA1;k<=0xDF;k++){const ch=dec.decode(new Uint8Array([k]));if(ch.length===1)SJ.set(ch,k)}
+    [['〜','～'],['−','－'],['‖','∥'],['¢','￠'],['£','￡'],['¬','￢'],['—','―']].forEach(([u,w])=>{if(!SJ.has(u)&&SJ.has(w))SJ.set(u,SJ.get(w))});
+  }
+  const out=[];
+  for(const ch of str){const c=ch.codePointAt(0);if(c<0x80){out.push(c);continue}const v=SJ.get(ch);if(v==null){out.push(0x3F);continue}if(v>0xFF)out.push(v>>8,v&0xFF);else out.push(v)}
+  return new Uint8Array(out);
+}
+const simaField=v=>String(v==null?'':v).replace(/[,\r\n\t]/g,' ').trim();
+function coordRows(){const cs=S.notes.filter(n=>n.t==='coord');return cs.map((n,i)=>({n,name:n.name||('P'+(i+1)),X:n.X,Y:n.Y,h:n.h}))}
+// SIMA coordinate data: G00 header, A00 … A01 records … A99
+function simaText(site,rows){
+  const L=['G00,03,'+simaField(site)+',','Z00,座標データ,','A00,'];
+  rows.forEach((r,i)=>L.push('A01,'+(i+1)+','+simaField(r.name)+','+fmtC(r.X)+','+fmtC(r.Y)+','+(r.h!=null&&isFinite(r.h)?fmtC(r.h):'')+','));
+  L.push('A99,');return L.join('\r\n')+'\r\n';
+}
+// CSV in the order 点名, X, Y, Z (also accepted by most layout apps)
+function csvText(rows){return rows.map(r=>[simaField(r.name),fmtC(r.X),fmtC(r.Y),r.h!=null&&isFinite(r.h)?fmtC(r.h):''].join(',')).join('\r\n')+'\r\n'}
+function crc32(u){let crc=0xFFFFFFFF;for(let i=0;i<u.length;i++){let c=(crc^u[i])&0xFF;for(let k=0;k<8;k++)c=c&1?(c>>>1)^0xEDB88320:c>>>1;crc=(crc>>>8)^c}return(crc^0xFFFFFFFF)>>>0}
+// a one-file zip (stored, UTF-8 name): carries a .sim through download channels that only accept common file types
+function zipOne(name,data){
+  const nm=new TextEncoder().encode(name),crc=crc32(data),d=new Date();
+  const tm=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1),dt=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate();
+  const lh=new DataView(new ArrayBuffer(30));[[0,0x04034b50,4],[4,20,2],[6,0x0800,2],[8,0,2],[10,tm,2],[12,dt,2],[14,crc,4],[18,data.length,4],[22,data.length,4],[26,nm.length,2],[28,0,2]].forEach(([o,v,n])=>n===4?lh.setUint32(o,v,true):lh.setUint16(o,v,true));
+  const ch=new DataView(new ArrayBuffer(46));[[0,0x02014b50,4],[4,20,2],[6,20,2],[8,0x0800,2],[10,0,2],[12,tm,2],[14,dt,2],[16,crc,4],[20,data.length,4],[24,data.length,4],[28,nm.length,2],[30,0,2],[32,0,2],[34,0,2],[36,0,2],[38,0,4],[42,0,4]].forEach(([o,v,n])=>n===4?ch.setUint32(o,v,true):ch.setUint16(o,v,true));
+  const end=new DataView(new ArrayBuffer(22));[[0,0x06054b50,4],[4,0,2],[6,0,2],[8,1,2],[10,1,2],[12,46+nm.length,4],[16,30+nm.length+data.length,4],[20,0,2]].forEach(([o,v,n])=>n===4?end.setUint32(o,v,true):end.setUint16(o,v,true));
+  return new Blob([lh.buffer,nm,data,ch.buffer,nm,end.buffer],{type:'application/zip'});
+}
+// hand a generated file to the viewer: the app's save dialog when running inside Claude, a download otherwise
+async function deliverFile(name,bytes,kind){
+  const cap=await useCap('downloads');
+  if(cap){
+    const tries=kind==='sim'?[[name.replace(/\.sim$/i,'')+'.zip',()=>zipOne(name,bytes),'ZIPで保存しました（中に '+name+' が入っています）'],[name+'.txt',()=>new Blob([bytes]),'.txt で保存しました。名前の最後の .txt を消すと .sim になります']]:[[name,()=>new Blob([bytes]),'保存しました'],[name+'.txt',()=>new Blob([bytes]),'.txt で保存しました']];
+    for(const[fn,mk,msg]of tries){
+      try{await cap.save({filename:fn,data:mk()});toast(msg,3200);return true}
+      catch(e){const c=e&&e.code;if(c==='declined')return false;if(c==='rate_limited'){toast('少し待ってからもう一度お試しください');return false}if(c!=='rejected_extension'&&c!=='extension_not_enabled'&&c!=='bad_request')break}
+    }
+    toast('この画面では保存できませんでした',2600);return false;
+  }
+  try{
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bytes],{type:'application/octet-stream'}));a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);toast('保存しました：'+name,2600);return true;
+  }catch(e){toast('保存できませんでした');return false}
+}
+function simaFileBase(){return(D?D.name:'zumen').replace(/\.[^.]+$/,'')+'_座標'}
+function siteName(){return LS.get('site:'+(D&&D.hash),'')||((D&&D.info&&(D.info.work||'').trim())||simaFileBase().replace(/_座標$/,''))}
+const simaOff=new Set();   // points left out of the next export (this session)
+function openSima(){
+  if(!D)return;
+  renderSima();openSheet('simaSheet');sfx('tap');
+}
+function renderSima(){
+  const b=$('#simaBody');const rows=coordRows();
+  if(!rows.length){b.innerHTML='<div class="empty">まだ座標の点がありません。<br>「座標」ツールの「読む」で照準を合わせて「置く」と、点が追加されます。「探す」で座標を入れて追加することもできます。</div>';return}
+  let h='<div class="setrow" style="gap:10px">現場名<input type="text" id="sSite" autocomplete="off" style="max-width:230px;font-family:var(--f-ui)" value="'+esc(siteName())+'"></div><div class="list">';
+  rows.forEach(r=>{const off=simaOff.has(r.n.id);h+='<div class="srow'+(off?' off':'')+'" data-id="'+r.n.id+'"><div class="l1"><input type="checkbox" aria-label="書き出す"'+(off?'':' checked')+'><input type="text" class="sn" aria-label="点名" autocomplete="off" style="font-family:var(--f-ui)" value="'+esc(r.name)+'"><input type="text" class="sh" inputmode="decimal" aria-label="標高" placeholder="標高" autocomplete="off" value="'+(r.h!=null?fmtC(r.h):'')+'"></div><div class="sxy">X '+fmtC(r.X)+'　Y '+fmtC(r.Y)+'</div></div>'});
+  h+='</div><p class="note" style="margin:0">X（北）・Y（東）・標高はm単位です。点名と標高はここで直せます（標高は空欄でもかまいません）。SIMAの座標データ（Shift_JIS）で保存するので、杭ナビなどの座標取り込みでそのまま読み込めます。</p>';
+  const can=!window.claude&&navigator.canShare&&(()=>{try{return navigator.canShare({files:[new File(['x'],'a.sim',{type:'application/octet-stream'})]})}catch(e){return false}})();
+  h+='<div class="row"><button class="btn small" id="sCsv" type="button">CSVで保存</button>'+(can?'<button class="btn small" id="sShare" type="button">共有…</button>':'')+'<span style="flex:1"></span><button class="btn primary" id="sSave" type="button" style="flex:0 1 auto">SIMAで保存（'+(rows.length-rows.filter(r=>simaOff.has(r.n.id)).length)+'点）</button></div>';
+  b.innerHTML=h;
+  const count=()=>{const n=rows.length-rows.filter(r=>simaOff.has(r.n.id)).length;$('#sSave').textContent='SIMAで保存（'+n+'点）'};
+  $$('.srow',b).forEach(el=>{
+    const n=S.notes.find(x=>x.id===el.dataset.id);if(!n)return;
+    el.querySelector('input[type=checkbox]').onchange=e=>{if(e.target.checked)simaOff.delete(n.id);else simaOff.add(n.id);el.classList.toggle('off',!e.target.checked);count()};
+    el.querySelector('.sn').onchange=e=>{const v=simaField(e.target.value);n.name=v||null;e.target.value=v||coordRows().find(r=>r.n===n).name;notesChanged()};
+    el.querySelector('.sh').onchange=e=>{const t=normNum(e.target.value).trim();if(t===''){n.h=null}else{const v=parseNum(t);if(!isFinite(v)){toast('標高は数字で入れてください');e.target.value=n.h!=null?fmtC(n.h):'';return}n.h=v;e.target.value=fmtC(v)}notesChanged()};
+  });
+  $('#sSite').onchange=e=>{LS.set('site:'+D.hash,simaField(e.target.value))};
+  const pick=()=>{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();return coordRows().filter(r=>!simaOff.has(r.n.id))};
+  $('#sSave').onclick=async()=>{const rs=pick();if(!rs.length){toast('書き出す点を選んでください');return}const site=simaField($('#sSite').value)||siteName();if(await deliverFile(simaFileBase()+'.sim',sjisEncode(simaText(site,rs)),'sim'))sfx('done')};
+  $('#sCsv').onclick=async()=>{const rs=pick();if(!rs.length){toast('書き出す点を選んでください');return}if(await deliverFile(simaFileBase()+'.csv',sjisEncode(csvText(rs)),'csv'))sfx('done')};
+  if(can)$('#sShare').onclick=async()=>{const rs=pick();if(!rs.length){toast('書き出す点を選んでください');return}const site=simaField($('#sSite').value)||siteName();const f=new File([sjisEncode(simaText(site,rs))],simaFileBase()+'.sim',{type:'application/octet-stream'});try{await navigator.share({files:[f],title:f.name})}catch(e){if(!e||e.name!=='AbortError')toast('共有できませんでした')}};
 }
 // the two known points behind a 2-point setting (shown while the coordinate tool is in use)
 function drawGeoPts(ctx){
@@ -2056,7 +2151,7 @@ function select(n){
   else if(n.t==='area'){title='面積';val='<div class="sval">'+fmtArea(n.v)+'</div>';sub='周長 '+fmtLen(n.per||0)+' · '+esc(n.sc);acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else if(n.t==='line'){title=DRAFT_NAMES[n.k]||'直線';val='<div class="sval">'+fmtLen(n.v)+'</div>';sub=(n.k==='perp'?'基準線までの距離 · ':'')+esc(n.sc==='図上'?'図上の長さ':n.sc+'で換算');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else if(n.t==='circle'){title='円';val='<div class="sval">R '+fmtLen(n.v)+'</div>';sub='直径 '+fmtLen(n.v*2)+' · '+esc(n.sc);acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
-  else if(n.t==='coord'){title='座標 P'+(S.notes.filter(x=>x.t==='coord').indexOf(n)+1);val='<div class="sval memo" style="font-family:var(--f-num)">X '+fmtC(n.X)+'\nY '+fmtC(n.Y)+'</div>';sub=esc(n.src==='user'?'2点で合わせた座標':'図面の座標');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
+  else if(n.t==='coord'){title='座標 '+esc(n.name||('P'+(S.notes.filter(x=>x.t==='coord').indexOf(n)+1)))+(n.h!=null?' · 標高 '+fmtC(n.h):'');val='<div class="sval memo" style="font-family:var(--f-num)">X '+fmtC(n.X)+'\nY '+fmtC(n.Y)+'</div>';sub=esc(n.src==='user'?'2点で合わせた座標':'図面の座標');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else{title='手書き';val='<div class="sval memo">赤ペンの書き込み</div>'}
   c.innerHTML='<div class="sbody"><div class="stitle">'+title+'</div>'+val+(sub?'<div class="ssub">'+sub+'</div>':'')+'</div><div class="sacts">'+acts+'<button class="btn small danger" data-act="del" type="button">削除</button><button class="ibtn" data-act="close" type="button" aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>';
   c.hidden=false;$('#readout').hidden=true;$('#hint').hidden=true;requestFrame();
@@ -2101,12 +2196,12 @@ function renderMenu(){
   const b=$('#menuBody');
   if(!D){b.innerHTML='<div class="empty">図面を開くと使えます</div>';return}
   if(menuTab==='notes'){
-    const pins=S.notes.filter(n=>n.t==='pin'),coords=S.notes.filter(n=>n.t==='coord');let h='<div class="row"><button class="btn small" id="mCopy" type="button">テキストでコピー</button><button class="btn small" id="mImg" type="button">画像で保存</button><span style="flex:1"></span><button class="btn small danger" id="mClear" type="button">'+(clearArmed?'もう一度押すと全部削除':'すべて削除')+'</button></div>';
+    const pins=S.notes.filter(n=>n.t==='pin'),coords=S.notes.filter(n=>n.t==='coord');let h='<div class="row"><button class="btn small" id="mCopy" type="button">テキストでコピー</button><button class="btn small" id="mImg" type="button">画像で保存</button>'+(coords.length?'<button class="btn small" id="mSima" type="button">SIMA出力</button>':'')+'<span style="flex:1"></span><button class="btn small danger" id="mClear" type="button">'+(clearArmed?'もう一度押すと全部削除':'すべて削除')+'</button></div>';
     if(!S.notes.length)h+='<div class="empty">まだメモはありません。<br>下のツールで寸法・面積・メモ・ペンを使うと、ここに一覧が出ます。</div>';
-    else{h+='<div class="list">';S.notes.forEach(n=>{let ib='',it='';if(n.t==='pin'){ib='<span class="ib memo">メモ'+(pins.indexOf(n)+1)+'</span>';it=esc(n.text)||'（文字なし）'}else if(n.t==='dist'){ib='<span class="ib">寸法</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+esc(n.sc)+'</small>'}else if(n.t==='area'){ib='<span class="ib">面積</span>';it='<span class="num">'+fmtArea(n.v)+'</span><small>周長 '+fmtLen(n.per||0)+' · '+esc(n.sc)+'</small>'}else if(n.t==='line'){ib='<span class="ib draft">作図</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+(DRAFT_NAMES[n.k]||'直線')+' · '+esc(n.sc)+'</small>'}else if(n.t==='circle'){ib='<span class="ib draft">作図</span>';it='<span class="num">R '+fmtLen(n.v)+'</span><small>円 · 直径 '+fmtLen(n.v*2)+' · '+esc(n.sc)+'</small>'}else if(n.t==='coord'){ib='<span class="ib coord">座標P'+(coords.indexOf(n)+1)+'</span>';it='<span class="num">X '+fmtC(n.X)+'<br>Y '+fmtC(n.Y)+'</span><small>'+(n.src==='user'?'2点で合わせた座標':'図面の座標')+'</small>'}else{ib='<span class="ib ink">ペン</span>';it='手書きの書き込み'}h+='<button class="item" data-id="'+n.id+'" type="button">'+ib+'<span class="it">'+it+'</span></button>'});h+='</div>'}
+    else{h+='<div class="list">';S.notes.forEach(n=>{let ib='',it='';if(n.t==='pin'){ib='<span class="ib memo">メモ'+(pins.indexOf(n)+1)+'</span>';it=esc(n.text)||'（文字なし）'}else if(n.t==='dist'){ib='<span class="ib">寸法</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+esc(n.sc)+'</small>'}else if(n.t==='area'){ib='<span class="ib">面積</span>';it='<span class="num">'+fmtArea(n.v)+'</span><small>周長 '+fmtLen(n.per||0)+' · '+esc(n.sc)+'</small>'}else if(n.t==='line'){ib='<span class="ib draft">作図</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+(DRAFT_NAMES[n.k]||'直線')+' · '+esc(n.sc)+'</small>'}else if(n.t==='circle'){ib='<span class="ib draft">作図</span>';it='<span class="num">R '+fmtLen(n.v)+'</span><small>円 · 直径 '+fmtLen(n.v*2)+' · '+esc(n.sc)+'</small>'}else if(n.t==='coord'){ib='<span class="ib coord">'+esc(n.name||('P'+(coords.indexOf(n)+1)))+'</span>';it='<span class="num">X '+fmtC(n.X)+'<br>Y '+fmtC(n.Y)+'</span><small>'+(n.src==='user'?'2点で合わせた座標':'図面の座標')+'</small>'}else{ib='<span class="ib ink">ペン</span>';it='手書きの書き込み'}h+='<button class="item" data-id="'+n.id+'" type="button">'+ib+'<span class="it">'+it+'</span></button>'});h+='</div>'}
     h+='<p class="note">'+storeText()+'</p>';
     b.innerHTML=h;
-    $('#mCopy').onclick=()=>copyText(notesText());$('#mImg').onclick=()=>{closeSheets();exportImage()};
+    $('#mCopy').onclick=()=>copyText(notesText());$('#mImg').onclick=()=>{closeSheets();exportImage()};if(coords.length)$('#mSima').onclick=()=>openSima();
     $('#mClear').onclick=()=>{if(!S.notes.length)return;if(!clearArmed){clearArmed=true;renderMenu();setTimeout(()=>{clearArmed=false;if(menuTab==='notes'&&!$('#menuSheet').hidden)renderMenu()},3000);return}clearArmed=false;pushUndo({op:'clear',notes:S.notes.slice()});S.notes=[];select(null);notesChanged();toast('すべて削除しました（↶で戻せます）')};
     $$('.item[data-id]',b).forEach(el=>el.onclick=()=>{const n=S.notes.find(x=>x.id===el.dataset.id);if(!n)return;closeSheets();focusNote(n)});
   }else if(menuTab==='layers'){
@@ -2140,7 +2235,7 @@ let clearArmed=false;
 function storeText(){return Store.mode==='cloud'?'メモと書き込みは、あなたのアカウントに図面ごとに保存されます（他の人からは見えません）。':Store.mode==='local'?'メモと書き込みは、この端末のブラウザに保存されます（他の人からは見えません）。ブラウザのデータを消すと消えるので、大事なメモは「画像で保存」か「テキストでコピー」でも残してください。':Store.mode==='none'?'この画面ではメモを保存できません。画像やテキストで書き出してください。':'保存先を確認しています…'}
 function notesText(){
   const pins=S.notes.filter(n=>n.t==='pin'),coords=S.notes.filter(n=>n.t==='coord');const lines=['【図面】'+D.name];let k=0;
-  S.notes.forEach(n=>{if(n.t==='pin')lines.push('・メモ'+(pins.indexOf(n)+1)+'：'+(n.text||'（文字なし）').replace(/\n/g,' '));else if(n.t==='dist')lines.push('・寸法：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='area')lines.push('・面積：'+fmtArea(n.v)+'　周長 '+fmtLen(n.per||0)+'（'+n.sc+'）');else if(n.t==='line')lines.push('・'+(DRAFT_NAMES[n.k]||'直線')+'：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='circle')lines.push('・円：R '+fmtLen(n.v)+'　直径 '+fmtLen(n.v*2)+'（'+n.sc+'）');else if(n.t==='coord')lines.push('・座標P'+(coords.indexOf(n)+1)+'：X='+fmtC(n.X)+' Y='+fmtC(n.Y)+'（'+(n.src==='user'?'2点で合わせた座標':'図面の座標')+'）');else k++});
+  S.notes.forEach(n=>{if(n.t==='pin')lines.push('・メモ'+(pins.indexOf(n)+1)+'：'+(n.text||'（文字なし）').replace(/\n/g,' '));else if(n.t==='dist')lines.push('・寸法：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='area')lines.push('・面積：'+fmtArea(n.v)+'　周長 '+fmtLen(n.per||0)+'（'+n.sc+'）');else if(n.t==='line')lines.push('・'+(DRAFT_NAMES[n.k]||'直線')+'：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='circle')lines.push('・円：R '+fmtLen(n.v)+'　直径 '+fmtLen(n.v*2)+'（'+n.sc+'）');else if(n.t==='coord')lines.push('・座標'+(n.name||('P'+(coords.indexOf(n)+1)))+'：X='+fmtC(n.X)+' Y='+fmtC(n.Y)+(n.h!=null?' H='+fmtC(n.h):'')+'（'+(n.src==='user'?'2点で合わせた座標':'図面の座標')+'）');else k++});
   if(k)lines.push('・手書き '+k+'件');return lines.join('\n');
 }
 function focusNote(n){
