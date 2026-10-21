@@ -189,6 +189,8 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .item .it b{font-size:14px}
 .cpre,.cunit{flex:none;font:700 16px/1 var(--f-num);color:var(--dim)}
 #readout .rs.wrap{white-space:pre-line}
+#numBtn{right:max(16px,env(safe-area-inset-right,0px));bottom:calc(var(--dock-h) + 104px);height:40px;padding:0 14px;font-size:13px;box-shadow:0 6px 16px rgba(0,0,0,.35)}
+#numBtn.lock{background:var(--tape);color:var(--tape-ink);border-color:transparent}
 #draftbar{flex-wrap:wrap;row-gap:3px;border-radius:21px;overflow:visible}
 .item .it{min-width:0;flex:1;font-size:13.5px;line-height:1.45;overflow-wrap:anywhere}
 .item .it .num{font:700 15px/1.3 var(--f-num);font-variant-numeric:tabular-nums}
@@ -313,6 +315,7 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
     <button class="dm" data-cm="sima" type="button">SIMA出力</button>
   </div>
 
+  <button id="numBtn" class="fl pill" type="button" hidden>長さを入力</button>
   <button id="fab" class="fl" type="button" hidden aria-label="照準の位置に点を置く"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg><span>置く</span></button>
 
   <nav id="dock" aria-label="ツール">
@@ -968,7 +971,7 @@ function sampleSFC(){
    ========================================================= */
 let D=null;                       // current drawing
 const V={cx:0,cy:0,z:1};          // view: sheet point at canvas centre, px per mm
-const S={tool:'pan',mA:null,areaPts:[],sel:null,notes:[],undo:[],snap:null,manual:0,penColor:'#ff3b30',penW:2.5,eraser:false,draftMode:'line',dA:null,dBase:null,draftColor:'#ff3b30',coordMode:'read',gA:null,geo:null,elev:null,grade:LS.get('grade',null)};
+const S={tool:'pan',mA:null,areaPts:[],sel:null,notes:[],undo:[],snap:null,manual:0,penColor:'#ff3b30',penW:2.5,eraser:false,draftMode:'line',dA:null,dBase:null,draftColor:'#ff3b30',coordMode:'read',gA:null,geo:null,elev:null,grade:LS.get('grade',null),dLen:null};
 const DRAFT_NAMES={line:'直線',h:'水平線',v:'垂直線',perp:'垂線',grade:'勾配線',circle:'円',hide:'線を隠す'};
 const DRAFT_COLORS=['#ff3b30','#3d8bff','#3fd28f','auto'];
 const aiming=()=>S.tool==='measure'||S.tool==='area'||S.tool==='draft'||S.tool==='coord';
@@ -1309,8 +1312,86 @@ function segAt(sx,sy,rpx){const q=toSheet(sx,sy);const c=collectSegs(q[0],q[1],r
 
 /* ---------- drafting: line / horizontal / vertical / perpendicular / circle ---------- */
 function perpFoot(sg,x,y){const vx=sg.bx-sg.ax,vy=sg.by-sg.ay,l=vx*vx+vy*vy;if(!l)return[sg.ax,sg.ay];const t=((x-sg.ax)*vx+(y-sg.ay)*vy)/l;return[sg.ax+vx*t,sg.ay+vy*t]}
+/* ---------- drafting by numbers: a line of a given length, a circle of a given radius ---------- */
+const LEN_MODES=['line','h','v','grade','circle'];
+// sheet length along unit u (sheet) that measures as Lmm in the figure rx; null when the drawing has no scale there
+function sheetLen(rx,u,Lmm){
+  if(S.manual>0)return Lmm/S.manual;
+  const xf=rx>0&&D.xfs[rx];if(!xf)return null;
+  const iv=xf.inv,lx=iv[0]*u[0]+iv[2]*u[1],ly=iv[1]*u[0]+iv[3]*u[1];return Lmm/(Math.hypot(lx,ly)||1);
+}
+const scaleKnown=rx=>S.manual>0||!!(rx>0&&D&&D.xfs[rx]);
+function noScaleToast(){toast('この図は縮尺がわからないため長さを指定できません。右上の「縮尺」で指定してください',3200)}
+// end of a line from a toward the reticle t with the length in spec; null when the direction is not decided yet
+function lenEnd(a,t,spec){
+  const m=S.draftMode;let u;
+  if(Math.hypot(t.x-a.x,t.y-a.y)*V.z<3)return null;   // the reticle is still on the start point: no direction yet
+  if(m==='h')u=[t.x<a.x?-1:1,0];
+  else if(m==='v')u=[0,t.y<a.y?-1:1];
+  else if(m==='grade'){if(!S.grade)return null;u=gradeDir(a,t)}
+  else{const dx=t.x-a.x,dy=t.y-a.y,d=Math.hypot(dx,dy);if(d*V.z<3)return null;u=[dx/d,dy/d]}
+  let sl;
+  if(m==='grade'){
+    if(!scaleKnown(a.rx))return null;
+    const{hk}=realScales(a.rx),g=gradeValue();let Lh=spec.Lh;
+    if(Lh==null&&spec.Ls!=null)Lh=spec.Ls/Math.sqrt(1+g*g);
+    if(Lh==null&&spec.Lv!=null)Lh=g>0?spec.Lv/g:null;
+    if(Lh==null||!(Math.abs(u[0])>1e-9))return null;
+    sl=Lh/(hk*Math.abs(u[0]));
+  }else sl=sheetLen(a.rx,u,spec.L);
+  if(sl==null)return null;
+  return{x:a.x+u[0]*sl,y:a.y+u[1]*sl,kind:0,rx:a.rx};
+}
+function lenLabel(spec){if(!spec)return'';if(spec.R!=null)return'半径 '+fmtLen(spec.R);if(spec.Lh!=null)return'水平 '+fmtLen(spec.Lh);if(spec.Lv!=null)return'高低差 '+fmtLen(spec.Lv);return'長さ '+fmtLen(spec.L!=null?spec.L:spec.Ls)}
+function tooBig(sl){const f=D.fit;return sl>5*Math.max(f[2]-f[0],f[3]-f[1])}
+function addLineNote(m,a,b,exact){
+  const mm=measure(a,{x:b.x,y:b.y,rx:a.rx}),col=S.draftColor;
+  if(m==='grade'){const gp=gradeParts(a,b);addNote({id:uid(),t:'line',k:'grade',a:[a.x,a.y],b:[b.x,b.y],v:gp.len,dx:gp.dx,dy:gp.dy,g:gradeLabel(),sc:mm.sc,rx:a.rx,c:col,ts:Date.now()})}
+  else addNote({id:uid(),t:'line',k:m,a:[a.x,a.y],b:[b.x,b.y],v:exact!=null?exact:mm.real,sc:mm.sc,rx:a.rx,c:col,ts:Date.now()});
+  effects.push({x:b.x,y:b.y,t0:now(),c:inkColor(col)});sfx('done');buzz([10,40,16]);
+}
+function addCircleNote(c,Rmm){
+  const r=sheetLen(c.rx,[1,0],Rmm);if(r==null){noScaleToast();return false}
+  if(tooBig(r)){toast('大きすぎます（単位は m です）',2600);return false}
+  const mm=measure(c,{x:c.x+r,y:c.y,rx:c.rx});
+  addNote({id:uid(),t:'circle',c:[c.x,c.y],r,v:Rmm,sc:mm.sc,rx:c.rx,col:S.draftColor,ts:Date.now()});
+  effects.push({x:c.x,y:c.y,t0:now(),c:inkColor(S.draftColor)});sfx('done');buzz([10,40,16]);return true;
+}
+// the button above 置く: type a length (or radius); drawn at once when the place and direction are already clear, otherwise kept for the next lines
+function openLenInput(){
+  const m=S.draftMode;if(!D||!LEN_MODES.includes(m))return;
+  if(S.dLen){S.dLen=null;toast('長さの指定を解除しました');readoutSoon();requestFrame();sfx('tap');return}
+  if(m==='grade'&&!S.grade){openGrade();return}
+  const circ=m==='circle',gr=m==='grade',mmOf=v=>v==null?null:v*1000;
+  const rows=circ?[{label:'半径',sub:'m',ph:'例 1.500',opt:true,pos:true},{label:'直径',sub:'m',ph:'例 3.000',opt:true,pos:true}]
+    :gr?[{label:'斜距離',sub:'m',ph:'例 3.606',opt:true,pos:true},{label:'水平',sub:'m',ph:'例 3.000',opt:true,pos:true},{label:'高低差',sub:'m',ph:'例 2.000',opt:true,pos:true}]
+    :[{label:'長さ',sub:'m',ph:'例 3.500',pos:true}];
+  const hint=circ?(S.dA?'半径か直径のどちらかを入れてください（m）。いまの中心にこの大きさで描きます。':'半径か直径のどちらかを入れてください（m）。このあと「置く」を押した場所に、この大きさの円を描きます。')
+    :(gr?'斜距離・水平・高低差のどれか1つを入れてください（m）。':'長さを入れてください（m）。')+(S.dA?'照準の向きに、この長さで線を引きます。':'このあと始点と向きを決めると、この長さで線を引きます。');
+  openNumSheet({title:circ?'円の大きさ':gr?'勾配線の長さ（'+gradeLabel()+'）':'線の長さ',hint,ok:S.dA&&circ?'この大きさで描く':S.dA?'この長さで引く':'決定',rows,cb:vals=>{
+    let spec;
+    if(circ){const R=vals[0]!=null?vals[0]:vals[1]!=null?vals[1]/2:null;if(R==null){toast('半径か直径を入れてください');return}spec={R:mmOf(R)}}
+    else if(gr){const k=vals.findIndex(v=>v!=null);if(k<0){toast('どれか1つを入れてください');return}spec=k===0?{Ls:mmOf(vals[0])}:k===1?{Lh:mmOf(vals[1])}:{Lv:mmOf(vals[2])}}
+    else spec={L:mmOf(vals[0])};
+    // place already known: draw now
+    if(S.dA){
+      if(!scaleKnown(S.dA.rx)){noScaleToast();return}
+      if(circ){if(addCircleNote(S.dA,spec.R))S.dA=null;readoutSoon();requestFrame();return}
+      const t=draftTarget(),e=lenEnd(S.dA,t,spec);
+      if(e){if(tooBig(Math.hypot(e.x-S.dA.x,e.y-S.dA.y))){toast('長すぎます（単位は m です）',2600);return}addLineNote(m,S.dA,e,m==='grade'?null:spec.L);S.dA=null;readoutSoon();requestFrame();return}
+    }
+    S.dLen=spec;toast(lenLabel(spec)+' で'+(circ?'描きます。「置く」で中心を決めてください':S.dA?'引きます。照準で向きを決めて「置く」':'引きます。始点で「置く」'),3000);readoutSoon();requestFrame();sfx('tap');
+  }});
+}
+function updateNumBtn(){
+  const b=$('#numBtn');const show=!!D&&S.tool==='draft'&&LEN_MODES.includes(S.draftMode)&&!S.sel;
+  b.hidden=!show;if(!show)return;
+  b.classList.toggle('lock',!!S.dLen);
+  b.textContent=S.dLen?lenLabel(S.dLen)+'  ✕':S.draftMode==='circle'?'半径を入力':'長さを入力';
+}
 function draftTarget(){
   const tg=currentTarget();const p={x:tg.x,y:tg.y,kind:tg.kind,rx:tg.rx,t0:tg.t0};
+  if(S.dA&&S.dLen&&S.draftMode!=='circle'){if(S.draftMode==='line')orthoFix(S.dA,p);const e=lenEnd(S.dA,p,S.dLen);if(e){p.x=e.x;p.y=e.y;p.kind=0;p.fixed=true}return p}
   if(S.dA){if(S.draftMode==='h')p.y=S.dA.y;else if(S.draftMode==='v')p.x=S.dA.x;else if(S.draftMode==='grade'&&S.grade){const e=gradeEnd(S.dA,p);p.x=e.x;p.y=e.y;p.kind=e.kind}else orthoFix(S.dA,p)}
   return p;
 }
@@ -1328,6 +1409,14 @@ function draftPlace(p,sx,sy){
     const f=perpFoot(S.dBase,p.x,p.y);const mm=measure(p,{x:f[0],y:f[1],rx:p.rx});
     if(mm.paper*V.z<1.5){toast('基準線の上の点です');return}
     addNote({id:uid(),t:'line',k:'perp',a:[p.x,p.y],b:f,v:mm.real,sc:mm.sc,rx:p.rx,c:col,ts:Date.now()});sfx('done');buzz([10,40,16]);return;
+  }
+  if(S.dLen&&m==='circle'){if(!scaleKnown(p.rx)){noScaleToast();return}addCircleNote(p,S.dLen.R);return}
+  if(S.dLen&&S.dA&&LEN_MODES.includes(m)){
+    if(!scaleKnown(S.dA.rx)){noScaleToast();return}
+    if(m==='line')orthoFix(S.dA,p);const e=lenEnd(S.dA,p,S.dLen);
+    if(!e){toast('照準を動かして線の向きを決めてください');return}
+    if(tooBig(Math.hypot(e.x-S.dA.x,e.y-S.dA.y))){toast('長すぎます（単位は m です）',2600);return}
+    addLineNote(m,S.dA,e,m==='grade'?null:S.dLen.L);S.dA=null;return;
   }
   if(m==='grade'){
     if(!S.grade){openGrade();return}
@@ -1358,6 +1447,15 @@ function draftReadout(ro,rv,rs){
     rv.className='rv';rv.textContent=fmtLen(mm.real);rs.textContent='基準線までの距離 · '+mm.sc+' · 続けて点を選べます';
     if(mm.unscaled&&!S.manual){rs.textContent='図上の距離です（縮尺を指定できます）';ro.classList.add('warn')}return;
   }
+  if(S.dLen&&m==='circle'){rv.className='rv small';rv.textContent='中心に照準を合わせる';rs.textContent=lenLabel(S.dLen)+'（指定）の円を「置く」で描きます';return}
+  if(S.dLen&&(m!=='grade'||S.grade)){
+    if(!S.dA){rv.className='rv small';rv.textContent='始点に照準を合わせる';rs.textContent=lenLabel(S.dLen)+'（指定）· 「置く」で始点を決定';return}
+    const t=draftTarget();if(!t.fixed){rv.className='rv small';rv.textContent='照準で向きを決める';rs.textContent=lenLabel(S.dLen)+'（指定）';return}
+    const mm=measure(S.dA,{x:t.x,y:t.y,rx:S.dA.rx});rv.className='rv';
+    if(m==='grade'){const gp=gradeParts(S.dA,t),e=elevAt(t.x,t.y,S.dA.rx);rv.textContent=fmtLen(gp.len);rs.classList.add('wrap');rs.textContent=gradeLabel()+' · 水平 '+fmtLen(gp.dx)+' · 高低差 '+fmtLen(gp.dy)+'\n長さ指定'+(e?' · 終点 EL '+fmtC(e.H):'')}
+    else{rv.textContent=fmtLen(S.dLen.L);rs.textContent=(t.ortho?t.ortho+' · ':'')+'長さ指定 · '+mm.sc+' · 「置く」で引く'}
+    return;
+  }
   if(m==='grade'){
     if(!S.grade){rv.className='rv small';rv.textContent='勾配を指定してください';rs.textContent='上の「勾配」ボタンで指定します';return}
     if(!S.dA){rv.className='rv small';rv.textContent='始点に照準を合わせる';rs.textContent='勾配 '+gradeLabel()+' · 「置く」で始点を決定';return}
@@ -1387,6 +1485,11 @@ function drawDraftLive(ctx,tp){
     const dx=pp[0]-fp[0],dy=pp[1]-fp[1],L=Math.hypot(dx,dy);
     if(L>1){const nx=dx/L,ny=dy/L;ctx.strokeStyle='rgba(0,0,0,.55)';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(pp[0],pp[1]);ctx.lineTo(fp[0],fp[1]);ctx.stroke();ctx.strokeStyle=col;ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(pp[0],pp[1]);ctx.lineTo(fp[0],fp[1]);ctx.stroke();ctx.lineWidth=1.6;rightAngle(ctx,fp[0],fp[1],-ny,nx,nx,ny,9)}
     dot(fp[0],fp[1]);return;
+  }
+  if(S.draftMode==='circle'&&S.dLen&&!S.dA){
+    const tg=currentTarget(),rx=tg.rx>=0?tg.rx:((D.regions.find(q=>tg.x>=q.bb[0]&&tg.x<=q.bb[2]&&tg.y>=q.bb[1]&&tg.y<=q.bb[3])||{}).rx||0);
+    const r=sheetLen(rx,[1,0],S.dLen.R);if(r!=null){const R=r*V.z;ctx.save();ctx.setLineDash([6,5]);ctx.lineWidth=2;ctx.strokeStyle=col;ctx.globalAlpha=.85;ctx.beginPath();ctx.arc(tp[0],tp[1],R,0,Math.PI*2);ctx.stroke();ctx.restore()}
+    return;
   }
   if(!S.dA)return;const a=toScreen(S.dA.x,S.dA.y);
   if(S.draftMode==='grade'&&S.grade){
@@ -1630,7 +1733,7 @@ function openGrade(){
     const done=v=>{
       if(!(v>0)||(kind==='deg'&&v>=90)){toast(kind==='deg'?'0〜90° の角度を入れてください':'0 より大きい数字を入れてください');return}
       S.grade={kind,v};LS.set('grade',S.grade);setGradeButton();closeSheets();
-      S.draftMode='grade';S.dA=null;S.dBase=null;$$('#draftbar .dm').forEach(x=>x.classList.toggle('on',x.dataset.dm==='grade'));readoutSoon();requestFrame();sfx('done');
+      if(S.draftMode!=='grade')S.dLen=null;S.draftMode='grade';S.dA=null;S.dBase=null;$$('#draftbar .dm').forEach(x=>x.classList.toggle('on',x.dataset.dm==='grade'));readoutSoon();requestFrame();sfx('done');
     };
     $$('.tagb',b).forEach(x=>x.onclick=()=>done(+x.dataset.v));
     $('#gOk').onclick=()=>done(parseGrade($('#gVal').value,kind));
@@ -1803,6 +1906,7 @@ let roPending=false;
 function readoutSoon(){if(!roPending){roPending=true;requestAnimationFrame(()=>{roPending=false;renderReadout()})}}
 function renderReadout(){
   const ro=$('#readout'),rv=$('#rv'),rs=$('#rs');
+  updateNumBtn();
   if(!D||S.sel||!aiming()){ro.hidden=true;return}
   ro.hidden=false;ro.classList.remove('warn');rs.classList.remove('wrap');const tg=currentTarget();
   if(S.tool==='draft'){draftReadout(ro,rv,rs);return}
@@ -2042,7 +2146,7 @@ function stash(){
     else c.snap=null;
   }
 }
-function resetTransient(){S.mA=null;S.areaPts=[];S.snap=null;S.dA=null;S.dBase=null;S.gA=null;lastSnapKey='';effects.length=0;fly.on=false;inertia.on=false;updateAreaBar();select(null)}
+function resetTransient(){S.mA=null;S.areaPts=[];S.snap=null;S.dA=null;S.dBase=null;S.gA=null;S.dLen=null;lastSnapKey='';effects.length=0;fly.on=false;inertia.on=false;updateAreaBar();select(null)}
 let actSeq=0;
 async function activate(doc,opt={}){
   if(!doc||DOCS.indexOf(doc)<0)return false;
@@ -2326,7 +2430,7 @@ function eraseAt(x,y){
 }
 function setTool(t){
   if(t===S.tool&&t!=='pan'){if(t==='measure'&&S.mA){S.mA=null;readoutSoon();requestFrame();toast('始点を取り消しました')}if(t==='draft'&&(S.dA||S.dBase)){S.dA=null;S.dBase=null;readoutSoon();requestFrame();toast('作図を取り消しました')}if(t==='coord'&&S.gA){S.gA=null;readoutSoon();requestFrame();toast('基準点を取り消しました')}return}
-  S.tool=t;$('#app').dataset.tool=t;S.mA=null;S.areaPts=[];S.dA=null;S.dBase=null;S.snap=null;lastSnapKey='';if(S.sel)select(null);
+  S.tool=t;$('#app').dataset.tool=t;S.mA=null;S.areaPts=[];S.dA=null;S.dBase=null;S.dLen=null;S.snap=null;lastSnapKey='';if(S.sel)select(null);
   $$('.tool').forEach(b=>b.classList.toggle('on',b.dataset.tool===t));
   $('#fab').hidden=!aiming();$('#areabar').hidden=t!=='area';$('#penbar').hidden=t!=='pen';$('#draftbar').hidden=t!=='draft';$('#coordbar').hidden=t!=='coord';if(t==='coord')setCoordMode('read');if(t==='draft')barH();
   if(t!=='pen'){S.eraser=false;$('#eraserBtn').classList.remove('on')}
@@ -2544,8 +2648,9 @@ $('#scaleChip').addEventListener('click',()=>{audioWake();if(D)openScale()});
 $$('#penbar .sw').forEach(b=>b.addEventListener('click',()=>{S.penColor=b.dataset.ink;S.eraser=false;$('#eraserBtn').classList.remove('on');$$('#penbar .sw').forEach(x=>x.classList.toggle('on',x===b));toolHint();sfx('tap')}));
 $$('#penbar .penw[data-w]').forEach(b=>b.addEventListener('click',()=>{S.penW=+b.dataset.w;$$('#penbar .penw[data-w]').forEach(x=>x.classList.toggle('on',x===b));sfx('tap')}));
 $('#eraserBtn').addEventListener('click',()=>{S.eraser=!S.eraser;$('#eraserBtn').classList.toggle('on',S.eraser);toolHint();sfx('tap')});
-$$('#draftbar .dm').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.dm==='grade'&&(!S.grade||S.draftMode==='grade')){openGrade();return}S.draftMode=b.dataset.dm;S.dA=null;S.dBase=null;$$('#draftbar .dm').forEach(x=>x.classList.toggle('on',x===b));readoutSoon();requestFrame();sfx('tap')}));
+$$('#draftbar .dm').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.dm==='grade'&&(!S.grade||S.draftMode==='grade')){openGrade();return}S.draftMode=b.dataset.dm;S.dA=null;S.dBase=null;S.dLen=null;$$('#draftbar .dm').forEach(x=>x.classList.toggle('on',x===b));readoutSoon();requestFrame();sfx('tap')}));
 setGradeButton();
+$('#numBtn').addEventListener('click',()=>{audioWake();openLenInput()});
 $$('#coordbar .dm').forEach(b=>b.addEventListener('click',()=>{audioWake();setCoordMode(b.dataset.cm);sfx('tap')}));
 $('#draftColor').addEventListener('click',()=>{const i=(DRAFT_COLORS.indexOf(S.draftColor)+1)%DRAFT_COLORS.length;S.draftColor=DRAFT_COLORS[i];$('#draftColor').style.setProperty('--c',S.draftColor==='auto'?'linear-gradient(135deg,#fff 50%,#111 50%)':S.draftColor);requestFrame();sfx('tap')});
 
