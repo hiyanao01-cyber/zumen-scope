@@ -89,7 +89,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .chip small{font:700 10px/1 var(--f-ui);color:var(--dim);letter-spacing:.06em}
 
 /* ---- readout: a tape-measure label ---- */
-#readout{position:absolute;z-index:4;left:50%;top:calc(var(--top-h) - 4px);transform:translateX(-50%);min-width:196px;max-width:calc(100% - 32px);padding:12px 16px 9px;border-radius:12px;text-align:center;color:var(--tape-ink);background-color:var(--tape);background-image:repeating-linear-gradient(90deg,rgba(26,19,0,.7) 0 1px,transparent 1px 7px),repeating-linear-gradient(90deg,rgba(26,19,0,.7) 0 1px,transparent 1px 35px);background-size:100% 5px,100% 9px;background-repeat:no-repeat;box-shadow:0 8px 24px rgba(0,0,0,.45),inset 0 -2px 0 rgba(0,0,0,.18);pointer-events:none}
+#readout{position:absolute;z-index:4;left:50%;top:calc(var(--top-h) - 4px);transform:translateX(-50%);width:max-content;min-width:196px;max-width:calc(100% - 32px);padding:12px 16px 9px;border-radius:12px;text-align:center;color:var(--tape-ink);background-color:var(--tape);background-image:repeating-linear-gradient(90deg,rgba(26,19,0,.7) 0 1px,transparent 1px 7px),repeating-linear-gradient(90deg,rgba(26,19,0,.7) 0 1px,transparent 1px 35px);background-size:100% 5px,100% 9px;background-repeat:no-repeat;box-shadow:0 8px 24px rgba(0,0,0,.45),inset 0 -2px 0 rgba(0,0,0,.18);pointer-events:none}
 #readout .rv{font:700 27px/1.1 var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:.01em;white-space:nowrap}
 #readout .rv.small{font:700 16px/1.35 var(--f-ui);letter-spacing:.02em}
 #readout .rv.coord{display:inline-block;text-align:left;font:700 22px/1.22 var(--f-num);white-space:pre}
@@ -116,7 +116,8 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 #leftbtns{left:max(16px,env(safe-area-inset-left,0px));bottom:calc(var(--dock-h) + 16px);display:flex;flex-direction:column;gap:10px}
 #leftbtns .ibtn{width:46px;height:46px;border-radius:14px;background:rgba(31,42,53,.94)}
 #app[data-tool="pen"] #leftbtns{bottom:calc(var(--dock-h) + 70px)}
-#app[data-tool="draft"] #leftbtns,#app[data-tool="coord"] #leftbtns{bottom:calc(var(--dock-h) + 102px)}
+#app[data-tool="coord"] #leftbtns{bottom:calc(var(--dock-h) + 102px)}
+#app[data-tool="draft"] #leftbtns{bottom:calc(var(--dock-h) + 32px + var(--bar-h,46px) + 22px)}
 #draftbar,#coordbar{left:max(16px,env(safe-area-inset-left,0px));bottom:calc(var(--dock-h) + 32px);max-width:calc(100% - max(16px,env(safe-area-inset-left,0px)) - max(16px,env(safe-area-inset-right,0px)) - 92px);overflow-x:auto;display:flex;align-items:center;gap:3px;padding:5px;border-radius:999px;background:rgba(21,28,36,.96);border:1px solid var(--rule);box-shadow:0 8px 22px rgba(0,0,0,.4)}
 .dm{height:34px;flex:none;padding:0 9px;border:0;border-radius:999px;background:transparent;color:var(--dim);font-weight:700;font-size:12.5px;touch-action:manipulation}
 .dm.on{background:var(--text);color:var(--steel)}
@@ -184,6 +185,11 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .item .ib.ink{background:#3d8bff;color:#fff}
 .item .ib.draft{background:#e9eef3;color:#151c24}
 .item .ib.coord{background:#4dd2ff;color:#04202b}
+.item .ib.elev{background:#5be38a;color:#052b12}
+.item .it b{font-size:14px}
+.cpre,.cunit{flex:none;font:700 16px/1 var(--f-num);color:var(--dim)}
+#readout .rs.wrap{white-space:pre-line}
+#draftbar{flex-wrap:wrap;row-gap:3px;border-radius:21px;overflow:visible}
 .item .it{min-width:0;flex:1;font-size:13.5px;line-height:1.45;overflow-wrap:anywhere}
 .item .it .num{font:700 15px/1.3 var(--f-num);font-variant-numeric:tabular-nums}
 .item .it small{display:block;color:var(--dim);font-size:11px}
@@ -292,6 +298,7 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
     <button class="dm" data-dm="h" type="button">水平</button>
     <button class="dm" data-dm="v" type="button">垂直</button>
     <button class="dm" data-dm="perp" type="button">垂線</button>
+    <button class="dm" data-dm="grade" type="button" id="dmGrade">勾配</button>
     <button class="dm" data-dm="circle" type="button">円</button>
     <button class="dm" data-dm="hide" type="button">隠す</button>
     <span class="sep"></span>
@@ -300,7 +307,7 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
 
   <div id="coordbar" class="fl" hidden>
     <button class="dm on" data-cm="read" type="button">読む</button>
-    <button class="dm" data-cm="set" type="button">2点で設定</button>
+    <button class="dm" data-cm="cfg" type="button">設定</button>
     <span class="sep"></span>
     <button class="dm" data-cm="find" type="button">探す</button>
     <button class="dm" data-cm="sima" type="button">SIMA出力</button>
@@ -387,10 +394,21 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
     <div class="shead"><h2 id="cTitle">座標を入力</h2><button class="ibtn" type="button" data-close aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="sbody">
       <p class="note" id="cHint" style="margin:0"></p>
-      <div class="cin"><label for="cX">X<small>北</small></label><button class="pm" type="button" data-for="cX" aria-label="Xの符号を切り替え">±</button><input type="text" id="cX" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="例 -12345.678"></div>
-      <div class="cin"><label for="cY">Y<small>東</small></label><button class="pm" type="button" data-for="cY" aria-label="Yの符号を切り替え">±</button><input type="text" id="cY" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="例 23456.789"></div>
+      <div id="cRows" style="display:flex;flex-direction:column;gap:12px"></div>
       <div class="row"><button class="btn" id="cCancel" type="button">やめる</button><button class="btn primary" id="cOk" type="button">決定</button></div>
     </div>
+  </section>
+
+  <section class="sheet" id="cfgSheet" hidden aria-label="座標と基準高の設定">
+    <div class="grab"></div>
+    <div class="shead"><h2>座標・基準高の設定</h2><button class="ibtn" type="button" data-close aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="sbody" id="cfgBody"></div>
+  </section>
+
+  <section class="sheet" id="gradeSheet" hidden aria-label="勾配を指定">
+    <div class="grab"></div>
+    <div class="shead"><h2>勾配を指定</h2><button class="ibtn" type="button" data-close aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="sbody" id="gradeBody"></div>
   </section>
 
   <section class="sheet" id="simaSheet" hidden aria-label="SIMAで書き出す">
@@ -950,8 +968,8 @@ function sampleSFC(){
    ========================================================= */
 let D=null;                       // current drawing
 const V={cx:0,cy:0,z:1};          // view: sheet point at canvas centre, px per mm
-const S={tool:'pan',mA:null,areaPts:[],sel:null,notes:[],undo:[],snap:null,manual:0,penColor:'#ff3b30',penW:2.5,eraser:false,draftMode:'line',dA:null,dBase:null,draftColor:'#ff3b30',coordMode:'read',gA:null,geo:null};
-const DRAFT_NAMES={line:'直線',h:'水平線',v:'垂直線',perp:'垂線',circle:'円',hide:'線を隠す'};
+const S={tool:'pan',mA:null,areaPts:[],sel:null,notes:[],undo:[],snap:null,manual:0,penColor:'#ff3b30',penW:2.5,eraser:false,draftMode:'line',dA:null,dBase:null,draftColor:'#ff3b30',coordMode:'read',gA:null,geo:null,elev:null,grade:LS.get('grade',null)};
+const DRAFT_NAMES={line:'直線',h:'水平線',v:'垂直線',perp:'垂線',grade:'勾配線',circle:'円',hide:'線を隠す'};
 const DRAFT_COLORS=['#ff3b30','#3d8bff','#3fd28f','auto'];
 const aiming=()=>S.tool==='measure'||S.tool==='area'||S.tool==='draft'||S.tool==='coord';
 const inkColor=c=>c==='auto'?(settings.theme==='dark'?'#f2f5f8':'#111111'):c;
@@ -1130,6 +1148,8 @@ function drawNotes(ctx,Wc,Hc,pr,v,exp){
     if(n.id===sel){ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=12;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()}
     tape(ctx,a[0],a[1],b[0],b[1]);const lp=labelPos(a[0],a[1],b[0],b[1]);const r=pill(ctx,lp[0],lp[1],fmtLen(n.v),{sel:n.id===sel,pop:popScale(n,t)});if(!exp)labelHits.push({r,id:n.id});
   }
+  for(const n of S.notes){if(n.t!=='elev')continue;const p=T(n.x,n.y);const r=drawElevMark(ctx,p[0],p[1],n,n.id===sel,popScale(n,t));if(!exp)labelHits.push({r,id:n.id})}
+  for(const n of S.notes){if(n.t!=='line'||n.k!=='grade'||!n.g)continue;const a=T(n.a[0],n.a[1]),b=T(n.b[0],n.b[1]);if(Math.hypot(b[0]-a[0],b[1]-a[1])<24)continue;const lp=labelPos(a[0],a[1],b[0],b[1]);const r=pill(ctx,lp[0],lp[1],n.g,{bg:'rgba(15,21,28,.9)',fg:inkColor(n.c),sel:n.id===sel});if(!exp)labelHits.push({r,id:n.id})}
   let ci=0;for(const n of S.notes){if(n.t!=='coord')continue;ci++;const p=T(n.x,n.y);const r=drawCoordMark(ctx,p[0],p[1],n,ci,n.id===sel,popScale(n,t));if(!exp)labelHits.push({r,id:n.id})}
   let idx=0;const pins=S.notes.filter(n=>n.t==='pin');const showLabels=pins.length<=40;
   for(const n of pins){idx++;const p=T(n.x,n.y);drawPin(ctx,p[0],p[1],n.c,idx,n.id===sel,showLabels?n.text:'',popScale(n,t))}
@@ -1165,9 +1185,10 @@ const KBIAS=[0,0,5,3,6,2,16],KNAME=['','端点','中点','中心','四半円点'
 function drawLive(ctx){
   ctx.setTransform(dpr,0,0,dpr,0,0);const t=now();
   if(aiming()){
-    const tg=S.tool==='draft'?draftTarget():currentTarget();const tp=toScreen(tg.x,tg.y);
+    const tg=S.tool==='draft'?draftTarget():currentTarget();const tp=toScreen(tg.x,tg.y);tp[2]=tg.kind;
     if(S.tool==='draft')drawDraftLive(ctx,tp);
     if(S.tool==='coord')drawGeoPts(ctx);
+    if(S.tool==='coord'||(S.tool==='draft'&&S.draftMode==='grade'))drawRefs(ctx);
     if(S.tool==='measure'&&S.mA){const a=toScreen(S.mA.x,S.mA.y);tape(ctx,a[0],a[1],tp[0],tp[1],true)}
     if(S.tool==='area'&&S.areaPts.length){
       const q=S.areaPts;ctx.beginPath();q.forEach((p,i)=>{const s=toScreen(p.x,p.y);i?ctx.lineTo(s[0],s[1]):ctx.moveTo(s[0],s[1])});ctx.lineTo(tp[0],tp[1]);ctx.closePath();
@@ -1256,7 +1277,7 @@ function snapAt(sx,sy,rpx){
     else if(n.t==='circle'){const rxv=n.rx!=null?n.rx:-1;tryPt(n.c[0],n.c[1],3,rxv);[[1,0],[-1,0],[0,1],[0,-1]].forEach(([u,w])=>tryPt(n.c[0]+u*n.r,n.c[1]+w*n.r,4,rxv));
       const dc=Math.hypot(x-n.c[0],y-n.c[1]);if(dc>1e-9&&Math.abs(dc-n.r)<=r){const k=n.r/dc;const s=Math.abs(dc-n.r)*z+KBIAS[6];if(s<bs){bs=s;best={x:n.c[0]+(x-n.c[0])*k,y:n.c[1]+(y-n.c[1])*k,kind:6,rx:rxv}}}}
     else if(n.t==='area'){const q=n.pts;for(let i=0;i<q.length;i+=2)tryPt(q[i],q[i+1],1,-1)}
-    else if(n.t==='coord')tryPt(n.x,n.y,1,n.rx!=null?n.rx:-1);
+    else if(n.t==='coord'||n.t==='elev')tryPt(n.x,n.y,1,n.rx!=null?n.rx:-1);
   }
   if(ncell<=1200){
     const P=D.P,cand=collectSegs(x,y,r);
@@ -1290,7 +1311,7 @@ function segAt(sx,sy,rpx){const q=toSheet(sx,sy);const c=collectSegs(q[0],q[1],r
 function perpFoot(sg,x,y){const vx=sg.bx-sg.ax,vy=sg.by-sg.ay,l=vx*vx+vy*vy;if(!l)return[sg.ax,sg.ay];const t=((x-sg.ax)*vx+(y-sg.ay)*vy)/l;return[sg.ax+vx*t,sg.ay+vy*t]}
 function draftTarget(){
   const tg=currentTarget();const p={x:tg.x,y:tg.y,kind:tg.kind,rx:tg.rx,t0:tg.t0};
-  if(S.dA){if(S.draftMode==='h')p.y=S.dA.y;else if(S.draftMode==='v')p.x=S.dA.x;else orthoFix(S.dA,p)}
+  if(S.dA){if(S.draftMode==='h')p.y=S.dA.y;else if(S.draftMode==='v')p.x=S.dA.x;else if(S.draftMode==='grade'&&S.grade){const e=gradeEnd(S.dA,p);p.x=e.x;p.y=e.y;p.kind=e.kind}else orthoFix(S.dA,p)}
   return p;
 }
 function primAt(sx,sy,rpx){const q=toSheet(sx,sy);const c=collectSegs(q[0],q[1],rpx/V.z).filter(u=>u.p>=0);if(!c.length)return-1;c.sort((u,w)=>u.d-w.d);return c[0].p}
@@ -1307,6 +1328,14 @@ function draftPlace(p,sx,sy){
     const f=perpFoot(S.dBase,p.x,p.y);const mm=measure(p,{x:f[0],y:f[1],rx:p.rx});
     if(mm.paper*V.z<1.5){toast('基準線の上の点です');return}
     addNote({id:uid(),t:'line',k:'perp',a:[p.x,p.y],b:f,v:mm.real,sc:mm.sc,rx:p.rx,c:col,ts:Date.now()});sfx('done');buzz([10,40,16]);return;
+  }
+  if(m==='grade'){
+    if(!S.grade){openGrade();return}
+    if(!S.dA){S.dA=p;effects.push({x:p.x,y:p.y,t0:now(),c:inkColor(col)});sfx('place');buzz(12);return}
+    const e=gradeEnd(S.dA,p);if(Math.hypot(e.x-S.dA.x,e.y-S.dA.y)*V.z<1.5){toast('始点と同じ位置です');return}
+    const gp=gradeParts(S.dA,e),mm=measure(S.dA,{x:e.x,y:e.y,rx:S.dA.rx});
+    addNote({id:uid(),t:'line',k:'grade',a:[S.dA.x,S.dA.y],b:[e.x,e.y],v:gp.len,dx:gp.dx,dy:gp.dy,g:gradeLabel(),sc:mm.sc,rx:S.dA.rx,c:col,ts:Date.now()});
+    effects.push({x:e.x,y:e.y,t0:now(),c:inkColor(col)});S.dA=null;sfx('done');buzz([10,40,16]);return;
   }
   if(m!=='line'||!S.dA)effects.push({x:p.x,y:p.y,t0:now(),c:inkColor(col)});
   if(!S.dA){S.dA=p;sfx('place');buzz(12);return}
@@ -1329,6 +1358,16 @@ function draftReadout(ro,rv,rs){
     rv.className='rv';rv.textContent=fmtLen(mm.real);rs.textContent='基準線までの距離 · '+mm.sc+' · 続けて点を選べます';
     if(mm.unscaled&&!S.manual){rs.textContent='図上の距離です（縮尺を指定できます）';ro.classList.add('warn')}return;
   }
+  if(m==='grade'){
+    if(!S.grade){rv.className='rv small';rv.textContent='勾配を指定してください';rs.textContent='上の「勾配」ボタンで指定します';return}
+    if(!S.dA){rv.className='rv small';rv.textContent='始点に照準を合わせる';rs.textContent='勾配 '+gradeLabel()+' · 「置く」で始点を決定';return}
+    const t=draftTarget(),gp=gradeParts(S.dA,t),e=elevAt(t.x,t.y,S.dA.rx);
+    rv.className='rv';rv.textContent=fmtLen(gp.len);rs.classList.add('wrap');
+    const l2=[t.kind===5?'線との交点':'',e?'終点 EL '+fmtC(e.H):''].filter(Boolean).join(' · ');
+    rs.textContent=gradeLabel()+' · 水平 '+fmtLen(gp.dx)+' · 高低差 '+fmtLen(gp.dy)+(l2?'\n'+l2:'');
+    if(measure(S.dA,t).unscaled&&!S.manual&&!(S.elev&&S.elev[S.dA.rx])){rs.textContent='図上の長さです（縮尺を指定できます）';ro.classList.add('warn')}
+    return;
+  }
   const what=m==='circle'?'中心':'始点';
   if(!S.dA){rv.className='rv small';rv.textContent=what+'に照準を合わせる';rs.textContent=nm+' · 「置く」で'+what+'を決定';return}
   const t=draftTarget();const mm=measure(S.dA,{x:t.x,y:t.y,rx:S.dA.rx});rv.className='rv';
@@ -1350,6 +1389,11 @@ function drawDraftLive(ctx,tp){
     dot(fp[0],fp[1]);return;
   }
   if(!S.dA)return;const a=toScreen(S.dA.x,S.dA.y);
+  if(S.draftMode==='grade'&&S.grade){
+    const tg=currentTarget(),u=gradeDir(S.dA,tg),E=Math.hypot(W,H);   // the slope as a guide, then the line itself
+    const uy=-u[1];ctx.save();ctx.globalAlpha=.45;ctx.setLineDash([8,6]);ctx.lineWidth=1.5;ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(a[0]+u[0]*E,a[1]+uy*E);ctx.stroke();ctx.restore();
+    if(tp[2]===5){ctx.lineWidth=2;ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(tp[0]-6,tp[1]-6);ctx.lineTo(tp[0]+6,tp[1]+6);ctx.moveTo(tp[0]+6,tp[1]-6);ctx.lineTo(tp[0]-6,tp[1]+6);ctx.stroke()}
+  }
   if(S.draftMode==='circle'){const R=Math.hypot(tp[0]-a[0],tp[1]-a[1]);ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=5;ctx.beginPath();ctx.arc(a[0],a[1],R,0,Math.PI*2);ctx.stroke();ctx.strokeStyle=col;ctx.lineWidth=2.4;ctx.beginPath();ctx.arc(a[0],a[1],R,0,Math.PI*2);ctx.stroke();ctx.setLineDash([5,4]);ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(tp[0],tp[1]);ctx.stroke();ctx.setLineDash([]);dot(a[0],a[1]);return}
   ctx.strokeStyle='rgba(0,0,0,.55)';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(tp[0],tp[1]);ctx.stroke();ctx.strokeStyle=col;ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(tp[0],tp[1]);ctx.stroke();dot(a[0],a[1]);
 }
@@ -1425,11 +1469,14 @@ function coordReadout(ro,rv,rs){
     rv.className='rv small';rv.textContent=S.gA?'基準点2に照準を合わせる':'基準点1に照準を合わせる';
     rs.textContent=S.gA?'基準点1 X '+fmtC(S.gA.X)+'  Y '+fmtC(S.gA.Y)+' · 「置く」で座標を入力':'座標のわかる点（杭・IPなど）で「置く」';return;
   }
-  const c=coordAt(tg.x,tg.y,rx);
-  if(!c){rv.className='rv small';rv.textContent='座標が未設定です';rs.textContent=hasCoords()?'この図には座標がありません · 「2点で設定」で合わせられます':'「2点で設定」で、座標のわかる2点から合わせます';ro.classList.add('warn');return}
-  rv.className='rv coord';rv.textContent='X '+fmtC(c.X)+'\nY '+fmtC(c.Y);
-  rs.textContent=(S.snap?KNAME[S.snap.kind]+' · ':'')+coordSrc(c);
+  if(S.coordMode==='elev'){rv.className='rv small';rv.textContent='基準高の点に照準を合わせる';rs.textContent='高さのわかる点（DL・計画高など）で「置く」';return}
+  const c=coordAt(tg.x,tg.y,rx),e=elevAt(tg.x,tg.y,rx);
+  if(!c&&!e){rv.className='rv small';rv.textContent='座標・基準高が未設定です';rs.textContent='「設定」から、座標は2点・基準高は1点で合わせられます';ro.classList.add('warn');return}
+  const L=[];if(c)L.push('X '+fmtC(c.X),'Y '+fmtC(c.Y));if(e)L.push('EL '+fmtC(e.H));
+  rv.className='rv coord';rv.textContent=L.join('\n');
+  rs.textContent=(S.snap?KNAME[S.snap.kind]+' · ':'')+(c?coordSrc(c):'')+(e?(c?' · ':'')+'基準高から '+fmtSigned(e.dh)+' m':'');
 }
+const fmtSigned=v=>(v>=0?'+':'−')+fmtC(Math.abs(v));
 function coordPlace(p){
   if(S.coordMode==='set'){
     if(S.gA&&S.gA.rx!==p.rx){toast('2点は同じ図（部分図）の中で選んでください',2600);return}
@@ -1442,10 +1489,20 @@ function coordPlace(p){
     });
     return;
   }
-  const c=coordAt(p.x,p.y,p.rx);
-  if(!c){toast('座標が未設定です。2点を指定して合わせてください',2600);setCoordMode('set');return}
-  effects.push({x:p.x,y:p.y,t0:now(),c:COORD_COL});buzz([10,40,16]);
-  addNote({id:uid(),t:'coord',x:p.x,y:p.y,rx:p.rx,X:c.X,Y:c.Y,src:c.src,ts:Date.now()});sfx('done');
+  if(S.coordMode==='elev'){
+    effects.push({x:p.x,y:p.y,t0:now(),c:ELEV_COL});sfx('place');buzz(12);
+    const k0=vertScale(p.rx),cur=elevAt(p.x,p.y,p.rx);
+    openNumSheet({title:'基準高を入力',hint:'この点の高さ（m）を入れてください。縦の縮尺は図面から読み取った値です。縦断図などで縦と横の縮尺が違うときは直してください。',ok:'決定',
+      rows:[{label:'EL',sub:'m',pm:true,ph:'例 25.300',val:cur?fmtC(cur.H):''},{label:'縦縮尺',pre:'1 :',ph:'例 100',val:k0?String(+k0.toFixed(3)):'',pos:true}],
+      cb:([H,k])=>applyElev(p,H,k)});
+    return;
+  }
+  const c=coordAt(p.x,p.y,p.rx),e=elevAt(p.x,p.y,p.rx);
+  if(!c&&!e){toast('座標・基準高が未設定です。「設定」から合わせてください',2600);openCfg();return}
+  effects.push({x:p.x,y:p.y,t0:now(),c:c?COORD_COL:ELEV_COL});buzz([10,40,16]);
+  if(c){const n={id:uid(),t:'coord',x:p.x,y:p.y,rx:p.rx,X:c.X,Y:c.Y,src:c.src,ts:Date.now()};if(e){n.h=e.H;n.hsrc='elev'}addNote(n)}
+  else addNote({id:uid(),t:'elev',x:p.x,y:p.y,rx:p.rx,H:e.H,ts:Date.now()});
+  sfx('done');
 }
 // points that were read from the 2-point setting follow it when it changes
 function refreshCoordNotes(){for(const q of S.notes){if(q.t!=='coord'||q.src!=='user')continue;const c=coordAt(q.x,q.y,q.rx);if(c&&c.src==='user'){q.X=c.X;q.Y=c.Y}}}
@@ -1462,14 +1519,137 @@ function applyGeo(g){
   if(diff>.01){dialog('2点の距離が図面と合いません','入力した座標の2点間：'+dW.toFixed(3)+' m\n図面上の2点間：'+real.toFixed(3)+' m（差 '+(diff*100).toFixed(1)+'%）\n\n座標の打ち間違いがないか確かめてください。違っていたら ↶ で戻して、もう一度設定できます。');sfx('erase');return}
   toast('座標を合わせました（図面との差 '+(diff*100).toFixed(2)+'%）',2600);sfx('done');buzz([10,40,16]);
 }
+/* ---------- 基準高: one point of known height → heights of every point in the same figure ---------- */
+const ELEV_COL='#5be38a';
+// real mm per sheet mm, horizontally / vertically, for a figure (a set 基準高 may give its own vertical scale)
+function realScales(rx){
+  let hk=1,vk=1;
+  if(S.manual>0){hk=vk=S.manual}
+  else if(rx>0&&D&&D.xfs[rx]){const iv=D.xfs[rx].inv;hk=Math.hypot(iv[0],iv[1]);vk=Math.hypot(iv[2],iv[3])}
+  const e=S.elev&&S.elev[rx];if(e&&e.k>0)vk=e.k;
+  return{hk,vk};
+}
+function vertScale(rx){if(S.manual>0)return S.manual;if(rx>0&&D&&D.xfs[rx]){const iv=D.xfs[rx].inv;return Math.hypot(iv[2],iv[3])}return 0}
+function elevAt(x,y,rx){const e=S.elev&&S.elev[rx];if(!e||!(e.k>0))return null;const dh=(y-e.p[1])*e.k/1000;return{H:e.H+dh,dh,ref:e}}
+function elevSnapshot(rx){return S.notes.filter(n=>(n.t==='elev'||n.hsrc==='elev')&&n.rx===rx).map(n=>[n.id,n.t==='elev'?n.H:n.h])}
+// points that took their height from the 基準高 follow it when it changes
+function refreshElevNotes(rx){for(const n of S.notes){if(n.rx!==rx)continue;if(n.t==='elev'){const e=elevAt(n.x,n.y,rx);if(e)n.H=e.H}else if(n.hsrc==='elev'){const e=elevAt(n.x,n.y,rx);if(e)n.h=e.H}}}
+function applyElev(p,H,k){
+  if(!(k>0)){toast('縦の縮尺を入れてください（例 1:100 なら 100）',2800);return}
+  pushUndo({op:'elev',before:S.elev?JSON.parse(JSON.stringify(S.elev)):null,rx:p.rx,prev:elevSnapshot(p.rx)});
+  S.elev=Object.assign({},S.elev||{});S.elev[p.rx]={p:[p.x,p.y],H,k};
+  refreshElevNotes(p.rx);setCoordMode('read');notesChanged();
+  toast('基準高を合わせました（EL '+fmtC(H)+'・縦 1:'+(+k.toFixed(3))+'）',2800);sfx('done');buzz([10,40,16]);
+}
+const figName=rx=>rx>0&&D&&D.xfs[rx]?D.xfs[rx].name:'用紙';
+function cfgStatus(){
+  const gp=D?D.xfs.filter((x,i)=>i>0&&x.kind===2).map(x=>x.name):[];
+  const xy=S.geo?'2点で合わせた座標（'+figName(S.geo.rx)+'）\n基準点1  X '+fmtC(S.geo.A[0])+'  Y '+fmtC(S.geo.A[1])+'\n基準点2  X '+fmtC(S.geo.B[0])+'  Y '+fmtC(S.geo.B[1]):gp.length?'図面に入っている座標（測地座標系：'+gp.join('、')+'）':'なし';
+  const el=Object.entries(S.elev||{}).map(([rx,e])=>figName(+rx)+'：EL '+fmtC(e.H)+'（縦 1:'+(+(+e.k).toFixed(3))+'）');
+  return{xy,el};
+}
+function clearGeo(){pushUndo({op:'geo',before:S.geo,prev:coordSnapshot()});S.geo=null;S.gA=null;notesChanged();readoutSoon();toast('座標の設定を消しました（↶で戻せます）')}
+function clearElev(){pushUndo({op:'elev',before:S.elev,rx:null,prev:[]});S.elev=null;notesChanged();readoutSoon();requestFrame();toast('基準高を消しました（↶で戻せます）')}
+function openCfg(){
+  if(!D)return;const b=$('#cfgBody');const st=cfgStatus();
+  b.innerHTML='<div class="list"><button class="item" id="cfgXY" type="button"><span class="ib coord">座標</span><span class="it"><b>2点で座標を合わせる</b><small>X・Yがわかる2点（杭・IPなど）を指定します</small></span></button>'+
+    '<button class="item" id="cfgEL" type="button"><span class="ib elev">基準高</span><span class="it"><b>1点で基準高を合わせる</b><small>高さがわかる1点（DL・計画高など）を指定します。同じ図の中の点の高さがわかります</small></span></button></div>'+
+    '<div class="sect">いまの設定</div><dl class="kv"><dt>座標</dt><dd style="white-space:pre-line">'+esc(st.xy)+'</dd><dt>基準高</dt><dd>'+(st.el.length?st.el.map(esc).join('<br>'):'なし')+'</dd></dl>'+
+    ((S.geo||st.el.length)?'<div class="row">'+(S.geo?'<button class="btn small" id="cfgXYClr" type="button">2点の座標設定を消す</button>':'')+(st.el.length?'<button class="btn small" id="cfgELClr" type="button">基準高を消す</button>':'')+'</div>':'');
+  $('#cfgXY').onclick=()=>{closeSheets();setCoordMode('set')};
+  $('#cfgEL').onclick=()=>{closeSheets();setCoordMode('elev')};
+  if(S.geo)$('#cfgXYClr').onclick=()=>{clearGeo();openCfg()};
+  if(st.el.length)$('#cfgELClr').onclick=()=>{clearElev();openCfg()};
+  openSheet('cfgSheet');sfx('tap');
+}
+// the known points behind the settings, plus each 基準高 as a level line (while the coordinate or slope tools are in use)
+function drawRefs(ctx){
+  for(const[rk,e]of Object.entries(S.elev||{})){
+    const rx=+rk;const r=rx>0&&D?(D.regions.find(q=>q.rx===rx)||null):null;
+    const y=toScreen(e.p[0],e.p[1])[1];if(y<-20||y>H+20)continue;
+    let x0=0,x1=W;if(r){x0=Math.max(0,toScreen(r.bb[0],0)[0]);x1=Math.min(W,toScreen(r.bb[2],0)[0])}
+    if(x1<=x0)continue;const px=toScreen(e.p[0],e.p[1])[0];
+    ctx.save();ctx.setLineDash([7,5]);ctx.lineWidth=1.4;ctx.strokeStyle=ELEV_COL;ctx.globalAlpha=.8;ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
+    ctx.beginPath();ctx.moveTo(px,y);ctx.lineTo(px-7,y-11);ctx.lineTo(px+7,y-11);ctx.closePath();ctx.lineWidth=3.5;ctx.strokeStyle='rgba(0,0,0,.6)';ctx.stroke();ctx.fillStyle=ELEV_COL;ctx.fill();
+    ctx.font='700 11px "Chakra Petch","BIZ UDPGothic",sans-serif';const t='基準 EL '+fmtC(e.H);const w=ctx.measureText(t).width+12;
+    ctx.fillStyle=ELEV_COL;rr(ctx,px+10,y-24,w,18,5);ctx.fill();ctx.fillStyle='#052b12';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(t,px+16,y-14.5);ctx.restore();
+  }
+}
+function drawElevMark(ctx,x,y,n,sel,pop){
+  ctx.save();ctx.translate(x,y);ctx.scale(pop,pop);ctx.lineCap='round';ctx.lineJoin='round';
+  const mark=()=>{ctx.beginPath();ctx.moveTo(-13,0);ctx.lineTo(13,0);ctx.moveTo(0,0);ctx.lineTo(-6,-10);ctx.lineTo(6,-10);ctx.closePath()};
+  ctx.lineWidth=4.5;ctx.strokeStyle='rgba(0,0,0,.6)';mark();ctx.stroke();ctx.lineWidth=2;ctx.strokeStyle=ELEV_COL;mark();ctx.stroke();
+  ctx.font='600 12px "Chakra Petch","BIZ UDPGothic",sans-serif';const t=(n.name?n.name+'  ':'')+'EL '+fmtC(n.H);const w=ctx.measureText(t).width+14,h=21,lx=10,ly=-h-12;
+  ctx.fillStyle='rgba(12,17,23,.93)';rr(ctx,lx,ly,w,h,6);ctx.fill();ctx.lineWidth=sel?2.5:1.2;ctx.strokeStyle=sel?'#fff':ELEV_COL;ctx.stroke();
+  ctx.fillStyle='#eafbef';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(t,lx+7,ly+h/2+.5);
+  ctx.restore();return[x+lx*pop,y+ly*pop,w*pop,h*pop];
+}
+
+/* ---------- slope lines: gradient as %, 1:n (割) or degrees ---------- */
+const fmtG=v=>{const r=+(+v).toFixed(3);return Number.isInteger(r)?r.toFixed(1):String(r)};
+function gradeLabel(g){g=g||S.grade;if(!g)return'';return g.kind==='pct'?fmtG(g.v)+'%':g.kind==='ratio'?'1:'+fmtG(g.v):fmtG(g.v)+'°'}
+function gradeValue(g){g=g||S.grade;if(!g)return 0;return g.kind==='pct'?Math.abs(g.v)/100:g.kind==='ratio'?1/Math.abs(g.v):Math.tan(Math.min(89.999,Math.abs(g.v))*D2R)}
+// unit direction on the sheet for the set slope, in the quadrant where the reticle is
+function gradeDir(a,t){
+  const{hk,vk}=realScales(a.rx),g=gradeValue();const sx=t.x<a.x?-1:1,sy=t.y<a.y?-1:1;
+  const ux=sx/hk,uy=sy*g/vk,L=Math.hypot(ux,uy)||1;return[ux/L,uy/L];
+}
+// end of a slope line: on the slope under the reticle, or where it meets a nearby line (e.g. the ground)
+function gradeEnd(a,t){
+  const u=gradeDir(a,t);let s=(t.x-a.x)*u[0]+(t.y-a.y)*u[1];if(s<0)s=0;
+  let best={x:a.x+u[0]*s,y:a.y+u[1]*s,kind:0,rx:a.rx};
+  const r=30/V.z;let bd=Infinity;
+  for(const c of collectSegs(t.x,t.y,r)){
+    const ex=c.bx-c.ax,ey=c.by-c.ay,den=u[0]*ey-u[1]*ex;if(Math.abs(den)<1e-12)continue;
+    const qx=c.ax-a.x,qy=c.ay-a.y,tt=(qx*ey-qy*ex)/den,ss=(qx*u[1]-qy*u[0])/den;
+    if(tt<=1e-9||ss<-1e-9||ss>1+1e-9)continue;
+    const ix=a.x+u[0]*tt,iy=a.y+u[1]*tt,d=Math.hypot(ix-t.x,iy-t.y);if(d<=r&&d<bd){bd=d;best={x:ix,y:iy,kind:5,rx:a.rx}}
+  }
+  return best;
+}
+function gradeParts(a,b){const{hk,vk}=realScales(a.rx);const dx=Math.abs(b.x-a.x)*hk,dy=Math.abs(b.y-a.y)*vk;return{len:Math.hypot(dx,dy),dx,dy}}
+function parseGrade(t,kind){
+  let v=normNum(t).replace(/\s/g,'');if(!v)return NaN;
+  if(kind==='ratio'){const m=/^(\d+(?:\.\d+)?)割(?:(\d+(?:\.\d+)?)分)?(?:(\d+(?:\.\d+)?)厘)?$/.exec(v);if(m)return+m[1]+(m[2]?m[2]/10:0)+(m[3]?m[3]/100:0);v=v.replace(/^1[:：]/,'')}
+  v=v.replace(/[%％°度]$/,'');return Number(v);
+}
+function setGradeButton(){const b=$('#dmGrade');if(b)b.textContent=S.grade?'勾配 '+gradeLabel():'勾配';barH()}
+// the drafting bar may wrap onto two rows; the buttons on the left sit above it
+function barH(){const b=$('#draftbar');if(b&&!b.hidden)document.documentElement.style.setProperty('--bar-h',b.offsetHeight+'px')}
+function openGrade(){
+  const b=$('#gradeBody');let kind=(S.grade&&S.grade.kind)||'ratio';
+  const render=()=>{
+    const P={pct:[1.5,2,2.5,3,5,8],ratio:[.3,.5,1,1.5,1.8,2],deg:[15,30,45,60]}[kind];
+    const cur=S.grade&&S.grade.kind===kind?fmtG(S.grade.v):'';
+    b.innerHTML='<div class="seg" style="align-self:flex-start">'+[['ratio','1:n（割）'],['pct','％'],['deg','角度']].map(([k,l])=>'<button type="button" data-k="'+k+'" class="'+(k===kind?'on':'')+'">'+l+'</button>').join('')+'</div>'+
+      '<div class="cin">'+(kind==='ratio'?'<span class="cpre">1 :</span>':'<label for="gVal">勾配</label>')+'<input type="text" id="gVal" inputmode="decimal" autocomplete="off" spellcheck="false" value="'+cur+'" placeholder="'+(kind==='ratio'?'例 1.5（1割5分）':kind==='pct'?'例 2.0':'例 30')+'">'+(kind==='ratio'?'':'<span class="cunit">'+(kind==='pct'?'%':'°')+'</span>')+'</div>'+
+      '<div class="tags">'+P.map(v=>'<button class="tagb" type="button" data-v="'+v+'">'+(kind==='ratio'?'1:'+fmtG(v):fmtG(v)+(kind==='pct'?'%':'°'))+'</button>').join('')+'</div>'+
+      '<p class="note" style="margin:0">'+(kind==='ratio'?'法面などの「1:1.5（1割5分）」です。':kind==='pct'?'横断勾配・縦断勾配などの％です。':'水平からの角度です。')+'右上がり・右下がりなどの向きは、線を引くときの照準の位置で決まります。近くの線（地盤線など）に照準を寄せると、そこで止まります。</p>'+
+      '<div class="row"><button class="btn primary" id="gOk" type="button">この勾配で引く</button></div>';
+    $$('.seg button',b).forEach(x=>x.onclick=()=>{kind=x.dataset.k;render();sfx('tap')});
+    const done=v=>{
+      if(!(v>0)||(kind==='deg'&&v>=90)){toast(kind==='deg'?'0〜90° の角度を入れてください':'0 より大きい数字を入れてください');return}
+      S.grade={kind,v};LS.set('grade',S.grade);setGradeButton();closeSheets();
+      S.draftMode='grade';S.dA=null;S.dBase=null;$$('#draftbar .dm').forEach(x=>x.classList.toggle('on',x.dataset.dm==='grade'));readoutSoon();requestFrame();sfx('done');
+    };
+    $$('.tagb',b).forEach(x=>x.onclick=()=>done(+x.dataset.v));
+    $('#gOk').onclick=()=>done(parseGrade($('#gVal').value,kind));
+    $('#gVal').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#gOk').click()}};
+  };
+  render();openSheet('gradeSheet');setTimeout(()=>{try{$('#gVal').focus({preventScroll:true})}catch(e){}},280);
+}
+
 function setCoordMode(m){
   if(m==='find'){findCoord();return}
   if(m==='sima'){openSima();return}
-  S.coordMode=m;S.gA=null;$$('#coordbar .dm[data-cm]').forEach(b=>b.classList.toggle('on',b.dataset.cm===m));readoutSoon();requestFrame();
+  if(m==='cfg'){openCfg();return}
+  S.coordMode=m;S.gA=null;const on=m==='read'?'read':'cfg';$$('#coordbar .dm[data-cm]').forEach(b=>b.classList.toggle('on',b.dataset.cm===on));
+  if(m==='set')toast('座標のわかる点に照準を合わせて「置く」',2400);else if(m==='elev')toast('高さのわかる点に照準を合わせて「置く」',2400);
+  readoutSoon();requestFrame();
 }
 function findCoord(){
   if(!D)return;
-  if(!hasCoords()){toast('座標が未設定です。先に2点で合わせてください',2600);setCoordMode('set');return}
+  if(!hasCoords()){toast('座標が未設定です。先に「設定」で合わせてください',2600);openCfg();return}
   const tg=currentTarget();
   openCoordInput('座標で探す','X（北）とY（東）を入れると、その位置へ移動して印をつけます。',coordAt(tg.x,tg.y,resolveRx(tg)),(X,Y)=>{
     const p=sheetPointAt(X,Y);if(!p){toast('座標が未設定です');return}
@@ -1481,24 +1661,35 @@ function findCoord(){
   },'この座標へ移動');
 }
 // coordinate entry sheet: full-width digits, other dashes and a pasted "X=… Y=…" pair are all accepted
-let coordCb=null;
-const normNum=v=>String(v||'').replace(/[０-９．－＋，]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0xFEE0)).replace(/[ー−‐―–]/g,'-');
-const parseNum=v=>{const t=normNum(v).replace(/[,\s]/g,'').replace(/^[XxYy][=:：]?/,'');return t===''?NaN:Number(t)};
-function openCoordInput(title,hint,pre,cb,ok){
-  coordCb=cb;$('#cTitle').textContent=title;$('#cHint').textContent=hint||'';$('#cOk').textContent=ok||'決定';
-  $('#cX').value=pre?fmtC(pre.X):'';$('#cY').value=pre?fmtC(pre.Y):'';
-  openSheet('coordSheet');setTimeout(()=>{try{const i=$('#cX');i.focus({preventScroll:true});i.select()}catch(e){}},280);
+const normNum=v=>String(v||'').replace(/[０-９．－＋，：]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0xFEE0)).replace(/[ー−‐―–]/g,'-');
+const parseNum=v=>{const t=normNum(v).replace(/[,\s]/g,'').replace(/^[XxYy][=:]?/,'');return t===''?NaN:Number(t)};
+let numCb=null,numRows=[];
+// a small sheet of numeric fields; rows: {label, sub, pre, pm (± button), ph, val, opt (may be empty), pos (> 0), pair (accepts a pasted "X… Y…" pair)}
+function openNumSheet(o){
+  numCb=o.cb;numRows=o.rows;$('#cTitle').textContent=o.title;$('#cHint').textContent=o.hint||'';$('#cOk').textContent=o.ok||'決定';
+  const box=$('#cRows');
+  box.innerHTML=o.rows.map((r,i)=>'<div class="cin"><label for="cR'+i+'">'+esc(r.label)+(r.sub?'<small>'+esc(r.sub)+'</small>':'')+'</label>'+(r.pm?'<button class="pm" type="button" data-i="'+i+'" aria-label="符号を切り替え">±</button>':'')+(r.pre?'<span class="cpre">'+esc(r.pre)+'</span>':'')+'<input type="text" id="cR'+i+'" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="'+esc(r.ph||'')+'" value="'+esc(r.val!=null?r.val:'')+'"></div>').join('');
+  $$('.pm',box).forEach(bt=>bt.onclick=()=>{const i=$('#cR'+bt.dataset.i);const v=normNum(i.value).trim();i.value=v.startsWith('-')?v.slice(1):'-'+v;sfx('tap')});
+  o.rows.forEach((r,i)=>{const inp=$('#cR'+i);
+    inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const nx=$('#cR'+(i+1));if(nx)nx.focus();else $('#cOk').click()}};
+    if(r.pair)inp.oninput=e=>{const v=normNum(e.target.value);const m=v.match(/[-+]?\d+(?:\.\d+)?/g);if(m&&m.length===2&&/[\sYy\/／、;]/.test(v)&&$('#cR'+(i+1))){inp.value=m[0];$('#cR'+(i+1)).value=m[1]}};
+  });
+  openSheet('coordSheet');setTimeout(()=>{try{const i=$('#cR0');i.focus({preventScroll:true});i.select()}catch(e){}},280);
 }
-$('#cX').addEventListener('input',e=>{const v=normNum(e.target.value);const m=v.match(/[-+]?\d+(?:\.\d+)?/g);if(m&&m.length===2&&/[\sYy\/／、;]/.test(v)){$('#cX').value=m[0];$('#cY').value=m[1]}});
-$('#cX').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#cY').focus()}});
-$('#cY').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#cOk').click()}});
-$$('#coordSheet .pm').forEach(b=>b.addEventListener('click',()=>{const i=$('#'+b.dataset.for);const v=normNum(i.value).trim();i.value=v.startsWith('-')?v.slice(1):'-'+v;sfx('tap')}));
 $('#cOk').addEventListener('click',()=>{
-  const X=parseNum($('#cX').value),Y=parseNum($('#cY').value);
-  if(!isFinite(X)||!isFinite(Y)){toast('X と Y の数字を入れてください');return}
-  const cb=coordCb;coordCb=null;closeSheets();if(cb)cb(X,Y);
+  const out=[];
+  for(let i=0;i<numRows.length;i++){
+    const r=numRows[i],t=$('#cR'+i).value,v=parseNum(t);
+    if(normNum(t).trim()===''&&r.opt){out.push(null);continue}
+    if(!isFinite(v)||(r.pos&&!(v>0))){toast(r.label+' を数字で入れてください');try{$('#cR'+i).focus()}catch(e){}return}
+    out.push(v);
+  }
+  const cb=numCb;numCb=null;closeSheets();if(cb)cb(out);
 });
-$('#cCancel').addEventListener('click',()=>{coordCb=null;closeSheets()});
+$('#cCancel').addEventListener('click',()=>{numCb=null;closeSheets()});
+function openCoordInput(title,hint,pre,cb,ok){
+  openNumSheet({title,hint,ok,rows:[{label:'X',sub:'北',pm:true,ph:'例 -12345.678',val:pre?fmtC(pre.X):'',pair:true},{label:'Y',sub:'東',pm:true,ph:'例 23456.789',val:pre?fmtC(pre.Y):''}],cb:v=>cb(v[0],v[1])});
+}
 function drawCoordMark(ctx,x,y,n,idx,sel,pop){
   ctx.save();ctx.translate(x,y);ctx.scale(pop,pop);ctx.lineCap='round';
   const mark=()=>{ctx.beginPath();ctx.arc(0,0,6,0,Math.PI*2);ctx.moveTo(-11,0);ctx.lineTo(-3,0);ctx.moveTo(3,0);ctx.lineTo(11,0);ctx.moveTo(0,-11);ctx.lineTo(0,-3);ctx.moveTo(0,3);ctx.lineTo(0,11)};
@@ -1613,7 +1804,7 @@ function readoutSoon(){if(!roPending){roPending=true;requestAnimationFrame(()=>{
 function renderReadout(){
   const ro=$('#readout'),rv=$('#rv'),rs=$('#rs');
   if(!D||S.sel||!aiming()){ro.hidden=true;return}
-  ro.hidden=false;ro.classList.remove('warn');const tg=currentTarget();
+  ro.hidden=false;ro.classList.remove('warn');rs.classList.remove('wrap');const tg=currentTarget();
   if(S.tool==='draft'){draftReadout(ro,rv,rs);return}
   if(S.tool==='coord'){coordReadout(ro,rv,rs);return}
   if(S.tool==='measure'){
@@ -1662,6 +1853,7 @@ function undo(){
   else if(u.op==='clear'){S.notes=u.notes}
   else if(u.op==='hide'){setHidden(u.i,false)}
   else if(u.op==='unhideAll'){u.list.forEach(i=>{D.hid[i]=1;dirtyPrim(D,i)});invalidateAll()}
+  else if(u.op==='elev'){S.elev=u.before;u.prev.forEach(([id,v])=>{const q=S.notes.find(n=>n.id===id);if(q){if(q.t==='elev')q.H=v;else q.h=v}});readoutSoon();requestFrame()}
   else if(u.op==='geo'){S.geo=u.before;S.gA=null;u.prev.forEach(([id,X,Y])=>{const q=S.notes.find(n=>n.id===id);if(q){q.X=X;q.Y=Y}});readoutSoon()}
   if(S.sel)select(S.notes.find(n=>n.id===S.sel)||null);
   sfx('undo');toast('元に戻しました');notesChanged();
@@ -1704,7 +1896,7 @@ function scheduleSave(){if(!D||D.noSave)return;clearTimeout(saveTimer);saveTimer
 function flushSave(){
   clearTimeout(saveTimer);saveTimer=0;if(!D||D.noSave)return;
   const hidden=[];for(let i=0;i<D.hid.length;i++)if(D.hid[i])hidden.push(i);
-  saveQ.set(D.hash,{kind:'drawing',name:D.name,hash:D.hash,size:D.size,updatedAt:Date.now(),manual:S.manual||0,notes:cleanNotes(S.notes),hidden,geo:S.geo?{rx:S.geo.rx,a:S.geo.a,b:S.geo.b,A:S.geo.A,B:S.geo.B}:null});
+  saveQ.set(D.hash,{kind:'drawing',name:D.name,hash:D.hash,size:D.size,updatedAt:Date.now(),manual:S.manual||0,notes:cleanNotes(S.notes),hidden,geo:S.geo?{rx:S.geo.rx,a:S.geo.a,b:S.geo.b,A:S.geo.A,B:S.geo.B}:null,elev:S.elev&&Object.keys(S.elev).length?S.elev:null});
   pumpSave();
 }
 async function pumpSave(){
@@ -1773,7 +1965,7 @@ async function hashBytes(buf){
    ========================================================= */
 const DOCS=[];let CUR=null;
 const PARSE_BUDGET=650000,MAX_PARSED=10,SNAP_KEEP=3;
-function newDoc(o){return{id:uid(),name:o.name||'図面',hash:o.hash,size:o.size||0,sample:!!o.sample,buf:o.buf||null,cached:o.cached,D:null,job:null,err:null,notes:[],undo:[],manual:0,geo:null,view:null,hidden:null,vis:null,loaded:false,loadP:null,used:0,snap:null,shown:false,title:''}}
+function newDoc(o){return{id:uid(),name:o.name||'図面',hash:o.hash,size:o.size||0,sample:!!o.sample,buf:o.buf||null,cached:o.cached,D:null,job:null,err:null,notes:[],undo:[],manual:0,geo:null,elev:null,view:null,hidden:null,vis:null,loaded:false,loadP:null,used:0,snap:null,shown:false,title:''}}
 function estCost(x){const d=x.D;return d?d.np+d.texts.length*2+(d.pts.length>>3):Math.max(500,(x.size||0)/80)}
 function ensureParsed(doc){
   if(doc.D)return Promise.resolve(true);
@@ -1843,7 +2035,7 @@ function clearSnaps(){DOCS.forEach(x=>x.snap=null)}
 function stash(){
   const c=CUR;if(!c)return;
   if(saveTimer)flushSave();
-  c.notes=S.notes;c.undo=S.undo;c.manual=S.manual;c.geo=S.geo;
+  c.notes=S.notes;c.undo=S.undo;c.manual=S.manual;c.geo=S.geo;c.elev=S.elev;
   if(D&&c.D===D){
     c.view={cx:V.cx,cy:V.cy,z:V.z,fitZ};
     if(snapView&&lastBaseMs>=26){const fresh=!needBase&&!job&&snapView.cx===V.cx&&snapView.cy===V.cy&&snapView.z===V.z;c.snap={canvas:base,view:snapView,fresh,theme:settings.theme,w:base.width,h:base.height,ms:lastBaseMs};base=freshBase();bctx=base.getContext('2d');trimSnaps()}
@@ -1859,7 +2051,7 @@ async function activate(doc,opt={}){
   stash();
   CUR=doc;doc.used=now();saveTabs();renderTabs();
   if(!doc.D){
-    D=null;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;S.geo=doc.geo||null;resetTransient();updateUndo();renderTitle();invalidateAll();
+    D=null;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;S.geo=doc.geo||null;S.elev=doc.elev||null;resetTransient();updateUndo();renderTitle();invalidateAll();
     const lt=setTimeout(()=>{if(CUR===doc&&!doc.D)showLoading(doc.name)},140);
     const ok=await ensureParsed(doc);clearTimeout(lt);
     if(seq!==actSeq)return ok;
@@ -1872,7 +2064,7 @@ async function activate(doc,opt={}){
   show(doc);return true;
 }
 function show(doc){
-  D=doc.D;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;S.geo=doc.geo||null;resetTransient();updateUndo();hideLoading();
+  D=doc.D;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;S.geo=doc.geo||null;S.elev=doc.elev||null;resetTransient();updateUndo();hideLoading();
   if(!doc.shown){doc.shown=true;if(D.bg&&!LS.get('themeChosen',false)){const th=(.2126*D.bg[0]+.7152*D.bg[1]+.0722*D.bg[2])>128?'light':'dark';if(th!==settings.theme){settings.theme=th;colCache.clear();clearSnaps()}}}
   renderTitle();
   if(doc.view){V.cx=doc.view.cx;V.cy=doc.view.cy;V.z=doc.view.z;fitZ=doc.view.fitZ}else fitView();
@@ -1895,6 +2087,7 @@ function loadNotes(doc){
       const ids=new Set(have.map(n=>n.id));notes=saved.notes.filter(n=>n&&!ids.has(n.id)).concat(have);
       if(!(cur?S.manual:doc.manual)&&saved.manual>0){doc.manual=saved.manual;if(cur)S.manual=saved.manual}
       if(saved.geo&&saved.geo.a&&saved.geo.B&&!(cur?S.geo:doc.geo)){doc.geo=saved.geo;if(cur)S.geo=saved.geo}
+      if(saved.elev&&typeof saved.elev==='object'&&!(cur?S.elev:doc.elev)){doc.elev=saved.elev;if(cur)S.elev=saved.elev}
       if(Array.isArray(saved.hidden)&&saved.hidden.length){
         if(doc.D){const d=doc.D;saved.hidden.forEach(i=>{if(i>=0&&i<d.np&&!d.hid[i]){d.hid[i]=1;dirtyPrim(d,i)}});if(cur)invalidateAll()}
         else doc.hidden=(doc.hidden||[]).concat(saved.hidden);
@@ -1917,7 +2110,7 @@ function errText(c){
 function closeDoc(doc,o={}){
   const i=DOCS.indexOf(doc);if(i<0)return;
   const wasCur=doc===CUR;
-  if(wasCur){if(saveTimer)flushSave();CUR=null;D=null;S.notes=[];S.undo=[];S.geo=null;resetTransient();updateUndo()}
+  if(wasCur){if(saveTimer)flushSave();CUR=null;D=null;S.notes=[];S.undo=[];S.geo=null;S.elev=null;resetTransient();updateUndo()}
   DOCS.splice(i,1);doc.D=null;doc.snap=null;doc.buf=null;
   saveTabs();renderTabs();
   if(wasCur){
@@ -1928,7 +2121,7 @@ function closeDoc(doc,o={}){
 }
 function closeAll(){
   if(saveTimer)flushSave();DOCS.splice(0).forEach(x=>{x.D=null;x.snap=null;x.buf=null});preRun++;
-  CUR=null;D=null;S.notes=[];S.undo=[];S.geo=null;resetTransient();updateUndo();saveTabs();renderTabs();renderTitle();invalidateAll();showWelcome();
+  CUR=null;D=null;S.notes=[];S.undo=[];S.geo=null;S.elev=null;resetTransient();updateUndo();saveTabs();renderTabs();renderTitle();invalidateAll();showWelcome();
 }
 function saveTabs(){LS.set('tabs',DOCS.filter(x=>!x.sample&&x.cached!==false).map(x=>({hash:x.hash,name:x.name,size:x.size})));LS.set('activeTab',CUR&&!CUR.sample?CUR.hash:'')}
 function addDoc(o){
@@ -2135,7 +2328,7 @@ function setTool(t){
   if(t===S.tool&&t!=='pan'){if(t==='measure'&&S.mA){S.mA=null;readoutSoon();requestFrame();toast('始点を取り消しました')}if(t==='draft'&&(S.dA||S.dBase)){S.dA=null;S.dBase=null;readoutSoon();requestFrame();toast('作図を取り消しました')}if(t==='coord'&&S.gA){S.gA=null;readoutSoon();requestFrame();toast('基準点を取り消しました')}return}
   S.tool=t;$('#app').dataset.tool=t;S.mA=null;S.areaPts=[];S.dA=null;S.dBase=null;S.snap=null;lastSnapKey='';if(S.sel)select(null);
   $$('.tool').forEach(b=>b.classList.toggle('on',b.dataset.tool===t));
-  $('#fab').hidden=!aiming();$('#areabar').hidden=t!=='area';$('#penbar').hidden=t!=='pen';$('#draftbar').hidden=t!=='draft';$('#coordbar').hidden=t!=='coord';if(t==='coord')setCoordMode('read');
+  $('#fab').hidden=!aiming();$('#areabar').hidden=t!=='area';$('#penbar').hidden=t!=='pen';$('#draftbar').hidden=t!=='draft';$('#coordbar').hidden=t!=='coord';if(t==='coord')setCoordMode('read');if(t==='draft')barH();
   if(t!=='pen'){S.eraser=false;$('#eraserBtn').classList.remove('on')}
   updateAreaBar();if(aiming())updateSnap();toolHint();readoutSoon();renderChip();requestFrame();sfx('tool');
 }
@@ -2149,6 +2342,8 @@ function select(n){
   if(n.t==='pin'){title='メモ '+pinIdx;val='<div class="sval memo">'+(esc(n.text)||'<span style="color:var(--dim)">（文字なし）</span>')+'</div>';acts='<button class="btn small" data-act="edit" type="button">編集</button>'}
   else if(n.t==='dist'){title='寸法';val='<div class="sval">'+fmtLen(n.v)+'</div>';sub=esc(n.sc==='図上'?'図上の寸法':n.sc+'で換算');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else if(n.t==='area'){title='面積';val='<div class="sval">'+fmtArea(n.v)+'</div>';sub='周長 '+fmtLen(n.per||0)+' · '+esc(n.sc);acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
+  else if(n.t==='line'&&n.k==='grade'){title='勾配線 '+esc(n.g||'');val='<div class="sval">'+fmtLen(n.v)+'</div>';const ea=elevAt(n.a[0],n.a[1],n.rx),eb=elevAt(n.b[0],n.b[1],n.rx);sub='水平 '+fmtLen(n.dx||0)+' · 高低差 '+fmtLen(n.dy||0)+(ea&&eb?' · EL '+fmtC(ea.H)+' → '+fmtC(eb.H):'');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
+  else if(n.t==='elev'){title='高さ'+(n.name?' '+esc(n.name):'');val='<div class="sval">EL '+fmtC(n.H)+' m</div>';const e=elevAt(n.x,n.y,n.rx);sub=e?'基準高 EL '+fmtC(e.ref.H)+' から '+fmtSigned(e.dh)+' m':'基準高から求めた高さ';acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else if(n.t==='line'){title=DRAFT_NAMES[n.k]||'直線';val='<div class="sval">'+fmtLen(n.v)+'</div>';sub=(n.k==='perp'?'基準線までの距離 · ':'')+esc(n.sc==='図上'?'図上の長さ':n.sc+'で換算');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else if(n.t==='circle'){title='円';val='<div class="sval">R '+fmtLen(n.v)+'</div>';sub='直径 '+fmtLen(n.v*2)+' · '+esc(n.sc);acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else if(n.t==='coord'){title='座標 '+esc(n.name||('P'+(S.notes.filter(x=>x.t==='coord').indexOf(n)+1)))+(n.h!=null?' · 標高 '+fmtC(n.h):'');val='<div class="sval memo" style="font-family:var(--f-num)">X '+fmtC(n.X)+'\nY '+fmtC(n.Y)+'</div>';sub=esc(n.src==='user'?'2点で合わせた座標':'図面の座標');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
@@ -2162,7 +2357,7 @@ $('#selcard').addEventListener('click',e=>{
   if(a==='close')select(null);
   else if(a==='del'){deleteNote(n.id);sfx('erase');toast('削除しました（↶で戻せます）')}
   else if(a==='edit')openMemo(n,false);
-  else if(a==='copy')copyText(n.t==='coord'?'X='+fmtC(n.X)+' Y='+fmtC(n.Y):n.t==='dist'||n.t==='line'?fmtLen(n.v):n.t==='circle'?'R '+fmtLen(n.v):fmtArea(n.v));
+  else if(a==='copy')copyText(n.t==='elev'?'EL='+fmtC(n.H):n.t==='line'&&n.k==='grade'?n.g+'  L='+fmtLen(n.v)+'（水平 '+fmtLen(n.dx||0)+'・高低差 '+fmtLen(n.dy||0)+'）':n.t==='coord'?'X='+fmtC(n.X)+' Y='+fmtC(n.Y):n.t==='dist'||n.t==='line'?fmtLen(n.v):n.t==='circle'?'R '+fmtLen(n.v):fmtArea(n.v));
 });
 
 /* ---------- memo editor ---------- */
@@ -2198,7 +2393,7 @@ function renderMenu(){
   if(menuTab==='notes'){
     const pins=S.notes.filter(n=>n.t==='pin'),coords=S.notes.filter(n=>n.t==='coord');let h='<div class="row"><button class="btn small" id="mCopy" type="button">テキストでコピー</button><button class="btn small" id="mImg" type="button">画像で保存</button>'+(coords.length?'<button class="btn small" id="mSima" type="button">SIMA出力</button>':'')+'<span style="flex:1"></span><button class="btn small danger" id="mClear" type="button">'+(clearArmed?'もう一度押すと全部削除':'すべて削除')+'</button></div>';
     if(!S.notes.length)h+='<div class="empty">まだメモはありません。<br>下のツールで寸法・面積・メモ・ペンを使うと、ここに一覧が出ます。</div>';
-    else{h+='<div class="list">';S.notes.forEach(n=>{let ib='',it='';if(n.t==='pin'){ib='<span class="ib memo">メモ'+(pins.indexOf(n)+1)+'</span>';it=esc(n.text)||'（文字なし）'}else if(n.t==='dist'){ib='<span class="ib">寸法</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+esc(n.sc)+'</small>'}else if(n.t==='area'){ib='<span class="ib">面積</span>';it='<span class="num">'+fmtArea(n.v)+'</span><small>周長 '+fmtLen(n.per||0)+' · '+esc(n.sc)+'</small>'}else if(n.t==='line'){ib='<span class="ib draft">作図</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+(DRAFT_NAMES[n.k]||'直線')+' · '+esc(n.sc)+'</small>'}else if(n.t==='circle'){ib='<span class="ib draft">作図</span>';it='<span class="num">R '+fmtLen(n.v)+'</span><small>円 · 直径 '+fmtLen(n.v*2)+' · '+esc(n.sc)+'</small>'}else if(n.t==='coord'){ib='<span class="ib coord">'+esc(n.name||('P'+(coords.indexOf(n)+1)))+'</span>';it='<span class="num">X '+fmtC(n.X)+'<br>Y '+fmtC(n.Y)+'</span><small>'+(n.src==='user'?'2点で合わせた座標':'図面の座標')+'</small>'}else{ib='<span class="ib ink">ペン</span>';it='手書きの書き込み'}h+='<button class="item" data-id="'+n.id+'" type="button">'+ib+'<span class="it">'+it+'</span></button>'});h+='</div>'}
+    else{h+='<div class="list">';S.notes.forEach(n=>{let ib='',it='';if(n.t==='pin'){ib='<span class="ib memo">メモ'+(pins.indexOf(n)+1)+'</span>';it=esc(n.text)||'（文字なし）'}else if(n.t==='dist'){ib='<span class="ib">寸法</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+esc(n.sc)+'</small>'}else if(n.t==='area'){ib='<span class="ib">面積</span>';it='<span class="num">'+fmtArea(n.v)+'</span><small>周長 '+fmtLen(n.per||0)+' · '+esc(n.sc)+'</small>'}else if(n.t==='line'&&n.k==='grade'){ib='<span class="ib draft">作図</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>勾配線 '+esc(n.g||'')+' · 水平 '+fmtLen(n.dx||0)+' · 高低差 '+fmtLen(n.dy||0)+'</small>'}else if(n.t==='elev'){ib='<span class="ib elev">高さ</span>';it='<span class="num">EL '+fmtC(n.H)+'</span><small>'+(n.name?esc(n.name)+' · ':'')+'基準高から求めた高さ</small>'}else if(n.t==='line'){ib='<span class="ib draft">作図</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+(DRAFT_NAMES[n.k]||'直線')+' · '+esc(n.sc)+'</small>'}else if(n.t==='circle'){ib='<span class="ib draft">作図</span>';it='<span class="num">R '+fmtLen(n.v)+'</span><small>円 · 直径 '+fmtLen(n.v*2)+' · '+esc(n.sc)+'</small>'}else if(n.t==='coord'){ib='<span class="ib coord">'+esc(n.name||('P'+(coords.indexOf(n)+1)))+'</span>';it='<span class="num">X '+fmtC(n.X)+'<br>Y '+fmtC(n.Y)+'</span><small>'+(n.src==='user'?'2点で合わせた座標':'図面の座標')+'</small>'}else{ib='<span class="ib ink">ペン</span>';it='手書きの書き込み'}h+='<button class="item" data-id="'+n.id+'" type="button">'+ib+'<span class="it">'+it+'</span></button>'});h+='</div>'}
     h+='<p class="note">'+storeText()+'</p>';
     b.innerHTML=h;
     $('#mCopy').onclick=()=>copyText(notesText());$('#mImg').onclick=()=>{closeSheets();exportImage()};if(coords.length)$('#mSima').onclick=()=>openSima();
@@ -2218,13 +2413,12 @@ function renderMenu(){
     let h='<dl class="kv">'+kv('ファイル',D.name)+kv('用紙',D.sheet.w?D.sheet.label+'（'+D.sheet.w+'×'+D.sheet.h+' mm）':'指定なし',true)+kv('工事名',(i.work||'').trim())+kv('図面名',(i.drawing||D.sheet.name||'').trim())+kv('縮尺（表題）',(i.scale||'').trim())+kv('受注者',(i.contractor||'').trim())+kv('発注者',(i.owner||'').trim())+'</dl>';
     const parts=D.xfs.slice(1);h+='<div class="sect">部分図と縮尺</div>';
     h+=parts.length?'<dl class="kv">'+parts.map(x=>'<dt>'+esc(x.name)+'</dt><dd class="n">'+ratioText(x.s)+(x.kind===2?'（測地座標）':'')+'</dd>').join('')+'</dl>':'<p class="note">部分図がないため、計測は図上の寸法になります。縮尺は右上の「縮尺」から指定できます。</p>';
-    const gp=D.xfs.filter((x,i)=>i>0&&x.kind===2).map(x=>x.name);
-    const gs=S.geo?'2点で合わせた座標を使っています。\n基準点1  X '+fmtC(S.geo.A[0])+'  Y '+fmtC(S.geo.A[1])+'\n基準点2  X '+fmtC(S.geo.B[0])+'  Y '+fmtC(S.geo.B[1]):gp.length?'図面に入っている座標（測地座標系：'+gp.join('、')+'）を使っています。':'座標は入っていません。下の「座標」ツールの「2点で設定」で、座標のわかる2点から合わせられます。';
-    h+='<div class="sect">座標</div><p class="note" style="margin:0;white-space:pre-line">'+esc(gs)+'</p>'+(S.geo?'<div class="row"><button class="btn small" id="gClear" type="button">2点の座標設定を消す</button></div>':'');
+    const st=cfgStatus();
+    h+='<div class="sect">座標・基準高</div><dl class="kv"><dt>座標</dt><dd style="white-space:pre-line">'+esc(st.xy)+'</dd><dt>基準高</dt><dd>'+(st.el.length?st.el.map(esc).join('<br>'):'なし')+'</dd></dl>'+((S.geo||st.el.length)?'<div class="row">'+(S.geo?'<button class="btn small" id="gClear" type="button">2点の座標設定を消す</button>':'')+(st.el.length?'<button class="btn small" id="eClear" type="button">基準高を消す</button>':'')+'</div>':'');
     const sk=Object.entries(D.skipped||{});
     h+='<div class="sect">内容</div><dl class="kv">'+kv('線・図形',D.np.toLocaleString('ja-JP')+' 本',true)+kv('文字',D.texts.length.toLocaleString('ja-JP')+' 件',true)+kv('読み込み',Math.round(D.parseMs)+' ms',true)+kv('未対応',sk.map(([k,v])=>k.replace('_feature','')+' ×'+v).join(', '))+'</dl>';
     b.innerHTML=h;
-    if(S.geo)$('#gClear').onclick=()=>{pushUndo({op:'geo',before:S.geo,prev:coordSnapshot()});S.geo=null;S.gA=null;notesChanged();renderMenu();readoutSoon();toast('座標の設定を消しました（↶で戻せます）')};
+    if(S.geo)$('#gClear').onclick=()=>{clearGeo();renderMenu()};if(S.elev&&Object.keys(S.elev).length)$('#eClear').onclick=()=>{clearElev();renderMenu()};
   }else{
     const seg=(key,opts)=>'<div class="seg">'+opts.map(([v,l])=>'<button class="'+(settings[key]===v?'on':'')+'" data-k="'+key+'" data-v="'+v+'" type="button">'+l+'</button>').join('')+'</div>';
     b.innerHTML='<div class="setrow">背景'+seg('theme',[['dark','黒'],['light','白']])+'</div><div class="setrow">文字の表示'+seg('text',[[true,'表示'],[false,'隠す']])+'</div><div class="setrow">線の太さ'+seg('weight',[[true,'図面どおり'],[false,'細線']])+'</div><div class="setrow">効果音'+seg('sound',[[true,'ON'],[false,'OFF']])+'</div><div class="setrow">振動'+seg('haptic',[[true,'ON'],[false,'OFF']])+'</div><p class="note">'+storeText()+'</p><p class="note">対応形式：SXF Ver.2〜3.1 のSFC（.sfc）。P21形式はCADでSFCに書き出してから開いてください。</p>';
@@ -2235,11 +2429,11 @@ let clearArmed=false;
 function storeText(){return Store.mode==='cloud'?'メモと書き込みは、あなたのアカウントに図面ごとに保存されます（他の人からは見えません）。':Store.mode==='local'?'メモと書き込みは、この端末のブラウザに保存されます（他の人からは見えません）。ブラウザのデータを消すと消えるので、大事なメモは「画像で保存」か「テキストでコピー」でも残してください。':Store.mode==='none'?'この画面ではメモを保存できません。画像やテキストで書き出してください。':'保存先を確認しています…'}
 function notesText(){
   const pins=S.notes.filter(n=>n.t==='pin'),coords=S.notes.filter(n=>n.t==='coord');const lines=['【図面】'+D.name];let k=0;
-  S.notes.forEach(n=>{if(n.t==='pin')lines.push('・メモ'+(pins.indexOf(n)+1)+'：'+(n.text||'（文字なし）').replace(/\n/g,' '));else if(n.t==='dist')lines.push('・寸法：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='area')lines.push('・面積：'+fmtArea(n.v)+'　周長 '+fmtLen(n.per||0)+'（'+n.sc+'）');else if(n.t==='line')lines.push('・'+(DRAFT_NAMES[n.k]||'直線')+'：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='circle')lines.push('・円：R '+fmtLen(n.v)+'　直径 '+fmtLen(n.v*2)+'（'+n.sc+'）');else if(n.t==='coord')lines.push('・座標'+(n.name||('P'+(coords.indexOf(n)+1)))+'：X='+fmtC(n.X)+' Y='+fmtC(n.Y)+(n.h!=null?' H='+fmtC(n.h):'')+'（'+(n.src==='user'?'2点で合わせた座標':'図面の座標')+'）');else k++});
+  S.notes.forEach(n=>{if(n.t==='pin')lines.push('・メモ'+(pins.indexOf(n)+1)+'：'+(n.text||'（文字なし）').replace(/\n/g,' '));else if(n.t==='dist')lines.push('・寸法：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='area')lines.push('・面積：'+fmtArea(n.v)+'　周長 '+fmtLen(n.per||0)+'（'+n.sc+'）');else if(n.t==='line'&&n.k==='grade')lines.push('・勾配線 '+n.g+'：L='+fmtLen(n.v)+'（水平 '+fmtLen(n.dx||0)+'・高低差 '+fmtLen(n.dy||0)+'）');else if(n.t==='elev')lines.push('・高さ：EL='+fmtC(n.H)+(n.name?'（'+n.name+'）':''));else if(n.t==='line')lines.push('・'+(DRAFT_NAMES[n.k]||'直線')+'：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='circle')lines.push('・円：R '+fmtLen(n.v)+'　直径 '+fmtLen(n.v*2)+'（'+n.sc+'）');else if(n.t==='coord')lines.push('・座標'+(n.name||('P'+(coords.indexOf(n)+1)))+'：X='+fmtC(n.X)+' Y='+fmtC(n.Y)+(n.h!=null?' H='+fmtC(n.h):'')+'（'+(n.src==='user'?'2点で合わせた座標':'図面の座標')+'）');else k++});
   if(k)lines.push('・手書き '+k+'件');return lines.join('\n');
 }
 function focusNote(n){
-  let bb;if(n.t==='pin'||n.t==='coord')bb=[n.x,n.y,n.x,n.y];else if(n.t==='dist'||n.t==='line')bb=[Math.min(n.a[0],n.b[0]),Math.min(n.a[1],n.b[1]),Math.max(n.a[0],n.b[0]),Math.max(n.a[1],n.b[1])];else if(n.t==='circle')bb=[n.c[0]-n.r,n.c[1]-n.r,n.c[0]+n.r,n.c[1]+n.r];else{const q=n.pts;bb=[Infinity,Infinity,-Infinity,-Infinity];for(let i=0;i<q.length;i+=2){bb[0]=Math.min(bb[0],q[i]);bb[1]=Math.min(bb[1],q[i+1]);bb[2]=Math.max(bb[2],q[i]);bb[3]=Math.max(bb[3],q[i+1])}}
+  let bb;if(n.t==='pin'||n.t==='coord'||n.t==='elev')bb=[n.x,n.y,n.x,n.y];else if(n.t==='dist'||n.t==='line')bb=[Math.min(n.a[0],n.b[0]),Math.min(n.a[1],n.b[1]),Math.max(n.a[0],n.b[0]),Math.max(n.a[1],n.b[1])];else if(n.t==='circle')bb=[n.c[0]-n.r,n.c[1]-n.r,n.c[0]+n.r,n.c[1]+n.r];else{const q=n.pts;bb=[Infinity,Infinity,-Infinity,-Infinity];for(let i=0;i<q.length;i+=2){bb[0]=Math.min(bb[0],q[i]);bb[1]=Math.min(bb[1],q[i+1]);bb[2]=Math.max(bb[2],q[i]);bb[3]=Math.max(bb[3],q[i+1])}}
   const sw=bb[2]-bb[0],sh=bb[3]-bb[1],avail=Math.max(80,H-TOPH-DOCKH);
   let z=(sw>0||sh>0)?Math.min(W*.6/Math.max(sw,1e-9),avail*.5/Math.max(sh,1e-9)):Math.max(V.z,fitZ*3);
   z=clamp(z,zMin(),Z_MAX);const cx=(bb[0]+bb[2])/2,cy=(bb[1]+bb[3])/2;
@@ -2350,7 +2544,8 @@ $('#scaleChip').addEventListener('click',()=>{audioWake();if(D)openScale()});
 $$('#penbar .sw').forEach(b=>b.addEventListener('click',()=>{S.penColor=b.dataset.ink;S.eraser=false;$('#eraserBtn').classList.remove('on');$$('#penbar .sw').forEach(x=>x.classList.toggle('on',x===b));toolHint();sfx('tap')}));
 $$('#penbar .penw[data-w]').forEach(b=>b.addEventListener('click',()=>{S.penW=+b.dataset.w;$$('#penbar .penw[data-w]').forEach(x=>x.classList.toggle('on',x===b));sfx('tap')}));
 $('#eraserBtn').addEventListener('click',()=>{S.eraser=!S.eraser;$('#eraserBtn').classList.toggle('on',S.eraser);toolHint();sfx('tap')});
-$$('#draftbar .dm').forEach(b=>b.addEventListener('click',()=>{S.draftMode=b.dataset.dm;S.dA=null;S.dBase=null;$$('#draftbar .dm').forEach(x=>x.classList.toggle('on',x===b));readoutSoon();requestFrame();sfx('tap')}));
+$$('#draftbar .dm').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.dm==='grade'&&(!S.grade||S.draftMode==='grade')){openGrade();return}S.draftMode=b.dataset.dm;S.dA=null;S.dBase=null;$$('#draftbar .dm').forEach(x=>x.classList.toggle('on',x===b));readoutSoon();requestFrame();sfx('tap')}));
+setGradeButton();
 $$('#coordbar .dm').forEach(b=>b.addEventListener('click',()=>{audioWake();setCoordMode(b.dataset.cm);sfx('tap')}));
 $('#draftColor').addEventListener('click',()=>{const i=(DRAFT_COLORS.indexOf(S.draftColor)+1)%DRAFT_COLORS.length;S.draftColor=DRAFT_COLORS[i];$('#draftColor').style.setProperty('--c',S.draftColor==='auto'?'linear-gradient(135deg,#fff 50%,#111 50%)':S.draftColor);requestFrame();sfx('tap')});
 
@@ -2360,7 +2555,7 @@ function layoutHUD(){
   const oldTop=TOPH;TOPH=Math.max(0,top.bottom-app.top-8);DOCKH=Math.max(0,app.bottom-dock.top);RC.x=W/2;RC.y=(TOPH+(H-DOCKH))/2;
   document.documentElement.style.setProperty('--dock-h',DOCKH+'px');document.documentElement.style.setProperty('--top-h',(TOPH+6)+'px');
   if(D&&TOPH!==oldTop&&fitV&&fitV.d===D&&V.cx===fitV.cx&&V.cy===fitV.cy&&V.z===fitV.z)fitView();   // still showing the whole drawing: re-fit around the tab strip
-  if(D&&aiming())updateSnap();readoutSoon();requestFrame();
+  barH();if(D&&aiming())updateSnap();readoutSoon();requestFrame();
 }
 function resize(){
   const r=cv.getBoundingClientRect();W=Math.max(1,r.width);H=Math.max(1,r.height);dpr=Math.min(window.devicePixelRatio||1,2.5);
