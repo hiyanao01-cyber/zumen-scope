@@ -49,8 +49,36 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 
 /* ---- top HUD ---- */
-#top{position:absolute;z-index:5;left:0;right:0;top:0;display:flex;align-items:center;gap:8px;padding-block:10px 14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:linear-gradient(rgba(21,28,36,.97) 0%,rgba(21,28,36,.9) 62%,rgba(21,28,36,0) 100%);pointer-events:none}
-#top>*{pointer-events:auto}
+#top{position:absolute;z-index:5;left:0;right:0;top:0;display:flex;flex-direction:column;gap:9px;padding-block:10px 14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:linear-gradient(rgba(21,28,36,.97) 0%,rgba(21,28,36,.9) 62%,rgba(21,28,36,0) 100%);pointer-events:none}
+.toprow{display:flex;align-items:center;gap:8px;min-width:0}
+.toprow>*{pointer-events:auto}
+/* open drawings: one tab per file, scrolls sideways */
+#tabs{order:1;position:relative;pointer-events:auto;display:flex;align-items:center;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-left:calc(-1*max(16px,env(safe-area-inset-left,0px)));margin-right:calc(-1*max(16px,env(safe-area-inset-right,0px)));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#tabs::-webkit-scrollbar{display:none}
+.ftab{flex:none;display:flex;align-items:stretch;height:36px;max-width:min(64vw,250px);border-radius:11px;border:1px solid var(--rule);background:rgba(31,42,53,.96);transition:background .12s,transform .12s}
+.ftab .tsel{min-width:0;flex:1;display:flex;align-items:center;gap:6px;padding:0 12px;border:0;border-radius:11px;background:transparent;color:var(--text);font:700 12.5px/1 var(--f-ui);white-space:nowrap;touch-action:manipulation}
+.ftab .tsel:active{transform:scale(.96)}
+.ftab .tn{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.ftab .tn small{font-size:11px;font-weight:700;color:var(--dim);margin-left:5px}
+.ftab .tc{flex:none;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--stake);color:#fff;font:700 10.5px/18px var(--f-num);text-align:center}
+.ftab.on{background:var(--tape);border-color:transparent;box-shadow:0 6px 16px rgba(255,198,26,.2)}
+.ftab.on .tsel{color:var(--tape-ink)}
+.ftab.on .tn small{color:rgba(26,19,0,.62)}
+.ftab .tx{flex:none;width:34px;border:0;border-left:1px solid rgba(26,19,0,.2);border-radius:0 11px 11px 0;background:transparent;color:var(--tape-ink);display:grid;place-items:center;touch-action:manipulation}
+.ftab .tx svg{width:16px;height:16px;stroke-width:2.4}
+.ftab.busy .tsel::before{content:"";flex:none;width:9px;height:9px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite}
+.ftab.err .tsel{color:#ff8a70}
+.tadd{flex:none;width:42px;height:36px;border-radius:11px;border:1px dashed #4a5d70;background:rgba(31,42,53,.8);color:var(--text);display:grid;place-items:center;touch-action:manipulation}
+.tadd:active{transform:scale(.92)}
+/* phones held sideways: tabs share the single top row to keep the drawing tall */
+@media (max-height:520px) and (min-width:600px){
+  #top{flex-direction:row;align-items:center}
+  .toprow{display:contents}
+  .toprow .file{order:0;flex:0 1 auto;max-width:26%}
+  #tabs[hidden]+.toprow .file{flex:1 1 auto;max-width:none}
+  #tabs{order:1;flex:1 1 0;min-width:0;margin:0;padding:0 2px}
+  #scaleChip{order:2;margin-left:auto}#openBtn{order:3}#menuBtn{order:4}
+}
 .file{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px}
 .fname{font-weight:700;font-size:15px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fmeta{font:500 11.5px/1.2 var(--f-num);color:var(--dim);letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -130,6 +158,8 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .tip svg{color:var(--tape);width:20px;height:20px}
 .sect{font:700 11px/1 var(--f-ui);letter-spacing:.12em;color:var(--dim);margin:2px 0 -6px}
 .recents{display:flex;flex-direction:column;gap:6px}
+#wRecentWrap{display:flex;flex-direction:column;gap:8px}
+#wRecentWrap .sect{margin:0}
 .rec{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid var(--rule);background:var(--steel-2);touch-action:manipulation}
 .rec .rn{min-width:0;flex:1;font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rec .rm{flex:none;font:500 11px/1.3 var(--f-num);color:var(--dim);text-align:right}
@@ -185,6 +215,7 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
 #toast{position:absolute;z-index:20;left:50%;top:calc(var(--top-h) + 8px);transform:translate(-50%,-6px);max-width:calc(100% - 32px);padding:10px 16px;border-radius:999px;background:var(--text);color:var(--steel);font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 #loading{position:absolute;z-index:15;inset:0;display:grid;place-items:center;background:rgba(11,15,20,.84);animation:fade .15s}
+#loading.below{top:var(--top-h);z-index:4;background:rgba(11,15,20,.6)}
 .load{display:flex;flex-direction:column;align-items:center;gap:14px;font-weight:700;font-size:14px;text-align:center;padding:0 24px}
 .load svg{width:64px;height:64px;color:var(--tape);animation:spin 1.4s linear infinite}
 .load small{font-size:12px;color:var(--dim);font-weight:400;max-width:280px;overflow-wrap:anywhere}
@@ -204,13 +235,16 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
   <canvas id="cv" aria-label="図面の表示エリア"></canvas>
 
   <header id="top">
-    <div class="file">
-      <div class="fname" id="fname">読み込み中…</div>
-      <div class="fmeta" id="fmeta">&nbsp;</div>
+    <div id="tabs" role="tablist" aria-label="開いている図面" hidden></div>
+    <div class="toprow">
+      <div class="file">
+        <div class="fname" id="fname">読み込み中…</div>
+        <div class="fmeta" id="fmeta">&nbsp;</div>
+      </div>
+      <button class="chip" id="scaleChip" type="button" aria-label="計測の縮尺"><small id="scaleMode">縮尺</small><span id="scaleTxt">自動</span></button>
+      <button class="ibtn" id="openBtn" type="button" aria-label="図面を開く"><svg class="i" viewBox="0 0 24 24"><path d="M3 7.5V18a1.5 1.5 0 0 0 1.5 1.5h15A1.5 1.5 0 0 0 21 18V9a1.5 1.5 0 0 0-1.5-1.5H12L10 5H4.5A1.5 1.5 0 0 0 3 6.5z"/><path d="M12 11v5M9.5 13.5h5"/></svg></button>
+      <button class="ibtn" id="menuBtn" type="button" aria-label="メニュー"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
     </div>
-    <button class="chip" id="scaleChip" type="button" aria-label="計測の縮尺"><small id="scaleMode">縮尺</small><span id="scaleTxt">自動</span></button>
-    <button class="ibtn" id="openBtn" type="button" aria-label="図面を開く"><svg class="i" viewBox="0 0 24 24"><path d="M3 7.5V18a1.5 1.5 0 0 0 1.5 1.5h15A1.5 1.5 0 0 0 21 18V9a1.5 1.5 0 0 0-1.5-1.5H12L10 5H4.5A1.5 1.5 0 0 0 3 6.5z"/><path d="M12 11v5M9.5 13.5h5"/></svg></button>
-    <button class="ibtn" id="menuBtn" type="button" aria-label="メニュー"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
   </header>
 
   <div id="readout" hidden><div class="rv" id="rv"></div><div class="rs" id="rs"></div></div>
@@ -273,6 +307,8 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
       <button class="btn primary" id="wOpen" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M3 7.5V18a1.5 1.5 0 0 0 1.5 1.5h15A1.5 1.5 0 0 0 21 18V9a1.5 1.5 0 0 0-1.5-1.5H12L10 5H4.5A1.5 1.5 0 0 0 3 6.5z"/></svg>図面ファイルを開く</button>
       <button class="btn" id="wSample" type="button">サンプルで試す</button>
     </div>
+    <p class="note" style="margin:-6px 0 0">複数のファイルをまとめて選べます。開いた図面は上のタブで切り替えられます。</p>
+    <div class="row" id="wTabsRow" hidden><button class="btn small" id="wCloseAll" type="button">開いている図面をすべて閉じる</button></div>
     <div class="tips">
       <div class="tip"><svg class="i" viewBox="0 0 24 24"><path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V12M11 11.5V5a1.5 1.5 0 0 1 3 0v6.5M14 11.5V7a1.5 1.5 0 0 1 3 0v7a6 6 0 0 1-6 6h-.5a6 6 0 0 1-4.6-2.2L4 15.4a1.5 1.5 0 0 1 2.3-1.9L8 15"/></svg>2本指で<br>拡大・移動</div>
       <div class="tip"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/></svg>照準を合わせて<br>「置く」で計測</div>
@@ -328,7 +364,7 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
   <div id="dialog" hidden><div class="dcard"><h3 id="dTitle"></h3><p id="dBody"></p><div class="row"><button class="btn primary" id="dOk" type="button">OK</button></div></div></div>
   <div id="imgview" hidden><img id="imgOut" alt="書き出した図面画像"><p>画像を長押しすると保存・共有できます。</p><button class="btn" id="imgClose" type="button" style="flex:0 0 auto;min-width:140px">閉じる</button></div>
   <div id="toast" role="status" aria-live="polite"></div>
-  <input type="file" id="file" hidden>
+  <input type="file" id="file" multiple hidden>
 </div>
 
 <script>
@@ -345,8 +381,6 @@ const now=()=>performance.now();
 const nextFrame=()=>new Promise(r=>requestAnimationFrame(()=>r()));
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let uidSeq=0;const uid=()=>Date.now().toString(36)+(uidSeq++).toString(36)+Math.random().toString(36).slice(2,6);
-class F64{constructor(n=4096){this.a=new Float64Array(n);this.n=0}push(v){if(this.n===this.a.length){const b=new Float64Array(this.a.length*2);b.set(this.a);this.a=b}this.a[this.n++]=v}done(){return this.a.slice(0,this.n)}}
-class I32{constructor(n=4096){this.a=new Int32Array(n);this.n=0}push(v){if(this.n===this.a.length){const b=new Int32Array(this.a.length*2);b.set(this.a);this.a=b}this.a[this.n++]=v}done(){return this.a.slice(0,this.n)}}
 
 const LS={
   get(k,d){try{const v=localStorage.getItem('zs:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
@@ -358,8 +392,22 @@ const settings=Object.assign({theme:'dark',sound:true,haptic:true,text:true,weig
 const saveSettings=()=>LS.set('settings',settings);
 
 /* =========================================================
-   SFC parsing
+   SFC parsing. PARSER() is self-contained: it runs on this page and,
+   via its own source text, inside a Web Worker so big files never freeze the UI.
    ========================================================= */
+function PARSER(){
+'use strict';
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const D2R=Math.PI/180;
+class F64{constructor(n=4096){this.a=new Float64Array(n);this.n=0}push(v){if(this.n===this.a.length){const b=new Float64Array(this.a.length*2);b.set(this.a);this.a=b}this.a[this.n++]=v}done(){return this.a.slice(0,this.n)}}
+class I32{constructor(n=4096){this.a=new Int32Array(n);this.n=0}push(v){if(this.n===this.a.length){const b=new Int32Array(this.a.length*2);b.set(this.a);this.a=b}this.a[this.n++]=v}done(){return this.a.slice(0,this.n)}}
+// cheap check on raw bytes before a file is accepted as a tab
+function sniff(buf){
+  const u=new Uint8Array(buf),n=u.length;let i=0;
+  while(i<n){i=u.indexOf(0x2F,i);if(i<0||i+4>=n)break;if(u[i+1]===0x2A&&u[i+2]===0x53&&u[i+3]===0x58&&u[i+4]===0x46)return'ok';i++}
+  let head='';const m=Math.min(n,4000);for(let k=0;k<m;k++)head+=String.fromCharCode(u[k]);
+  return/ISO-10303-21/.test(head)?'P21':'NOTSFC';
+}
 function decodeBytes(buf){
   const u8=new Uint8Array(buf);
   if(u8[0]===0xEF&&u8[1]===0xBB&&u8[2]===0xBF)return new TextDecoder('utf-8').decode(u8.subarray(3));
@@ -600,7 +648,7 @@ function flatten(M){
             if(n>=2&&int(p[ai])!==0){const vx=q[0]-q[2],vy=q[1]-q[3];const l=Math.hypot(vx,vy);if(l>0)arrow(m,q[0],q[1],vx/l,vy/l,num(p[ai+1]),cc,L)}
             if(bal){const cx=num(p[7]),cy=num(p[8]),r=Math.abs(num(p[9]));if(r>0){prim(ellPts(cx,cy,r,r,0,0,360,sc,true),true,2,st,L,m,rx);sp(m,cx,cy,3,L,rx)}}
             dimText(p,bal?12:9,cc,L,m,rx);break}
-          case 'externally_defined_hatch_feature':{const L=lay(int(p[0]),Lov);const r=hatchSet(int(p[2]),list(p[4]),L,m,rx,sc);break}
+          case 'externally_defined_hatch_feature':{const L=lay(int(p[0]),Lov);hatchSet(int(p[2]),list(p[4]),L,m,rx,sc);break}
           case 'fill_area_style_tiles_feature':case 'fill_area_style_tiles_hatching_feature':{const L=lay(int(p[0]),Lov);hatchSet(int(p[12]),list(p[14]),L,m,rx,sc);break}
           case 'fill_area_style_colour_feature':{
             const L=lay(int(p[0]),Lov);const r=hatchSet(int(p[2]),list(p[4]),L,m,rx,sc);if(!r)break;
@@ -632,8 +680,18 @@ function flatten(M){
     snap:{x:SN.x.done(),y:SN.y.done(),k:SN.k.done(),L:SN.L.done(),rx:SN.rx.done(),p:SN.p.done()},texts,marks,arrows,fills,styles,xfs,regions,lcount,skipped};
 }
 
-/* ---------- indexes: render batches + snap grid ---------- */
-function finalize(G,M,meta){
+/* ---------- indexes: fit box, render batches, snap grids (typed arrays, cheap to hand between threads) ---------- */
+// group items by key into sorted buckets: keys[], start[] (length+1), items[]
+function buckets(K,I,n){
+  const cnt=new Map();for(let i=0;i<n;i++){const k=K[i];const c=cnt.get(k);cnt.set(k,c===undefined?1:c+1)}
+  const keys=new Float64Array(cnt.size);let j=0;for(const k of cnt.keys())keys[j++]=k;keys.sort();
+  const start=new Int32Array(keys.length+1),slot=new Map();
+  for(let q=0;q<keys.length;q++){slot.set(keys[q],q);start[q+1]=start[q]+cnt.get(keys[q])}
+  const fill=start.slice(0,keys.length),items=new Int32Array(n);
+  for(let i=0;i<n;i++){const q=slot.get(K[i]);items[fill[q]++]=I?I[i]:i}
+  return{keys,start,items};
+}
+function index(G,M){
   const s=M.sheet;let sw=0,sh=0,slabel='';
   if(!s.synthetic){
     if(s.type===9||!SHEETS[s.type]){sw=s.x;sh=s.y;slabel='自由'}
@@ -661,46 +719,112 @@ function finalize(G,M,meta){
     fit=inside?[Math.min(0,cb[0]),Math.min(0,cb[1]),Math.max(sw,cb[2]),Math.max(sh,cb[3])]:cb;
   }
   const world={x0:fit[0],y0:fit[1],w:Math.max(1e-6,fit[2]-fit[0]),h:Math.max(1e-6,fit[3]-fit[1])};
-  // batches by style/layer/tile
-  const NT=6,ts=Math.max(world.w,world.h)/NT;const bm=new Map();
+  // batches by style/layer/tile; paths are built on the page, lazily
+  const NT=6,ts=Math.max(world.w,world.h)/NT;const bm=new Map(),binfo=[],bOf=new Int32Array(np);
   for(let i=0;i<np;i++){
     const x0=bb[4*i],y0=bb[4*i+1],x1=bb[4*i+2],y1=bb[4*i+3];let tile;
     if(x1-x0>ts*1.5||y1-y0>ts*1.5)tile=NT*NT;else{const tx=clamp(Math.floor(((x0+x1)/2-world.x0)/ts),0,NT-1),ty=clamp(Math.floor(((y0+y1)/2-world.y0)/ts),0,NT-1);tile=ty*NT+tx}
-    const key=(P.st[i]*4096+P.L[i])*64+tile;let b=bm.get(key);
-    if(!b){b={st:P.st[i],L:P.L[i],idx:[],bb:[Infinity,Infinity,-Infinity,-Infinity],path:null};bm.set(key,b)}
-    b.idx.push(i);if(x0<b.bb[0])b.bb[0]=x0;if(y0<b.bb[1])b.bb[1]=y0;if(x1>b.bb[2])b.bb[2]=x1;if(y1>b.bb[3])b.bb[3]=y1;
+    const key=(P.st[i]*4096+P.L[i])*64+tile;let k=bm.get(key);
+    if(k===undefined){k=binfo.length;bm.set(key,k);binfo.push({st:P.st[i],L:P.L[i],n:0,bb:[Infinity,Infinity,-Infinity,-Infinity]})}
+    const b=binfo[k];bOf[i]=k;b.n++;if(x0<b.bb[0])b.bb[0]=x0;if(y0<b.bb[1])b.bb[1]=y0;if(x1>b.bb[2])b.bb[2]=x1;if(y1>b.bb[3])b.bb[3]=y1;
   }
-  const pts=G.pts;const batches=[...bm.values()].sort((a,b)=>a.st-b.st);
-  buildPaths(batches,P,pts,null);
+  const ord=binfo.map((b,i)=>i).sort((a,b)=>binfo[a].st-binfo[b].st||a-b);
+  const remap=new Int32Array(binfo.length);ord.forEach((k,j)=>remap[k]=j);
+  const batches=ord.map(k=>binfo[k]);
+  const bStart=new Int32Array(batches.length+1);for(let j=0;j<batches.length;j++)bStart[j+1]=bStart[j]+batches[j].n;
+  const bFill=bStart.slice(0,batches.length),bItems=new Int32Array(np);
+  for(let i=0;i<np;i++){const j=remap[bOf[i]];bOf[i]=j;bItems[bFill[j]++]=i}
   // snap grid
   const cs=Math.max(world.w,world.h)/160||1;const gx0=world.x0,gy0=world.y0;
   const key=(x,y)=>{const cx=clamp(Math.floor((x-gx0)/cs),-30000,30000),cy=clamp(Math.floor((y-gy0)/cs),-30000,30000);return(cx+32768)*65536+(cy+32768)};
-  const gp=new Map();const SX=G.snap.x,SY=G.snap.y;
-  for(let i=0;i<SX.length;i++){const k=key(SX[i],SY[i]);let a=gp.get(k);if(!a){a=[];gp.set(k,a)}a.push(i)}
+  const SX=G.snap.x,SY=G.snap.y,ns=SX.length,sk=new Float64Array(ns);
+  for(let i=0;i<ns;i++)sk[i]=key(SX[i],SY[i]);
+  const gpts=buckets(sk,null,ns);
   let totalSegs=0;for(let i=0;i<np;i++)if(!(P.fl[i]&4))totalSegs+=P.n[i]-1+(P.fl[i]&1);
   let segs=null,segP=null,segA=null,segB=null;
   if(totalSegs<=900000){
-    segs=new Map();const sP=new I32(),sA=new I32(),sB=new I32();const step=cs*.5;
+    const pts=G.pts,sP=new I32(),sA=new I32(),sB=new I32(),pk=new F64(),pi=new I32();const step=cs*.5;
     for(let i=0;i<np;i++){
       if(P.fl[i]&4)continue;const o=P.off[i],n=P.n[i],cl=P.fl[i]&1;const cnt=n-1+cl;
       for(let j=0;j<cnt;j++){
         const a=o+j,b=o+((j+1)%n);const ax=pts[2*a],ay=pts[2*a+1],bx=pts[2*b],by=pts[2*b+1];
         const id=sP.n;sP.push(i);sA.push(a);sB.push(b);
         const len=Math.hypot(bx-ax,by-ay);const k=Math.min(4000,Math.ceil(len/step));let last=-1;
-        for(let t=0;t<=k;t++){const f=k?t/k:0;const kk=key(ax+(bx-ax)*f,ay+(by-ay)*f);if(kk!==last){let arr=segs.get(kk);if(!arr){arr=[];segs.set(kk,arr)}if(arr[arr.length-1]!==id)arr.push(id);last=kk}}
+        for(let t=0;t<=k;t++){const f=k?t/k:0;const kk=key(ax+(bx-ax)*f,ay+(by-ay)*f);if(kk!==last){pk.push(kk);pi.push(id);last=kk}}
       }
     }
     segP=sP.done();segA=sA.done();segB=sB.done();
+    segs=buckets(pk.a,pi.a,pk.n);
   }
-  const layers=M.layers.map((l,i)=>({name:l.name,count:G.lcount[i]||0}));
-  const vis=new Uint8Array(M.layers.length);M.layers.forEach((l,i)=>vis[i]=l.visible?1:0);
-  return Object.assign({},meta,{hid:new Uint8Array(np),M,sheet:{w:sw,h:sh,label:slabel,name:s.name||''},pts,P,np,styles:G.styles,batches,texts:G.texts,marks:G.marks,arrows:G.arrows,fills:G.fills,xfs:G.xfs,regions:G.regions,
-    snap:G.snap,grid:{cs,gx0,gy0,key,pts:gp,segs,segP,segA,segB},layers,vis,fit,info:M.info,bg:M.bg,skipped:G.skipped});
+  const layers=M.layers.map((l,i)=>({name:l.name,count:G.lcount[i]||0,visible:!!l.visible}));
+  return{sheet:{w:sw,h:sh,label:slabel,name:s.name||''},pts:G.pts,P,np,styles:G.styles,batches,bStart,bItems,bOf,texts:G.texts,marks:G.marks,arrows:G.arrows,fills:G.fills,xfs:G.xfs,regions:G.regions,
+    snap:G.snap,grid:{cs,gx0,gy0,pts:gpts,segs,segP,segA,segB},layers,fit,info:M.info,bg:M.bg,skipped:G.skipped};
 }
+function run(buf){
+  const t0=performance.now();const feats=parseSFC(decodeBytes(buf));const M=buildModel(feats);const G=flatten(M);
+  if(!G.np&&!G.texts.length)throw new Error('EMPTY');
+  const R=index(G,M);R.parseMs=performance.now()-t0;return R;
+}
+// buffers that can be moved (not copied) between threads
+function transfers(R){
+  const set=new Set();const add=a=>{if(a&&a.buffer instanceof ArrayBuffer)set.add(a.buffer)};
+  add(R.pts);for(const k in R.P)add(R.P[k]);for(const k in R.snap)add(R.snap[k]);add(R.bStart);add(R.bItems);add(R.bOf);
+  const g=R.grid;[g.pts,g.segs].forEach(b=>{if(b){add(b.keys);add(b.start);add(b.items)}});add(g.segP);add(g.segA);add(g.segB);
+  for(const f of R.fills)for(const r of f.rings)add(r);
+  return[...set];
+}
+return{sniff,decodeBytes,parseSFC,buildModel,flatten,index,run,transfers};
+}
+const Parser=PARSER();
 
-function buildPaths(batches,P,pts,hid){
-  for(const b of batches){if(hid&&!b.idx.some(i=>hid[i])&&b.path&&!b.dirty)continue;const path=new Path2D();let any=false;for(const i of b.idx){if(hid&&hid[i])continue;any=true;const o=P.off[i]*2,n=P.n[i];path.moveTo(pts[o],pts[o+1]);for(let j=1;j<n;j++)path.lineTo(pts[o+2*j],pts[o+2*j+1]);if(P.fl[i]&1)path.closePath()}b.path=path;b.empty=!any;b.dirty=!!hid&&b.idx.some(i=>hid[i])}
+/* ---------- parsing off the main thread: a small pool of workers built from PARSER's own source ---------- */
+const PW={
+  pool:[],ok:null,seq:0,cb:new Map(),url:null,
+  spawn(){
+    try{
+      if(!this.url){const src='"use strict";const PARSER='+PARSER.toString()+';const P=PARSER();self.onmessage=e=>{const m=e.data;if(m&&m.ping){self.postMessage({pong:1});return}if(m&&m.hash){try{crypto.subtle.digest("SHA-256",m.buf).then(h=>{const u=new Uint8Array(h);let s="";for(let i=0;i<12;i++)s+=(u[i]<16?"0":"")+u[i].toString(16);self.postMessage({id:m.id,ok:true,hash:s})},()=>self.postMessage({id:m.id,ok:false}))}catch(err){self.postMessage({id:m.id,ok:false})}return}let R=null;try{R=P.run(m.buf)}catch(err){self.postMessage({id:m.id,ok:false,err:String(err&&err.message||err)});return}try{self.postMessage({id:m.id,ok:true,R},P.transfers(R))}catch(err){self.postMessage({id:m.id,ok:false,err:"POST"})}};';
+        this.url=URL.createObjectURL(new Blob([src],{type:'text/javascript'}))}
+      const w=new Worker(this.url);const slot={w,busy:0};
+      w.onmessage=e=>{const m=e.data;if(!m)return;if(m.pong){this.ok=true;return}const job=this.cb.get(m.id);if(job){this.cb.delete(m.id);clearTimeout(job.timer);slot.busy--;job.res(m)}};
+      w.onerror=e=>{try{e.preventDefault()}catch(_){}this.fail()};
+      w.postMessage({ping:1});this.pool.push(slot);return slot;
+    }catch(e){this.fail();return null}
+  },
+  settle(list,v){list.forEach(([id,job])=>{this.cb.delete(id);clearTimeout(job.timer);job.res(v)})},
+  fail(){this.ok=false;this.pool.forEach(s=>{try{s.w.terminate()}catch(e){}});this.pool=[];this.settle([...this.cb.entries()],{fallback:true})},
+  kill(s){try{s.w.terminate()}catch(e){}this.pool=this.pool.filter(p=>p!==s);this.settle([...this.cb.entries()].filter(([,j])=>j.s===s),{fallback:true})},
+  parse(buf){return this.run('parse',buf)},
+  hash(buf){return this.run('hash',buf)},
+  run(kind,buf){
+    return new Promise(res=>{
+      if(this.ok===false){res({fallback:true});return}
+      let s=this.pool.find(p=>!p.busy);if(!s&&(!this.pool.length||(this.pool.length<2&&buf.byteLength<8e6)))s=this.spawn();if(!s&&this.pool.length)s=this.pool.reduce((a,b)=>a.busy<=b.busy?a:b);   // a 2nd worker only for smaller files (memory)
+      if(!s||this.ok===false){res({fallback:true});return}
+      const id=++this.seq;
+      const job={res,s,timer:setTimeout(()=>{if(!this.cb.has(id))return;this.cb.delete(id);this.kill(s);res({ok:false,err:'TIMEOUT'})},Math.max(20000,buf.byteLength/250))};
+      this.cb.set(id,job);s.busy++;
+      try{const copy=buf.slice(0);s.w.postMessage({id,buf:copy,hash:kind==='hash'},[copy])}catch(e){clearTimeout(job.timer);this.cb.delete(id);s.busy--;res({fallback:true});return}
+      if(this.ok!==true)setTimeout(()=>{if(this.ok!==true&&this.cb.has(id))this.fail()},4000);
+    });
+  }
+};
+
+/* ---------- drawing data on the page: lazy stroke paths ---------- */
+function makeD(R,meta){
+  const batches=R.batches.map((b,j)=>({st:b.st,L:b.L,bb:b.bb,idx:R.bItems.subarray(R.bStart[j],R.bStart[j+1]),path:null,empty:false}));
+  const vis=new Uint8Array(R.layers.length);R.layers.forEach((l,i)=>vis[i]=l.visible?1:0);
+  const d=Object.assign({},meta,R,{batches,vis,hid:new Uint8Array(R.np),layers:R.layers.map(l=>({name:l.name,count:l.count}))});
+  d.heavy=(d.np+d.texts.length)>40000;
+  return d;
 }
+function batchPath(d,b){
+  const P=d.P,pts=d.pts,hid=d.hid,idx=b.idx,off=P.off,cnt=P.n,fl=P.fl;const path=new Path2D();let any=false;
+  for(let q=0;q<idx.length;q++){const i=idx[q];if(hid[i])continue;any=true;const o=off[i]*2,n=cnt[i];path.moveTo(pts[o],pts[o+1]);for(let j=1;j<n;j++)path.lineTo(pts[o+2*j],pts[o+2*j+1]);if(fl[i]&1)path.closePath()}
+  b.path=path;b.empty=!any;return path;
+}
+function dirtyPrim(d,i){const b=d.batches[d.bOf[i]];if(b){b.path=null;b.empty=false}}
+// find a bucket by key (binary search) → slot index or -1
+function bfind(c,k){const K=c.keys;let lo=0,hi=K.length-1;while(lo<=hi){const m=(lo+hi)>>1,v=K[m];if(v<k)lo=m+1;else if(v>k)hi=m-1;else return m}return-1}
 /* =========================================================
    sample drawing (fictional), written as real SFC text
    ========================================================= */
@@ -817,7 +941,9 @@ function fitView(rect,animate){
   const cx=(r[0]+r[2])/2,cy=(r[1]+r[3])/2-(H/2-RC.y)/z;
   if(!rect)fitZ=z;
   if(animate)flyTo({cx,cy,z});else{V.cx=cx;V.cy=cy;V.z=z;viewChanged()}
+  fitV=!rect&&!animate?{d:D,cx,cy,z}:null;
 }
+let fitV=null;   // the whole-drawing view, while the viewer has not moved away from it
 
 /* =========================================================
    rendering
@@ -827,26 +953,27 @@ function renderScene(ctx,Wc,Hc,pr,v,opt){rDeadline=Infinity;const g=renderGen(ct
 function* renderGen(ctx,Wc,Hc,pr,v,opt){
   const T=THEME[settings.theme];
   ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=T.bg;ctx.fillRect(0,0,Wc*pr,Hc*pr);
-  if(!D)return;
+  const d=D;if(!d)return;
   const z=v.z,k=pr*z,tx=pr*(Wc/2-v.cx*z),ty=pr*(Hc/2+v.cy*z);
   const vx0=v.cx-Wc/2/z,vx1=v.cx+Wc/2/z,vy0=v.cy-Hc/2/z,vy1=v.cy+Hc/2/z;
   const hit=b=>!(b[2]<vx0||b[0]>vx1||b[3]<vy0||b[1]>vy1);
-  const vis=D.vis;
+  const vis=d.vis;
   ctx.setTransform(k,0,0,-k,tx,ty);
-  if(D.sheet.w>0){
-    if(settings.theme==='light'){ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(1.2/z*2,-1.2/z*2,D.sheet.w,D.sheet.h)}
-    ctx.fillStyle=T.paper;ctx.fillRect(0,0,D.sheet.w,D.sheet.h);ctx.lineWidth=1/z;ctx.strokeStyle=T.edge;ctx.strokeRect(0,0,D.sheet.w,D.sheet.h);
+  if(d.sheet.w>0){
+    if(settings.theme==='light'){ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(1.2/z*2,-1.2/z*2,d.sheet.w,d.sheet.h)}
+    ctx.fillStyle=T.paper;ctx.fillRect(0,0,d.sheet.w,d.sheet.h);ctx.lineWidth=1/z;ctx.strokeStyle=T.edge;ctx.strokeRect(0,0,d.sheet.w,d.sheet.h);
   }
-  for(const f of D.fills){
+  for(const f of d.fills){
     if(!vis[f.L]||!hit(f.bb))continue;
     if(!f.path){const p=new Path2D();for(const r of f.rings){p.moveTo(r[0],r[1]);for(let i=2;i<r.length;i+=2)p.lineTo(r[i],r[i+1]);p.closePath()}f.path=p}
     ctx.fillStyle=themeColor(f.rgb);ctx.globalAlpha=.55;ctx.fill(f.path,'evenodd');ctx.globalAlpha=1;
   }
   const minPx=Math.max(.6,1.15/pr);
   const EMPTY=[];let dashOn=false;
-  for(const b of D.batches){
+  for(const b of d.batches){
     if(!vis[b.L]||b.empty||!hit(b.bb))continue;
-    const s=D.styles[b.st];
+    if(!b.path){batchPath(d,b);if(b.empty)continue}
+    const s=d.styles[b.st];
     ctx.setTransform(k,0,0,-k,tx,ty);ctx.strokeStyle=themeColor(s.rgb);
     const px=settings.weight?clamp(s.w*z*.8,minPx,4.5):minPx;ctx.lineWidth=px/z;
     if(s.dash&&s.per*z>5){ctx.setLineDash(s.dash);ctx.lineCap='round';ctx.lineJoin='round';dashOn=true}else{if(dashOn){ctx.setLineDash(EMPTY);dashOn=false}ctx.lineCap='butt';ctx.lineJoin='miter'}
@@ -856,24 +983,24 @@ function* renderGen(ctx,Wc,Hc,pr,v,opt){
   if(dashOn)ctx.setLineDash(EMPTY);
   // arrows + markers in screen space
   ctx.setTransform(pr,0,0,pr,0,0);ctx.lineWidth=1.1;ctx.lineCap='round';
-  for(const a of D.arrows){
+  for(const a of d.arrows){
     if(!vis[a.L])continue;const sx=Wc/2+(a.x-v.cx)*z,sy=Hc/2-(a.y-v.cy)*z;if(sx<-20||sx>Wc+20||sy<-20||sy>Hc+20)continue;
     const L=clamp(a.sz*z,3,14);const ux=a.ux,uy=-a.uy,nx=-uy,ny=ux;
     ctx.strokeStyle=themeColor(a.rgb);ctx.beginPath();ctx.moveTo(sx-ux*L+nx*L*.33,sy-uy*L+ny*L*.33);ctx.lineTo(sx,sy);ctx.lineTo(sx-ux*L-nx*L*.33,sy-uy*L-ny*L*.33);ctx.stroke();
   }
-  for(const m of D.marks){
+  for(const m of d.marks){
     if(!vis[m.L])continue;const sx=Wc/2+(m.x-v.cx)*z,sy=Hc/2-(m.y-v.cy)*z;if(sx<-10||sx>Wc+10||sy<-10||sy>Hc+10)continue;
     ctx.strokeStyle=themeColor(m.rgb);ctx.beginPath();
     if(m.code===4||m.code<0){ctx.arc(sx,sy,3.5,0,Math.PI*2)}else if(m.code===3){ctx.moveTo(sx-3,sy-3);ctx.lineTo(sx+3,sy+3);ctx.moveTo(sx+3,sy-3);ctx.lineTo(sx-3,sy+3)}else{ctx.moveTo(sx-3.5,sy);ctx.lineTo(sx+3.5,sy);ctx.moveTo(sx,sy-3.5);ctx.lineTo(sx,sy+3.5)}
     ctx.stroke();
   }
-  if(settings.text&&!(opt&&opt.noText))yield* drawTexts(ctx,Wc,Hc,pr,v);
+  if(settings.text&&!(opt&&opt.noText))yield* drawTexts(ctx,Wc,Hc,pr,v,d);
   ctx.setTransform(1,0,0,1,0,0);
 }
 const ALIGN=['left','center','right'],BASE=['ideographic','middle','top'];
-function* drawTexts(ctx,Wc,Hc,pr,v){
-  const z=v.z,vis=D.vis;let cur='',full=0,cnt=0;const greek=new Map();
-  for(const t of D.texts){
+function* drawTexts(ctx,Wc,Hc,pr,v,d){
+  const z=v.z,vis=d.vis;let cur='',full=0,cnt=0;const greek=new Map();
+  for(const t of d.texts){
     if((++cnt&255)===0&&now()>rDeadline){ctx.setTransform(1,0,0,1,0,0);yield;cur=''}
     if(!vis[t.L])continue;const hp=t.h*z;if(hp<1.1)continue;
     const sx=Wc/2+(t.x-v.cx)*z,sy=Hc/2-(t.y-v.cy)*z,rp=t.r*z;if(sx+rp<0||sx-rp>Wc||sy+rp<0||sy-rp>Hc)continue;
@@ -1052,7 +1179,7 @@ function frame(){
     mctx.setTransform(k,0,0,k,ox*dpr,oy*dpr);mctx.drawImage(base,0,0);mctx.setTransform(1,0,0,1,0,0);
   }else mctx.drawImage(base,0,0);
   drawNotes(mctx,W,H,dpr,V,false);drawLive(mctx);
-  if(busy||needBase)requestFrame();
+  if(busy||needBase||costProbe)requestFrame();
 }
 function invalidateAll(){needBase=true;job=null;snapView=null;requestFrame()}
 function viewChanged(){needBase=true;if(aiming())updateSnap();requestFrame();chipSoon()}
@@ -1075,7 +1202,8 @@ function snapAt(sx,sy,rpx){
   const ncell=(cx1-cx0+1)*(cy1-cy0+1);if(ncell>5000)return null;
   const vis=D.vis,SX=D.snap.x,SY=D.snap.y,SK=D.snap.k,SL=D.snap.L,SR=D.snap.rx,SPI=D.snap.p,HID=D.hid;let best=null,bs=Infinity;
   const ck=(cx,cy)=>(clamp(cx,-30000,30000)+32768)*65536+(clamp(cy,-30000,30000)+32768);
-  for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const arr=g.pts.get(ck(cx,cy));if(!arr)continue;for(let j=0;j<arr.length;j++){const i=arr[j];if(!vis[SL[i]]||(SPI[i]>=0&&HID[SPI[i]]))continue;const d=Math.hypot(SX[i]-x,SY[i]-y);if(d>r)continue;const s=d*z+KBIAS[SK[i]];if(s<bs){bs=s;best={x:SX[i],y:SY[i],kind:SK[i],rx:SR[i]}}}}
+  const GP=g.pts,GS=GP.start,GI=GP.items;
+  for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const q=bfind(GP,ck(cx,cy));if(q<0)continue;for(let j=GS[q],e=GS[q+1];j<e;j++){const i=GI[j];if(!vis[SL[i]]||(SPI[i]>=0&&HID[SPI[i]]))continue;const d=Math.hypot(SX[i]-x,SY[i]-y);if(d>r)continue;const s=d*z+KBIAS[SK[i]];if(s<bs){bs=s;best={x:SX[i],y:SY[i],kind:SK[i],rx:SR[i]}}}}
   // points of what the viewer has drawn (lines, circles, tapes, areas)
   const tryPt=(px,py,k,rxv)=>{const d=Math.hypot(px-x,py-y);if(d>r)return;const s=d*z+KBIAS[k];if(s<bs){bs=s;best={x:px,y:py,kind:k,rx:rxv}}};
   for(const n of S.notes){
@@ -1104,8 +1232,8 @@ function collectSegs(x,y,r){
   const near=(ax,ay,bx,by)=>{const vx=bx-ax,vy=by-ay,ll=vx*vx+vy*vy;let t=ll?((x-ax)*vx+(y-ay)*vy)/ll:0;t=clamp(t,0,1);const px=ax+vx*t,py=ay+vy*t;return[px,py,Math.hypot(px-x,py-y)]};
   if(g.segs){
     const cx0=Math.floor((x-r-g.gx0)/g.cs)-1,cx1=Math.floor((x+r-g.gx0)/g.cs)+1,cy0=Math.floor((y-r-g.gy0)/g.cs)-1,cy1=Math.floor((y+r-g.gy0)/g.cs)+1;
-    if((cx1-cx0+1)*(cy1-cy0+1)<=1200){const seen=new Set();
-      for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const arr=g.segs.get(ck(cx,cy));if(!arr)continue;for(let j=0;j<arr.length;j++){const id=arr[j];if(seen.has(id))continue;seen.add(id);const p=g.segP[id];if(!vis[P.L[p]]||D.hid[p])continue;const a=g.segA[id],b=g.segB[id];const ax=pts[2*a],ay=pts[2*a+1],bx=pts[2*b],by=pts[2*b+1];const q=near(ax,ay,bx,by);if(q[2]<=r)out.push({d:q[2],px:q[0],py:q[1],p,a,ax,ay,bx,by,rx:P.rx[p]})}}}
+    if((cx1-cx0+1)*(cy1-cy0+1)<=1200){const seen=new Set();const GS=g.segs,SS=GS.start,SI=GS.items;
+      for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const q=bfind(GS,ck(cx,cy));if(q<0)continue;for(let j=SS[q],e=SS[q+1];j<e;j++){const id=SI[j];if(seen.has(id))continue;seen.add(id);const p=g.segP[id];if(!vis[P.L[p]]||D.hid[p])continue;const a=g.segA[id],b=g.segB[id];const ax=pts[2*a],ay=pts[2*a+1],bx=pts[2*b],by=pts[2*b+1];const q=near(ax,ay,bx,by);if(q[2]<=r)out.push({d:q[2],px:q[0],py:q[1],p,a,ax,ay,bx,by,rx:P.rx[p]})}}}
   }
   S.notes.forEach((n,i)=>{if(n.t!=='line')return;const q=near(n.a[0],n.a[1],n.b[0],n.b[1]);if(q[2]<=r)out.push({d:q[2],px:q[0],py:q[1],p:-(i+2),a:-(i+2)*10,ax:n.a[0],ay:n.a[1],bx:n.b[0],by:n.b[1],rx:n.rx!=null?n.rx:-1})});
   return out;
@@ -1120,7 +1248,7 @@ function draftTarget(){
   return p;
 }
 function primAt(sx,sy,rpx){const q=toSheet(sx,sy);const c=collectSegs(q[0],q[1],rpx/V.z).filter(u=>u.p>=0);if(!c.length)return-1;c.sort((u,w)=>u.d-w.d);return c[0].p}
-function setHidden(i,on){D.hid[i]=on?1:0;buildPaths(D.batches,D.P,D.pts,D.hid);invalidateAll();if(aiming())updateSnap()}
+function setHidden(i,on){D.hid[i]=on?1:0;dirtyPrim(D,i);invalidateAll();if(aiming())updateSnap()}
 function hiddenCount(){let n=0;for(let i=0;i<D.hid.length;i++)n+=D.hid[i];return n}
 // keep a straight line exactly horizontal/vertical when it is drawn within 3 degrees of it
 function orthoFix(a,p){if(!a||S.draftMode!=='line'||(p.kind&&p.kind!==6))return p;const dx=p.x-a.x,dy=p.y-a.y,t=Math.tan(3*D2R);if(Math.abs(dy)<=Math.abs(dx)*t){p.y=a.y;p.ortho='水平'}else if(Math.abs(dx)<=Math.abs(dy)*t){p.x=a.x;p.ortho='垂直'}return p}
@@ -1261,7 +1389,7 @@ function toolHint(){
    ========================================================= */
 function pushUndo(u){S.undo.push(u);if(S.undo.length>60)S.undo.shift();updateUndo()}
 function updateUndo(){$('#undoBtn').hidden=!S.undo.length}
-function notesChanged(){requestFrame();scheduleSave();if(!$('#menuSheet').hidden&&menuTab==='notes')renderMenu()}
+function notesChanged(){requestFrame();scheduleSave();renderTabs();if(!$('#menuSheet').hidden&&menuTab==='notes')renderMenu()}
 function addNote(n){n._pop=now();S.notes.push(n);pushUndo({op:'add',id:n.id});notesChanged()}
 function deleteNote(id){const i=S.notes.findIndex(n=>n.id===id);if(i<0)return;const[n]=S.notes.splice(i,1);pushUndo({op:'del',note:n,index:i});if(S.sel===id)select(null);notesChanged()}
 function editNote(id,patch){const n=S.notes.find(x=>x.id===id);if(!n)return;pushUndo({op:'edit',id,before:JSON.parse(JSON.stringify(n))});Object.assign(n,patch);notesChanged()}
@@ -1272,11 +1400,11 @@ function undo(){
   else if(u.op==='edit'){const i=S.notes.findIndex(n=>n.id===u.id);if(i>=0)S.notes[i]=u.before}
   else if(u.op==='clear'){S.notes=u.notes}
   else if(u.op==='hide'){setHidden(u.i,false)}
-  else if(u.op==='unhideAll'){u.list.forEach(i=>D.hid[i]=1);buildPaths(D.batches,D.P,D.pts,D.hid);invalidateAll()}
+  else if(u.op==='unhideAll'){u.list.forEach(i=>{D.hid[i]=1;dirtyPrim(D,i)});invalidateAll()}
   if(S.sel)select(S.notes.find(n=>n.id===S.sel)||null);
   sfx('undo');toast('元に戻しました');notesChanged();
 }
-function cleanNotes(){return S.notes.map(n=>{const o={};for(const k in n)if(k[0]!=='_')o[k]=n[k];return o})}
+function cleanNotes(arr){return(arr||S.notes).map(n=>{const o={};for(const k in n)if(k[0]!=='_')o[k]=n[k];return o})}
 
 /* ---------- storage: account (db) → this browser (localStorage) ---------- */
 const capCache={};
@@ -1308,83 +1436,342 @@ const Store={
     return list.slice(0,10);
   }
 };
-let saveTimer=0,saving=false,saveAgain=false,saveState='idle';
+/* ---------- saving: one queued write per drawing, so switching tabs never drops an edit ---------- */
+let saveTimer=0,saveBusy=false;const saveQ=new Map();
 function scheduleSave(){if(!D||D.noSave)return;clearTimeout(saveTimer);saveTimer=setTimeout(flushSave,650)}
-async function flushSave(){
-  if(!D)return;if(saving){saveAgain=true;return}saving=true;
-  const body={kind:'drawing',name:D.name,hash:D.hash,size:D.size,updatedAt:Date.now(),manual:S.manual||0,notes:cleanNotes(),hidden:D.hid?Array.from(D.hid.reduce((a,v,i)=>(v&&a.push(i),a),[])):[]};
-  try{
-    const bytes=new TextEncoder().encode(JSON.stringify(body)).length;
-    if(bytes>250000){toast('書き込みが多すぎて保存できません。古い手書きを消してください',3500);saveState='error'}
-    else{await Store.save(D.hash,body);saveState='saved'}
-  }catch(e){saveState='error';if(Store.mode==='none')toast('この画面ではメモを保存できません。画像やテキストで書き出してください',3500)}
-  saving=false;if(saveAgain){saveAgain=false;flushSave()}
+function flushSave(){
+  clearTimeout(saveTimer);saveTimer=0;if(!D||D.noSave)return;
+  const hidden=[];for(let i=0;i<D.hid.length;i++)if(D.hid[i])hidden.push(i);
+  saveQ.set(D.hash,{kind:'drawing',name:D.name,hash:D.hash,size:D.size,updatedAt:Date.now(),manual:S.manual||0,notes:cleanNotes(S.notes),hidden});
+  pumpSave();
 }
+async function pumpSave(){
+  if(saveBusy)return;saveBusy=true;
+  while(saveQ.size){
+    const[hash,body]=saveQ.entries().next().value;saveQ.delete(hash);
+    try{
+      const bytes=new TextEncoder().encode(JSON.stringify(body)).length;
+      if(bytes>250000)toast('書き込みが多すぎて保存できません。古い手書きを消してください',3500);
+      else await Store.save(hash,body);
+    }catch(e){if(Store.mode==='none')toast('この画面ではメモを保存できません。画像やテキストで書き出してください',3500)}
+  }
+  saveBusy=false;
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&saveTimer)flushSave()});
+window.addEventListener('pagehide',()=>{if(saveTimer)flushSave()});
 
-/* ---------- local file cache (per-device convenience) ---------- */
+/* ---------- local file cache (per-device convenience): files + a small index ---------- */
 const Cache={
-  db:null,
-  open(){if(this.db)return this.db;this.db=new Promise(res=>{let done=false;const fin=v=>{if(!done){done=true;res(v)}};setTimeout(()=>fin(null),1500);try{const r=indexedDB.open('zumen-scope',1);r.onupgradeneeded=()=>{r.result.createObjectStore('files',{keyPath:'hash'})};r.onsuccess=()=>fin(r.result);r.onerror=()=>fin(null);r.onblocked=()=>fin(null)}catch(e){fin(null)}});return this.db},
-  async tx(mode,fn){const db=await this.open();if(!db)return null;return new Promise(res=>{try{const t=db.transaction('files',mode);const st=t.objectStore('files');const out=fn(st);t.oncomplete=()=>res(out&&out.result!==undefined?out.result:true);t.onerror=()=>res(null);t.onabort=()=>res(null)}catch(e){res(null)}})},
-  async put(hash,name,buf){await this.tx('readwrite',st=>st.put({hash,name,buf,at:Date.now()}));const all=await this.tx('readonly',st=>st.getAll());if(Array.isArray(all)&&all.length>5){all.sort((a,b)=>b.at-a.at);for(const r of all.slice(5))await this.tx('readwrite',st=>st.delete(r.hash))}},
-  async get(hash){const r=await this.tx('readonly',st=>st.get(hash));return r&&r.buf?r:null},
-  async touch(hash){const r=await this.get(hash);if(r){r.at=Date.now();await this.tx('readwrite',st=>st.put(r))}},
-  async last(){const all=await this.tx('readonly',st=>st.getAll());if(!Array.isArray(all)||!all.length)return null;all.sort((a,b)=>b.at-a.at);return all[0]},
-  async has(){const all=await this.tx('readonly',st=>st.getAllKeys());return new Set(Array.isArray(all)?all:[])}
+  db:null,MAXN:30,MAXB:300e6,
+  open(){
+    if(this.db)return this.db;
+    this.db=new Promise(res=>{
+      let done=false;const fin=v=>{if(!done){done=true;res(v)}else if(v){try{v.close()}catch(e){}}};setTimeout(()=>fin(null),2500);
+      try{
+        const r=indexedDB.open('zumen-scope',2);
+        r.onupgradeneeded=e=>{try{
+          const db=r.result,tx=r.transaction;const files=db.objectStoreNames.contains('files')?tx.objectStore('files'):db.createObjectStore('files',{keyPath:'hash'});
+          if(!db.objectStoreNames.contains('meta')){const meta=db.createObjectStore('meta',{keyPath:'hash'});
+            if(e.oldVersion>=1){const c=files.openCursor();c.onsuccess=()=>{const k=c.result;if(!k)return;const v=k.value||{};if(v.hash)meta.put({hash:v.hash,name:v.name||'',size:v.buf?v.buf.byteLength:0,at:v.at||0});k.continue()}}}
+        }catch(err){}};
+        r.onsuccess=()=>{const db=r.result;db.onversionchange=()=>{try{db.close()}catch(e){}};fin(db)};r.onerror=()=>fin(null);r.onblocked=()=>fin(null);
+      }catch(e){fin(null)}
+    });
+    return this.db;
+  },
+  async req(stores,mode,fn){const db=await this.open();if(!db)return null;return new Promise(res=>{try{const t=db.transaction(stores,mode);const out=fn(t);t.oncomplete=()=>res(out&&out.result!==undefined?out.result:true);t.onerror=()=>res(null);t.onabort=()=>res(null)}catch(e){res(null)}})},
+  async put(hash,name,buf){
+    const at=Date.now();
+    const ok=await this.req(['files','meta'],'readwrite',t=>{t.objectStore('files').put({hash,name,buf,at});t.objectStore('meta').put({hash,name,size:buf.byteLength,at})});
+    if(!ok)return false;
+    const all=await this.req(['meta'],'readonly',t=>t.objectStore('meta').getAll());
+    if(Array.isArray(all)){
+      all.sort((a,b)=>(b.at||0)-(a.at||0));const keep=new Set(DOCS.map(x=>x.hash));let n=0,bytes=0;const drop=[];
+      for(const r of all){n++;bytes+=r.size||0;if(keep.has(r.hash)||r.hash===hash)continue;if(n>this.MAXN||bytes>this.MAXB)drop.push(r.hash)}
+      if(drop.length)await this.req(['files','meta'],'readwrite',t=>{const f=t.objectStore('files'),m=t.objectStore('meta');drop.forEach(h=>{f.delete(h);m.delete(h)})});
+    }
+    return true;
+  },
+  async get(hash){const r=await this.req(['files'],'readonly',t=>t.objectStore('files').get(hash));return r&&r.buf?r:null},
+  async touch(hash){const r=await this.req(['meta'],'readonly',t=>t.objectStore('meta').get(hash));if(r&&r.hash){r.at=Date.now();await this.req(['meta'],'readwrite',t=>t.objectStore('meta').put(r))}},
+  async last(){const all=await this.req(['meta'],'readonly',t=>t.objectStore('meta').getAll());if(!Array.isArray(all)||!all.length)return null;all.sort((a,b)=>(b.at||0)-(a.at||0));return this.get(all[0].hash)},
+  async has(){const k=await this.req(['meta'],'readonly',t=>t.objectStore('meta').getAllKeys());return Array.isArray(k)?new Set(k):null},
+  async list(){const all=await this.req(['meta'],'readonly',t=>t.objectStore('meta').getAll());return Array.isArray(all)?all:[]}
 };
 async function hashBytes(buf){
+  if(buf.byteLength>=4e6&&PW.ok!==false){const m=await PW.hash(buf);if(m&&m.ok&&m.hash)return m.hash}   // big files: hash off the main thread
   try{if(crypto&&crypto.subtle){const h=await crypto.subtle.digest('SHA-256',buf);return Array.from(new Uint8Array(h)).slice(0,12).map(b=>b.toString(16).padStart(2,'0')).join('')}}catch(e){}
   let h1=0x811c9dc5,h2=0x9747b28c;const u=new Uint8Array(buf);for(let i=0;i<u.length;i++){h1^=u[i];h1=Math.imul(h1,16777619);h2^=u[i];h2=Math.imul(h2,2246822519)}
   return(h1>>>0).toString(16).padStart(8,'0')+(h2>>>0).toString(16).padStart(8,'0')+u.length.toString(16);
 }
 
 /* =========================================================
-   loading drawings
+   open drawings: one tab per file. Parsed drawings stay in memory
+   (within a budget) so switching tabs is instant.
    ========================================================= */
-async function openBuffer(buf,name,opt={}){
-  showLoading(name);await nextFrame();await nextFrame();
-  try{
-    const t0=now();const text=decodeBytes(buf);const feats=parseSFC(text);const M=buildModel(feats);const G=flatten(M);
-    if(!G.np&&!G.texts.length)throw new Error('EMPTY');
-    const hash=opt.hash||await hashBytes(buf);
-    const d=finalize(G,M,{name,size:buf.byteLength,hash,sample:!!opt.sample});d.parseMs=now()-t0;d.heavy=(d.np+d.texts.length)>40000;
-    D=d;S.notes=[];S.undo=[];S.sel=null;S.mA=null;S.areaPts=[];S.snap=null;S.manual=0;updateUndo();select(null);
-    colCache.clear();
-    if(!opt.keepTheme&&D.bg&&!LS.get('themeChosen',false)){settings.theme=(.2126*D.bg[0]+.7152*D.bg[1]+.0722*D.bg[2])>128?'light':'dark'}
-    renderTitle();fitView();hideLoading();lastBaseMs=0;invalidateAll();
-    if(!opt.sample)Cache.put(hash,name,buf);
-    const saved=await Store.load(hash);
-    if(D&&D.hash===hash){
-      if(saved&&Array.isArray(saved.notes)){S.notes=saved.notes;S.manual=saved.manual||0;if(Array.isArray(saved.hidden)&&saved.hidden.length){saved.hidden.forEach(i=>{if(i>=0&&i<D.hid.length)D.hid[i]=1});buildPaths(D.batches,D.P,D.pts,D.hid);invalidateAll()}}
-      else if(opt.sample){S.notes=exampleNotes()}
-      renderChip();requestFrame();
-    }
-    toolHint();readoutSoon();
-    return true;
-  }catch(err){
-    hideLoading();const c=String(err&&err.message);
-    if(c==='P21')dialog('P21形式のファイルです','このアプリはSXFのSFC形式（.sfc）に対応しています。\nCADでSFC形式に書き出してから開いてください。');
-    else if(c==='NOTSFC')dialog('SFCファイルではないようです','拡張子が .sfc のSXF図面ファイルを選んでください。');
-    else if(c==='EMPTY')dialog('表示できる要素がありません','ファイルは読み込めましたが、図形や文字が見つかりませんでした。');
-    else{dialog('読み込めませんでした','ファイルが壊れているか、未対応の書き方が含まれています。\n（'+c+'）')}
-    return false;
+const DOCS=[];let CUR=null;
+const PARSE_BUDGET=650000,MAX_PARSED=10,SNAP_KEEP=3;
+function newDoc(o){return{id:uid(),name:o.name||'図面',hash:o.hash,size:o.size||0,sample:!!o.sample,buf:o.buf||null,cached:o.cached,D:null,job:null,err:null,notes:[],undo:[],manual:0,view:null,hidden:null,vis:null,loaded:false,loadP:null,used:0,snap:null,shown:false,title:''}}
+function estCost(x){const d=x.D;return d?d.np+d.texts.length*2+(d.pts.length>>3):Math.max(500,(x.size||0)/80)}
+function ensureParsed(doc){
+  if(doc.D)return Promise.resolve(true);
+  if(doc.err)return Promise.resolve(false);
+  if(!doc.job){
+    doc.job=(async()=>{
+      await null;
+      try{
+        let buf=doc.buf;
+        if(!buf){const f=await Cache.get(doc.hash);if(f&&f.buf){buf=f.buf;if(!doc.size)doc.size=buf.byteLength}}
+        if(!buf){doc.err='NOFILE';return false}
+        doc.buf=buf;
+        let m=buf.byteLength<65536?{fallback:true}:await PW.parse(buf);
+        if(m.fallback){if(buf.byteLength>=65536){if(CUR===doc)showLoading(doc.name);await nextFrame();await nextFrame()}try{m={ok:true,R:Parser.run(buf)}}catch(e){m={ok:false,err:String(e&&e.message||e)}}}
+        if(!m.ok){doc.err=m.err||'ERR';return false}
+        if(DOCS.indexOf(doc)<0)return false;
+        attach(doc,m.R);return true;
+      }finally{doc.job=null;renderTabs()}
+    })();
+    renderTabs();
   }
+  return doc.job;
+}
+function attach(doc,R){
+  const d=makeD(R,{name:doc.name,size:doc.size,hash:doc.hash,sample:doc.sample});
+  if(doc.vis&&doc.vis.length===d.vis.length)d.vis.set(doc.vis);
+  if(doc.hidden){for(const i of doc.hidden)if(i>=0&&i<d.np)d.hid[i]=1;doc.hidden=null}
+  doc.D=d;doc.title=((d.info&&d.info.drawing)||d.sheet.name||'').trim();
+  if(doc.cached===true&&doc.buf&&doc.buf.byteLength>2e6)doc.buf=null;   // big files are re-read from this device's copy if ever needed again
+  if(!doc.used)doc.used=1;
+  trimParsed();
+}
+// keep the most recently viewed drawings parsed; the rest keep only their notes and re-parse on demand
+function trimParsed(){
+  const list=DOCS.filter(x=>x.D&&x!==CUR).sort((a,b)=>b.used-a.used);
+  let tot=CUR&&CUR.D?estCost(CUR):0,n=CUR&&CUR.D?1:0;
+  for(const x of list){const c=estCost(x);if(n<MAX_PARSED&&tot+c<=PARSE_BUDGET){tot+=c;n++}else unparse(x)}
+}
+function unparse(x){
+  const d=x.D;if(!d)return;x.vis=d.vis.slice();const h=[];for(let i=0;i<d.hid.length;i++)if(d.hid[i])h.push(i);x.hidden=h;x.D=null;x.snap=null;
+  if(x.cached&&x.buf&&x.buf.byteLength>2e6)x.buf=null;
+}
+// parse the other tabs in the background, one at a time
+let preT=0,preRun=0;
+function schedulePreload(ms){clearTimeout(preT);preT=setTimeout(preload,ms==null?450:ms)}
+let lastInput=0;['pointerdown','pointermove','wheel','keydown'].forEach(t=>window.addEventListener(t,()=>{lastInput=now()},{capture:true,passive:true}));
+async function preload(){
+  const token=++preRun;
+  while(token===preRun){
+    if(!CUR||!CUR.D){schedulePreload(800);return}
+    const noWorker=PW.ok===false;   // without a worker only small files are read ahead, and only while the screen is idle
+    const i0=Math.max(0,DOCS.indexOf(CUR));const order=DOCS.slice(i0+1).concat(DOCS.slice(0,i0));
+    let tot=0,n=0;for(const x of DOCS)if(x.D){tot+=estCost(x);n++}
+    const next=order.find(x=>!x.D&&!x.err&&!x.job&&(!noWorker||(x.size||0)<1.5e6));
+    if(!next||n>=MAX_PARSED||tot+estCost(next)>PARSE_BUDGET*.85)return;
+    if(noWorker&&(interacting()||needBase||now()-lastInput<1200)){schedulePreload(700);return}
+    await ensureParsed(next);
+    if(next.D&&!next.loaded)loadNotes(next);
+    await new Promise(r=>setTimeout(r,150));
+  }
+}
+let spare=null;
+function freshBase(){const c=spare&&spare.width===cv.width&&spare.height===cv.height?spare:document.createElement('canvas');spare=null;c.width=cv.width;c.height=cv.height;return c}
+function trimSnaps(){DOCS.filter(x=>x.snap).sort((a,b)=>b.used-a.used).slice(SNAP_KEEP).forEach(x=>x.snap=null)}
+function clearSnaps(){DOCS.forEach(x=>x.snap=null)}
+// park the current drawing's state (notes, undo, view, last rendered image) on its tab
+function stash(){
+  const c=CUR;if(!c)return;
+  if(saveTimer)flushSave();
+  c.notes=S.notes;c.undo=S.undo;c.manual=S.manual;
+  if(D&&c.D===D){
+    c.view={cx:V.cx,cy:V.cy,z:V.z,fitZ};
+    if(snapView&&lastBaseMs>=26){const fresh=!needBase&&!job&&snapView.cx===V.cx&&snapView.cy===V.cy&&snapView.z===V.z;c.snap={canvas:base,view:snapView,fresh,theme:settings.theme,w:base.width,h:base.height,ms:lastBaseMs};base=freshBase();bctx=base.getContext('2d');trimSnaps()}
+    else c.snap=null;
+  }
+}
+function resetTransient(){S.mA=null;S.areaPts=[];S.snap=null;S.dA=null;S.dBase=null;lastSnapKey='';effects.length=0;fly.on=false;inertia.on=false;updateAreaBar();select(null)}
+let actSeq=0;
+async function activate(doc,opt={}){
+  if(!doc||DOCS.indexOf(doc)<0)return false;
+  if(CUR===doc&&doc.D&&D===doc.D){hideLoading();return true}
+  const seq=++actSeq;
+  stash();
+  CUR=doc;doc.used=now();saveTabs();renderTabs();
+  if(!doc.D){
+    D=null;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;resetTransient();updateUndo();renderTitle();invalidateAll();
+    const lt=setTimeout(()=>{if(CUR===doc&&!doc.D)showLoading(doc.name)},140);
+    const ok=await ensureParsed(doc);clearTimeout(lt);
+    if(seq!==actSeq)return ok;
+    hideLoading();
+    if(!ok){
+      const[t,b]=errText(doc.err);if(!opt.quiet)dialog(t,(DOCS.length>1?doc.name+'\n':'')+b);
+      closeDoc(doc,{auto:!opt.noFallback,quiet:opt.quiet});return false;
+    }
+  }
+  show(doc);return true;
+}
+function show(doc){
+  D=doc.D;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;resetTransient();updateUndo();hideLoading();
+  if(!doc.shown){doc.shown=true;if(D.bg&&!LS.get('themeChosen',false)){const th=(.2126*D.bg[0]+.7152*D.bg[1]+.0722*D.bg[2])>128?'light':'dark';if(th!==settings.theme){settings.theme=th;colCache.clear();clearSnaps()}}}
+  renderTitle();
+  if(doc.view){V.cx=doc.view.cx;V.cy=doc.view.cy;V.z=doc.view.z;fitZ=doc.view.fitZ}else fitView();
+  // a heavy drawing comes back from its last rendered image; it is redrawn only if that image is out of date
+  const sn=doc.snap;doc.snap=null;
+  if(sn&&sn.w===cv.width&&sn.h===cv.height&&sn.theme===settings.theme){spare=base;base=sn.canvas;bctx=base.getContext('2d');job=null;snapView=sn.view;lastBaseMs=sn.ms;needBase=!sn.fresh}
+  else{lastBaseMs=0;invalidateAll()}
+  if(aiming())updateSnap();requestFrame();toolHint();readoutSoon();renderChip();renderTabs();
+  if(!$('#menuSheet').hidden)renderMenu();
+  if(!doc.loaded)loadNotes(doc);
+  trimParsed();schedulePreload();
+}
+function loadNotes(doc){
+  if(doc.loadP)return doc.loadP;
+  doc.loadP=(async()=>{
+    let saved=null;try{saved=await Store.load(doc.hash)}catch(e){}
+    if(DOCS.indexOf(doc)<0)return;
+    const cur=CUR===doc;const have=cur?S.notes:doc.notes;let notes=have;
+    if(saved&&Array.isArray(saved.notes)){
+      const ids=new Set(have.map(n=>n.id));notes=saved.notes.filter(n=>n&&!ids.has(n.id)).concat(have);
+      if(!(cur?S.manual:doc.manual)&&saved.manual>0){doc.manual=saved.manual;if(cur)S.manual=saved.manual}
+      if(Array.isArray(saved.hidden)&&saved.hidden.length){
+        if(doc.D){const d=doc.D;saved.hidden.forEach(i=>{if(i>=0&&i<d.np&&!d.hid[i]){d.hid[i]=1;dirtyPrim(d,i)}});if(cur)invalidateAll()}
+        else doc.hidden=(doc.hidden||[]).concat(saved.hidden);
+      }
+      if(have.length&&cur)scheduleSave();
+    }else if(doc.sample&&!have.length)notes=exampleNotes();
+    doc.notes=notes;doc.loaded=true;
+    if(cur){S.notes=notes;renderChip();requestFrame();if(!$('#menuSheet').hidden&&menuTab==='notes')renderMenu()}
+    renderTabs();
+  })();
+  return doc.loadP;
+}
+function errText(c){
+  if(c==='P21')return['P21形式のファイルです','このアプリはSXFのSFC形式（.sfc）に対応しています。\nCADでSFC形式に書き出してから開いてください。'];
+  if(c==='NOTSFC')return['SFCファイルではないようです','拡張子が .sfc のSXF図面ファイルを選んでください。'];
+  if(c==='EMPTY')return['表示できる要素がありません','ファイルは読み込めましたが、図形や文字が見つかりませんでした。'];
+  if(c==='NOFILE')return['ファイルが見つかりません','この端末に図面ファイルが残っていません。もう一度ファイルを選んでください。'];
+  return['読み込めませんでした','ファイルが壊れているか、未対応の書き方が含まれています。\n（'+c+'）'];
+}
+function closeDoc(doc,o={}){
+  const i=DOCS.indexOf(doc);if(i<0)return;
+  const wasCur=doc===CUR;
+  if(wasCur){if(saveTimer)flushSave();CUR=null;D=null;S.notes=[];S.undo=[];resetTransient();updateUndo()}
+  DOCS.splice(i,1);doc.D=null;doc.snap=null;doc.buf=null;
+  saveTabs();renderTabs();
+  if(wasCur){
+    const next=DOCS[Math.min(i,DOCS.length-1)];
+    if(next&&o.auto!==false)activate(next,{quiet:o.quiet});
+    else{renderTitle();invalidateAll();if(!next)showWelcome()}
+  }
+}
+function closeAll(){
+  if(saveTimer)flushSave();DOCS.splice(0).forEach(x=>{x.D=null;x.snap=null;x.buf=null});preRun++;
+  CUR=null;D=null;S.notes=[];S.undo=[];resetTransient();updateUndo();saveTabs();renderTabs();renderTitle();invalidateAll();showWelcome();
+}
+function saveTabs(){LS.set('tabs',DOCS.filter(x=>!x.sample&&x.cached!==false).map(x=>({hash:x.hash,name:x.name,size:x.size})));LS.set('activeTab',CUR&&!CUR.sample?CUR.hash:'')}
+function addDoc(o){
+  const doc=newDoc(o);DOCS.push(doc);
+  if(!o.sample&&o.buf&&!o.cached){
+    // keep a copy on this device so the tab can come back next time; big files wait until the first drawing is up
+    const go=()=>{if(!doc.buf||DOCS.indexOf(doc)<0)return;Cache.put(doc.hash,doc.name,doc.buf).then(ok=>{doc.cached=!!ok;saveTabs();if(ok&&doc.D&&doc.buf&&doc.buf.byteLength>2e6)doc.buf=null})};
+    const later=()=>{if(DOCS.indexOf(doc)<0)return;if(doc.job||(CUR===doc&&!doc.D)||needBase||job){setTimeout(later,600);return}go()};
+    if(o.buf.byteLength>4e6)setTimeout(later,1200);else go();
+  }
+  return doc;
+}
+function dropSample(keep){const s=DOCS.find(x=>x.sample);if(s&&s!==keep)closeDoc(s,{auto:false})}
+// open one or many files picked by the viewer; the first becomes the active tab right away
+const shortErr=c=>c==='P21'?'P21形式':c==='NOTSFC'?'SFCではありません':c==='EMPTY'?'図形がありません':'読み込めません';
+async function openFiles(list){
+  list=Array.from(list||[]);if(!list.length)return false;$('#welcome').hidden=true;
+  const bad=[],added=[];let first=null,firstP=null,code='';
+  for(const f of list){
+    let buf=null;try{buf=await f.arrayBuffer()}catch(e){}
+    if(!buf){bad.push(f.name+'（読み込めません）');code='READ';continue}
+    const sn=Parser.sniff(buf);if(sn!=='ok'){bad.push(f.name+'（'+shortErr(sn)+'）');code=sn;continue}
+    const hash=await hashBytes(buf);
+    let doc=DOCS.find(x=>x.hash===hash);
+    if(!doc){doc=addDoc({name:f.name,hash,size:buf.byteLength,buf});added.push(doc)}
+    if(!first){first=doc;firstP=activate(doc,{quiet:true});dropSample(doc)}
+    renderTabs();
+  }
+  saveTabs();
+  let ok=first?await firstP:false;
+  if(first&&!ok&&first.err){bad.push(first.name+'（'+shortErr(first.err)+'）');code=first.err}
+  // the first file failed: show the next one that opened
+  if(!CUR){const nx=added.find(x=>DOCS.indexOf(x)>=0)||DOCS[0];if(nx)ok=await activate(nx)}
+  if(bad.length){
+    if(list.length===1){const[t,b]=errText(code);dialog(t,b)}
+    else dialog(CUR?'開けなかったファイルがあります':'開けませんでした','SXFのSFC形式（.sfc）のファイルを選んでください。\n\n'+bad.join('\n'));
+  }
+  if(!CUR&&!DOCS.length)showWelcome();
+  if(ok&&!bad.length){
+    sfx('done');
+    if(added.length>1)toast(added.length+'枚の図面を開きました（上のタブで切り替え）',2800);
+    else{if(CUR&&CUR.loadP)await CUR.loadP;toast(S.notes.length?'メモ '+S.notes.length+' 件を復元しました':'図面を開きました')}
+  }
+  return ok;
+}
+async function openBuffer(buf,name,opt={}){
+  const sn=Parser.sniff(buf);if(sn!=='ok'){const[t,b]=errText(sn);dialog(t,b);return false}
+  const hash=opt.hash||await hashBytes(buf);let doc=DOCS.find(x=>x.hash===hash);
+  if(!doc)doc=addDoc({name,hash,size:buf.byteLength,buf,sample:!!opt.sample,cached:opt.sample?false:undefined});
+  const p=activate(doc);if(!opt.sample)dropSample(doc);return p;
+}
+async function openCached(hash){
+  let doc=DOCS.find(x=>x.hash===hash);
+  if(!doc){const f=await Cache.get(hash);if(!f)return false;doc=addDoc({name:f.name,hash,size:f.buf.byteLength,buf:f.buf,cached:true})}
+  Cache.touch(hash);const p=activate(doc);dropSample(doc);saveTabs();return p;
 }
 function exampleNotes(){
   const X=x=>60+x*.002,Y=y=>205+y*.002;
-  const a={x:X(50000),y:Y(3000),rx:1},b={x:X(50000),y:Y(-3000),rx:1};const m=measure(a,b);
-  return[{id:uid(),t:'dist',a:[a.x,a.y],b:[b.x,b.y],v:m.real,sc:m.sc,ts:Date.now()},{id:uid(),t:'pin',x:X(30000),y:Y(5600)+3,text:'例：ボックスの位置を現地で確認（タップで編集）',c:'#ff5b3a',ts:Date.now()}];
+  return[{id:uid(),t:'dist',a:[X(50000),Y(3000)],b:[X(50000),Y(-3000)],v:6000,sc:'1:500',ts:Date.now()},{id:uid(),t:'pin',x:X(30000),y:Y(5600)+3,text:'例：ボックスの位置を現地で確認（タップで編集）',c:'#ff5b3a',ts:Date.now()}];
 }
-async function openSample(){D&&(D.noSave=false);await openBuffer(new TextEncoder().encode(sampleSFC()).buffer,'サンプル図面（架空）',{sample:true,hash:'sample-v1'})}
+async function openSample(){const s=DOCS.find(x=>x.sample);if(s)return activate(s);return openBuffer(new TextEncoder().encode(sampleSFC()).buffer,'サンプル図面（架空）',{sample:true,hash:'sample-v1'})}
 function renderTitle(){
-  $('#fname').textContent=D?D.name:'—';
-  if(!D){$('#fmeta').innerHTML='&nbsp;';return}
-  const parts=[];if(D.sheet.label)parts.push(D.sheet.label);
+  const doc=CUR;$('#fname').textContent=doc?doc.name:(D?D.name:'—');
+  if(!D){$('#fmeta').innerHTML=doc?(doc.err?'開けませんでした':'図面を解析しています…'):'&nbsp;';renderChip();return}
+  const parts=[];if(doc&&doc.title&&doc.name.indexOf(doc.title)<0)parts.push(doc.title);if(D.sheet.label)parts.push(D.sheet.label);
   const sc=[...new Set(D.xfs.slice(1).map(x=>ratioText(x.s)))];if(sc.length)parts.push(sc.slice(0,3).join(' / ')+(sc.length>3?' …':''));
   if(D.sample)parts.unshift('<b>サンプル</b>');
   $('#fmeta').innerHTML=parts.map(p=>p.startsWith('<b>')?p:esc(p)).join(' · ')||'&nbsp;';
   renderChip();
 }
+
+/* ---------- tab strip ---------- */
+const TAB_X='<svg class="i" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></svg>',TAB_ADD='<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+let tabsRaf=0,tabsShown=null;
+function renderTabs(){if(!tabsRaf)tabsRaf=requestAnimationFrame(drawTabs)}
+const tabLabel=x=>x.name.replace(/\.(sfc|sfz)$/i,'');
+function drawTabs(){
+  tabsRaf=0;const el=$('#tabs');const on=DOCS.length>=2;const flip=el.hidden===on;
+  if(!on){if(flip){el.hidden=true;el.textContent='';tabsShown=null;layoutHUD()}return}
+  el.hidden=false;
+  let add=el.querySelector('.tadd');
+  if(!add){add=document.createElement('button');add.className='tadd';add.type='button';add.setAttribute('aria-label','図面を追加');add.innerHTML=TAB_ADD;el.appendChild(add)}
+  const have=new Map();$$('.ftab',el).forEach(t=>have.set(t.dataset.id,t));
+  DOCS.forEach((x,k)=>{
+    let t=have.get(x.id);have.delete(x.id);
+    if(!t){t=document.createElement('div');t.dataset.id=x.id}
+    const a=x===CUR,n=(a?S.notes:x.notes).length,lab=tabLabel(x),sub=x.title&&lab.indexOf(x.title)<0?x.title:'';
+    t.className='ftab'+(a?' on':'')+(x.job?' busy':'')+(x.err?' err':'');
+    const sig=[a,n,lab,sub].join('\u0001');
+    if(t.dataset.sig!==sig){t.dataset.sig=sig;t.innerHTML='<button class="tsel" type="button" role="tab" aria-selected="'+a+'" title="'+esc(x.name)+'"><span class="tn">'+esc(lab)+(sub?'<small>'+esc(sub)+'</small>':'')+'</span>'+(n?'<span class="tc">'+n+'</span>':'')+'</button>'+(a?'<button class="tx" type="button" aria-label="この図面を閉じる">'+TAB_X+'</button>':'')}
+    if(el.children[k]!==t)el.insertBefore(t,el.children[k]||add);
+  });
+  have.forEach(t=>t.remove());
+  if(flip)layoutHUD();
+  if(CUR&&tabsShown!==CUR.id){
+    tabsShown=CUR.id;const a=el.querySelector('.ftab.on');
+    if(a){const l=a.offsetLeft,r=l+a.offsetWidth;if(l<el.scrollLeft+16)el.scrollLeft=Math.max(0,l-16);else if(r>el.scrollLeft+el.clientWidth-16)el.scrollLeft=r-el.clientWidth+16}
+  }
+}
+$('#tabs').addEventListener('click',e=>{
+  audioWake();
+  if(e.target.closest('.tadd')){pickFile();return}
+  const t=e.target.closest('.ftab');if(!t)return;const doc=DOCS.find(x=>x.id===t.dataset.id);if(!doc)return;
+  if(e.target.closest('.tx')){closeDoc(doc);sfx('erase');return}
+  if(doc!==CUR){$('#welcome').hidden=true;activate(doc);sfx('tool');buzz(6)}
+});
 
 /* =========================================================
    input
@@ -1559,7 +1946,7 @@ function renderMenu(){
     ls.forEach(l=>{h+='<button class="lay'+(D.vis[l.i]?' on':'')+'" data-i="'+l.i+'" type="button"><span class="tog"></span><span class="ln">'+esc(l.name)+'</span><span class="lc">'+l.count+'</span></button>'});
     h+='</div>';b.innerHTML=h;
     $$('.lay',b).forEach(el=>el.onclick=()=>{const i=+el.dataset.i;D.vis[i]=D.vis[i]?0:1;el.classList.toggle('on',!!D.vis[i]);invalidateAll();if(aiming())updateSnap()});
-    if(hc)$('#lUnhide').onclick=()=>{const list=[];D.hid.forEach((v,i)=>v&&list.push(i));D.hid.fill(0);buildPaths(D.batches,D.P,D.pts,D.hid);invalidateAll();pushUndo({op:'unhideAll',list});scheduleSave();renderMenu();toast('隠した線を戻しました')};
+    if(hc)$('#lUnhide').onclick=()=>{const list=[];D.hid.forEach((v,i)=>v&&list.push(i));D.hid.fill(0);list.forEach(i=>dirtyPrim(D,i));invalidateAll();pushUndo({op:'unhideAll',list});scheduleSave();renderMenu();toast('隠した線を戻しました')};
     $('#lAll').onclick=()=>{D.vis.fill(1);renderMenu();invalidateAll()};$('#lNone').onclick=()=>{D.vis.fill(0);renderMenu();invalidateAll()};
   }else if(menuTab==='info'){
     const i=D.info||{};const kv=(k,v,n)=>v?'<dt>'+k+'</dt><dd'+(n?' class="n"':'')+'>'+esc(v)+'</dd>':'';
@@ -1572,7 +1959,7 @@ function renderMenu(){
   }else{
     const seg=(key,opts)=>'<div class="seg">'+opts.map(([v,l])=>'<button class="'+(settings[key]===v?'on':'')+'" data-k="'+key+'" data-v="'+v+'" type="button">'+l+'</button>').join('')+'</div>';
     b.innerHTML='<div class="setrow">背景'+seg('theme',[['dark','黒'],['light','白']])+'</div><div class="setrow">文字の表示'+seg('text',[[true,'表示'],[false,'隠す']])+'</div><div class="setrow">線の太さ'+seg('weight',[[true,'図面どおり'],[false,'細線']])+'</div><div class="setrow">効果音'+seg('sound',[[true,'ON'],[false,'OFF']])+'</div><div class="setrow">振動'+seg('haptic',[[true,'ON'],[false,'OFF']])+'</div><p class="note">'+storeText()+'</p><p class="note">対応形式：SXF Ver.2〜3.1 のSFC（.sfc）。P21形式はCADでSFCに書き出してから開いてください。</p>';
-    $$('.seg button',b).forEach(el=>el.onclick=()=>{const k=el.dataset.k;let v=el.dataset.v;if(v==='true')v=true;else if(v==='false')v=false;settings[k]=v;if(k==='theme'){LS.set('themeChosen',true);colCache.clear()}saveSettings();invalidateAll();renderMenu();sfx('tap')});
+    $$('.seg button',b).forEach(el=>el.onclick=()=>{const k=el.dataset.k;let v=el.dataset.v;if(v==='true')v=true;else if(v==='false')v=false;settings[k]=v;if(k==='theme'){LS.set('themeChosen',true);colCache.clear()}saveSettings();clearSnaps();invalidateAll();renderMenu();sfx('tap')});
   }
 }
 let clearArmed=false;
@@ -1634,7 +2021,7 @@ function copyText(t){
 let toastT=0;function toast(m,ms=1800){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),ms)}
 function dialog(title,body){$('#dTitle').textContent=title;$('#dBody').textContent=body;$('#dBody').style.userSelect='text';$('#dBody').style.webkitUserSelect='text';$('#dialog').hidden=false}
 $('#dOk').addEventListener('click',()=>$('#dialog').hidden=true);
-function showLoading(name){$('#loadSub').textContent=name||'';$('#loading').hidden=false}
+function showLoading(name){$('#loadSub').textContent=name||'';const l=$('#loading');l.classList.toggle('below',!$('#tabs').hidden);l.hidden=false}
 function hideLoading(){$('#loading').hidden=true}
 
 /* ---------- sound + haptics ---------- */
@@ -1655,17 +2042,26 @@ function sfx(k){if(!settings.sound||!AC)return;try{
 function buzz(p){if(!settings.haptic)return;try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
 
 /* ---------- welcome + recents ---------- */
+// recent drawings: files kept on this device plus drawings with saved notes
+async function recentList(){
+  const[rec,metas]=await Promise.all([Store.recent(),Cache.list()]);const m=new Map();
+  for(const c of metas)if(c&&c.hash)m.set(c.hash,{hash:c.hash,name:c.name,at:c.at||0,count:null,file:true});
+  for(const r of rec){if(!r||!r.hash)continue;const e=m.get(r.hash);if(e){e.count=r.count;e.at=Math.max(e.at,r.updatedAt||0)}else m.set(r.hash,{hash:r.hash,name:r.name,at:r.updatedAt||0,count:r.count,file:false})}
+  return[...m.values()].filter(r=>r.hash!=='sample-v1').sort((a,b)=>b.at-a.at);
+}
 async function showWelcome(){
   const w=$('#welcome');w.hidden=false;
-  const rec=await Store.recent();const cached=await Cache.has();const list=rec.filter(r=>r.hash&&r.hash!=='sample-v1');
+  $('#wTabsRow').hidden=DOCS.filter(x=>!x.sample).length<2;
+  const list=(await recentList()).filter(r=>!DOCS.some(x=>x.hash===r.hash));
   const wrap=$('#wRecentWrap'),box=$('#wRecent');
   if(!list.length){wrap.hidden=true;return}
-  box.innerHTML=list.slice(0,6).map(r=>{const d=new Date(r.updatedAt||0);const ds=(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');return'<button class="rec" data-h="'+esc(r.hash)+'" type="button"><span class="rn">'+esc(r.name||'図面')+'</span><span class="rm">'+ds+'<br>メモ '+(r.count||0)+(cached.has(r.hash)?'':' · 要ファイル')+'</span></button>'}).join('');
+  box.innerHTML=list.slice(0,8).map(r=>{const d=new Date(r.at||0);const ds=(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    return'<button class="rec" data-h="'+esc(r.hash)+'" type="button"><span class="rn">'+esc(r.name||'図面')+'</span><span class="rm">'+ds+'<br>'+(r.count?'メモ '+r.count:'メモなし')+(r.file?'':' · 要ファイル')+'</span></button>'}).join('');
   wrap.hidden=false;
-  $$('.rec',box).forEach(b=>b.onclick=async()=>{const f=await Cache.get(b.dataset.h);if(f){w.hidden=true;await openBuffer(f.buf,f.name,{hash:f.hash});Cache.touch(f.hash)}else{toast('同じファイルを選ぶとメモが戻ります',2600);pickFile()}});
+  $$('.rec',box).forEach(b=>b.onclick=async()=>{audioWake();w.hidden=true;const ok=await openCached(b.dataset.h);if(ok===false&&!DOCS.some(x=>x.hash===b.dataset.h)){toast('同じファイルを選ぶとメモが戻ります',2600);pickFile()}});
 }
 function pickFile(){const f=$('#file');f.value='';f.click()}
-$('#file').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;$('#welcome').hidden=true;const buf=await f.arrayBuffer();const ok=await openBuffer(buf,f.name);if(ok){sfx('done');toast(S.notes.length?'メモ '+S.notes.length+' 件を復元しました':'図面を開きました')}});
+$('#file').addEventListener('change',e=>{const fs=e.target.files;if(fs&&fs.length)openFiles(fs)});
 
 /* ---------- wiring ---------- */
 $$('.tool').forEach(b=>b.addEventListener('click',()=>{audioWake();setTool(b.dataset.tool);$('#welcome').hidden=true}));
@@ -1674,10 +2070,11 @@ $('#areaBack').addEventListener('click',()=>{S.areaPts.pop();updateAreaBar();rea
 $('#areaDone').addEventListener('click',finishArea);
 $('#undoBtn').addEventListener('click',()=>{audioWake();undo()});
 $('#fitBtn').addEventListener('click',()=>{audioWake();fitView(null,true);sfx('tap')});
-$('#themeBtn').addEventListener('click',()=>{audioWake();settings.theme=settings.theme==='dark'?'light':'dark';LS.set('themeChosen',true);saveSettings();colCache.clear();invalidateAll();toast(settings.theme==='dark'?'背景：黒':'背景：白');sfx('tap')});
-$('#openBtn').addEventListener('click',async()=>{audioWake();const rec=(await Store.recent()).filter(r=>r.hash!=='sample-v1');if(rec.length){showWelcome()}else pickFile()});
+$('#themeBtn').addEventListener('click',()=>{audioWake();settings.theme=settings.theme==='dark'?'light':'dark';LS.set('themeChosen',true);saveSettings();colCache.clear();clearSnaps();invalidateAll();toast(settings.theme==='dark'?'背景：黒':'背景：白');sfx('tap')});
+$('#openBtn').addEventListener('click',async()=>{audioWake();if(DOCS.filter(x=>!x.sample).length>=2||(await recentList()).some(r=>!DOCS.some(x=>x.hash===r.hash)))showWelcome();else pickFile()});
 $('#wClose').addEventListener('click',()=>{$('#welcome').hidden=true;sfx('tap')});
 $('#wOpen').addEventListener('click',()=>{audioWake();pickFile()});
+$('#wCloseAll').addEventListener('click',()=>{audioWake();closeAll();sfx('erase')});
 $('#wSample').addEventListener('click',async()=>{audioWake();$('#welcome').hidden=true;if(!D||!D.sample)await openSample();toast('サンプル図面です。下のツールを試してみてください',2600)});
 $('#menuBtn').addEventListener('click',()=>{audioWake();renderMenu();openSheet('menuSheet');sfx('tap')});
 $('#scaleChip').addEventListener('click',()=>{audioWake();if(D)openScale()});
@@ -1687,13 +2084,18 @@ $('#eraserBtn').addEventListener('click',()=>{S.eraser=!S.eraser;$('#eraserBtn')
 $$('#draftbar .dm').forEach(b=>b.addEventListener('click',()=>{S.draftMode=b.dataset.dm;S.dA=null;S.dBase=null;$$('#draftbar .dm').forEach(x=>x.classList.toggle('on',x===b));readoutSoon();requestFrame();sfx('tap')}));
 $('#draftColor').addEventListener('click',()=>{const i=(DRAFT_COLORS.indexOf(S.draftColor)+1)%DRAFT_COLORS.length;S.draftColor=DRAFT_COLORS[i];$('#draftColor').style.setProperty('--c',S.draftColor==='auto'?'linear-gradient(135deg,#fff 50%,#111 50%)':S.draftColor);requestFrame();sfx('tap')});
 
-function resize(){
-  const r=cv.getBoundingClientRect();const oldW=W,oldH=H;W=Math.max(1,r.width);H=Math.max(1,r.height);dpr=Math.min(window.devicePixelRatio||1,2.5);
-  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);base.width=nbuf.width=cv.width;base.height=nbuf.height=cv.height;job=null;
+// HUD sizes decide where the reticle sits; re-run when the tab strip appears or goes
+function layoutHUD(){
   const app=$('#app').getBoundingClientRect(),top=$('#top').getBoundingClientRect(),dock=$('#dock').getBoundingClientRect();
-  TOPH=Math.max(0,top.bottom-app.top-8);DOCKH=Math.max(0,app.bottom-dock.top);RC.x=W/2;RC.y=(TOPH+(H-DOCKH))/2;
+  const oldTop=TOPH;TOPH=Math.max(0,top.bottom-app.top-8);DOCKH=Math.max(0,app.bottom-dock.top);RC.x=W/2;RC.y=(TOPH+(H-DOCKH))/2;
   document.documentElement.style.setProperty('--dock-h',DOCKH+'px');document.documentElement.style.setProperty('--top-h',(TOPH+6)+'px');
-  needBase=true;snapView=null;if(D&&aiming())updateSnap();requestFrame();
+  if(D&&TOPH!==oldTop&&fitV&&fitV.d===D&&V.cx===fitV.cx&&V.cy===fitV.cy&&V.z===fitV.z)fitView();   // still showing the whole drawing: re-fit around the tab strip
+  if(D&&aiming())updateSnap();readoutSoon();requestFrame();
+}
+function resize(){
+  const r=cv.getBoundingClientRect();W=Math.max(1,r.width);H=Math.max(1,r.height);dpr=Math.min(window.devicePixelRatio||1,2.5);
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);base.width=nbuf.width=cv.width;base.height=nbuf.height=cv.height;job=null;spare=null;clearSnaps();
+  needBase=true;snapView=null;layoutHUD();
 }
 window.addEventListener('resize',resize);
 if(window.visualViewport){const vv=window.visualViewport;const kb=()=>{const k=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);document.documentElement.style.setProperty('--kb',k+'px')};vv.addEventListener('resize',kb);vv.addEventListener('scroll',kb)}
@@ -1702,11 +2104,26 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#dialog').hi
 /* ---------- boot ---------- */
 async function boot(){
   resize();Store.init();
-  const last=await Promise.race([Cache.last(),new Promise(r=>setTimeout(()=>r(null),600))]);
-  if(last&&last.buf){const ok=await openBuffer(last.buf,last.name,{hash:last.hash});if(ok){toast('前回の図面を開きました');return}}
-  await openSample();showWelcome();
+  const wait=(p,ms)=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),ms))]);
+  const tabs=LS.get('tabs',null);const has=await wait(Cache.has(),1500);
+  if(Array.isArray(tabs)&&tabs.length&&has){
+    // reopen the tabs from last time; only the active one is parsed now, the rest follow in the background
+    for(const t of tabs)if(t&&t.hash&&has.has(t.hash)&&!DOCS.some(x=>x.hash===t.hash))DOCS.push(newDoc({name:t.name,hash:t.hash,size:t.size,cached:true}));
+    const want=LS.get('activeTab','');
+    while(DOCS.length){
+      const d=DOCS.find(x=>x.hash===want)||DOCS[0];
+      if(await activate(d,{quiet:true,noFallback:true})){toast(DOCS.length>1?'前回の図面 '+DOCS.length+'枚を開きました':'前回の図面を開きました');warm();return}
+      if(DOCS.indexOf(d)>=0){warm();return}   // the viewer picked another tab meanwhile
+    }
+  }else if(!Array.isArray(tabs)&&has&&has.size){
+    const last=await wait(Cache.last(),1200);
+    if(last&&last.buf){const doc=addDoc({name:last.name,hash:last.hash,size:last.buf.byteLength,buf:last.buf,cached:true});if(await activate(doc,{quiet:true,noFallback:true})){saveTabs();toast('前回の図面を開きました');warm();return}}
+  }
+  await openSample();showWelcome();warm();
 }
-window.__zs={get D(){return D},get perf(){return{lastBaseMs,job:!!job,needBase}},S,V,RC,select,viewChanged,openBuffer,openSample,setTool,placePoint,currentTarget,snapAt,toScreen,toSheet,measure,parseSFC,buildModel,flatten,sampleSFC,finishArea,settings,Store};
+// start a parsing worker while idle so the first real file opens without delay
+function warm(){setTimeout(()=>{if(PW.ok!==false&&!PW.pool.length)PW.spawn()},1200)}
+window.__zs={get D(){return D},get CUR(){return CUR},DOCS,activate,openFiles,openCached,closeDoc,closeAll,get perf(){return{lastBaseMs,job:!!job,needBase}},S,V,RC,select,viewChanged,openBuffer,openSample,setTool,placePoint,currentTarget,snapAt,toScreen,toSheet,measure,parseSFC:Parser.parseSFC,buildModel:Parser.buildModel,flatten:Parser.flatten,Parser,PW,sampleSFC,finishArea,settings,Store,Cache};
 boot();
 if('serviceWorker' in navigator&&!window.claude&&/^https?:$/.test(location.protocol)){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
 })();
