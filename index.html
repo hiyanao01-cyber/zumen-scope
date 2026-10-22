@@ -116,7 +116,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 #leftbtns{left:max(16px,env(safe-area-inset-left,0px));bottom:calc(var(--dock-h) + 16px);display:flex;flex-direction:column;gap:10px}
 #leftbtns .ibtn{width:46px;height:46px;border-radius:14px;background:rgba(31,42,53,.94)}
 #app[data-tool="pen"] #leftbtns{bottom:calc(var(--dock-h) + 70px)}
-#app[data-tool="coord"] #leftbtns{bottom:calc(var(--dock-h) + 102px)}
+#app[data-tool="coord"] #leftbtns{bottom:calc(var(--dock-h) + 32px + var(--bar-h,46px) + 22px)}
 #app[data-tool="draft"] #leftbtns{bottom:calc(var(--dock-h) + 32px + var(--bar-h,46px) + 22px)}
 #draftbar,#coordbar{left:max(16px,env(safe-area-inset-left,0px));bottom:calc(var(--dock-h) + 32px);max-width:calc(100% - max(16px,env(safe-area-inset-left,0px)) - max(16px,env(safe-area-inset-right,0px)) - 92px);overflow-x:auto;display:flex;align-items:center;gap:3px;padding:5px;border-radius:999px;background:rgba(21,28,36,.96);border:1px solid var(--rule);box-shadow:0 8px 22px rgba(0,0,0,.4)}
 .dm{height:34px;flex:none;padding:0 9px;border:0;border-radius:999px;background:transparent;color:var(--dim);font-weight:700;font-size:12.5px;touch-action:manipulation}
@@ -191,7 +191,21 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 #readout .rs.wrap{white-space:pre-line}
 #numBtn{right:max(16px,env(safe-area-inset-right,0px));bottom:calc(var(--dock-h) + 104px);height:40px;padding:0 14px;font-size:13px;box-shadow:0 6px 16px rgba(0,0,0,.35)}
 #numBtn.lock{background:var(--tape);color:var(--tape-ink);border-color:transparent}
-#draftbar{flex-wrap:wrap;row-gap:3px;border-radius:21px;overflow:visible}
+#draftbar,#coordbar{flex-wrap:wrap;row-gap:3px;border-radius:21px;overflow:visible}
+#gpsBtn{right:max(16px,env(safe-area-inset-right,0px));bottom:calc(var(--dock-h) + 16px);width:46px;height:46px;border-radius:14px;background:rgba(31,42,53,.94);box-shadow:0 6px 16px rgba(0,0,0,.35)}
+#app[data-tool="pen"] #gpsBtn{bottom:calc(var(--dock-h) + 70px)}
+#app[data-tool="measure"] #gpsBtn,#app[data-tool="area"] #gpsBtn,#app[data-tool="coord"] #gpsBtn{bottom:calc(var(--dock-h) + 106px)}
+#app[data-tool="draft"] #gpsBtn{bottom:calc(var(--dock-h) + 154px)}
+#gpsBtn.on{color:#5b9dff;border-color:#3d8bff}
+#gpsBtn.follow{background:#3d8bff;color:#fff;border-color:transparent}
+#gpsBtn.wait svg{animation:blink 1s ease-in-out infinite}
+@keyframes blink{50%{opacity:.3}}
+.item .ib.sta{background:#d58cff;color:#2a0838}
+select{height:40px;max-width:64vw;padding:0 10px;border-radius:11px;border:1px solid var(--rule);background:var(--void);color:var(--text);font:700 13.5px/1 var(--f-ui)}
+.cin label.sm{width:auto;min-width:62px;font:700 13px/1.25 var(--f-ui)}
+.cin .seg{flex:none}
+#selcard.col{flex-direction:column;align-items:stretch;gap:10px}
+#selcard.col .sacts{justify-content:flex-end;flex-wrap:wrap}
 .item .it{min-width:0;flex:1;font-size:13.5px;line-height:1.45;overflow-wrap:anywhere}
 .item .it .num{font:700 15px/1.3 var(--f-num);font-variant-numeric:tabular-nums}
 .item .it small{display:block;color:var(--dim);font-size:11px}
@@ -309,13 +323,15 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
 
   <div id="coordbar" class="fl" hidden>
     <button class="dm on" data-cm="read" type="button">読む</button>
+    <button class="dm" data-cm="sta" type="button">測点</button>
     <button class="dm" data-cm="cfg" type="button">設定</button>
     <span class="sep"></span>
     <button class="dm" data-cm="find" type="button">探す</button>
-    <button class="dm" data-cm="sima" type="button">SIMA出力</button>
+    <button class="dm" data-cm="sima" type="button">SIMA</button>
   </div>
 
   <button id="numBtn" class="fl pill" type="button" hidden>長さを入力</button>
+  <button id="gpsBtn" class="fl ibtn" type="button" aria-label="現在地を表示（GPS）" hidden><svg class="i" viewBox="0 0 24 24"><path d="M12 3.2 18.6 19.4 12 15.9 5.4 19.4z"/></svg></button>
   <button id="fab" class="fl" type="button" hidden aria-label="照準の位置に点を置く"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg><span>置く</span></button>
 
   <nav id="dock" aria-label="ツール">
@@ -402,9 +418,9 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
     </div>
   </section>
 
-  <section class="sheet" id="cfgSheet" hidden aria-label="座標と基準高の設定">
+  <section class="sheet" id="cfgSheet" hidden aria-label="座標・基準高・測点の設定">
     <div class="grab"></div>
-    <div class="shead"><h2>座標・基準高の設定</h2><button class="ibtn" type="button" data-close aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="shead"><h2>座標・基準高・測点の設定</h2><button class="ibtn" type="button" data-close aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="sbody" id="cfgBody"></div>
   </section>
 
@@ -1154,6 +1170,7 @@ function drawNotes(ctx,Wc,Hc,pr,v,exp){
   for(const n of S.notes){if(n.t!=='elev')continue;const p=T(n.x,n.y);const r=drawElevMark(ctx,p[0],p[1],n,n.id===sel,popScale(n,t));if(!exp)labelHits.push({r,id:n.id})}
   for(const n of S.notes){if(n.t!=='line'||n.k!=='grade'||!n.g)continue;const a=T(n.a[0],n.a[1]),b=T(n.b[0],n.b[1]);if(Math.hypot(b[0]-a[0],b[1]-a[1])<24)continue;const lp=labelPos(a[0],a[1],b[0],b[1]);const r=pill(ctx,lp[0],lp[1],n.g,{bg:'rgba(15,21,28,.9)',fg:inkColor(n.c),sel:n.id===sel});if(!exp)labelHits.push({r,id:n.id})}
   let ci=0;for(const n of S.notes){if(n.t!=='coord')continue;ci++;const p=T(n.x,n.y);const r=drawCoordMark(ctx,p[0],p[1],n,ci,n.id===sel,popScale(n,t));if(!exp)labelHits.push({r,id:n.id})}
+  for(const n of S.notes){if(n.t!=='sta')continue;const p=T(n.x,n.y);const r=drawStaMark(ctx,p[0],p[1],n,n.id===sel,popScale(n,t));if(!exp)labelHits.push({r,id:n.id})}
   let idx=0;const pins=S.notes.filter(n=>n.t==='pin');const showLabels=pins.length<=40;
   for(const n of pins){idx++;const p=T(n.x,n.y);drawPin(ctx,p[0],p[1],n.c,idx,n.id===sel,showLabels?n.text:'',popScale(n,t))}
 }
@@ -1187,6 +1204,8 @@ const effects=[];
 const KBIAS=[0,0,5,3,6,2,16],KNAME=['','端点','中点','中心','四半円点','交点','線上'];
 function drawLive(ctx){
   ctx.setTransform(dpr,0,0,dpr,0,0);const t=now();
+  if(D&&S.tool==='coord')drawClLayer(ctx);
+  drawGps(ctx);
   if(aiming()){
     const tg=S.tool==='draft'?draftTarget():currentTarget();const tp=toScreen(tg.x,tg.y);tp[2]=tg.kind;
     if(S.tool==='draft')drawDraftLive(ctx,tp);
@@ -1280,7 +1299,7 @@ function snapAt(sx,sy,rpx){
     else if(n.t==='circle'){const rxv=n.rx!=null?n.rx:-1;tryPt(n.c[0],n.c[1],3,rxv);[[1,0],[-1,0],[0,1],[0,-1]].forEach(([u,w])=>tryPt(n.c[0]+u*n.r,n.c[1]+w*n.r,4,rxv));
       const dc=Math.hypot(x-n.c[0],y-n.c[1]);if(dc>1e-9&&Math.abs(dc-n.r)<=r){const k=n.r/dc;const s=Math.abs(dc-n.r)*z+KBIAS[6];if(s<bs){bs=s;best={x:n.c[0]+(x-n.c[0])*k,y:n.c[1]+(y-n.c[1])*k,kind:6,rx:rxv}}}}
     else if(n.t==='area'){const q=n.pts;for(let i=0;i<q.length;i+=2)tryPt(q[i],q[i+1],1,-1)}
-    else if(n.t==='coord'||n.t==='elev')tryPt(n.x,n.y,1,n.rx!=null?n.rx:-1);
+    else if(n.t==='coord'||n.t==='elev'||n.t==='sta')tryPt(n.x,n.y,1,n.rx!=null?n.rx:-1);
   }
   if(ncell<=1200){
     const P=D.P,cand=collectSegs(x,y,r);
@@ -1553,34 +1572,61 @@ function coordAt(x,y,rx){
   if(xf&&xf.kind===2){const iv=xf.inv;const lx=iv[0]*x+iv[2]*y+iv[4],ly=iv[1]*x+iv[3]*y+iv[5];return{X:ly/1000,Y:lx/1000,src:'sfc',name:xf.name}}
   return null;
 }
-// where a coordinate lies on the sheet (mpp: metres per sheet mm); prefers a system whose part of the sheet contains it
-function sheetPointAt(X,Y){
-  const cand=[],inReg=(p,rx)=>{const bb=rx>0?(D.regions.find(q=>q.rx===rx)||{}).bb:D.fit;return!!bb&&p.x>=bb[0]&&p.x<=bb[2]&&p.y>=bb[1]&&p.y<=bb[3]};
-  const g=S.geo,T=geoFit(g);
-  if(T){const u=Y-T.tE,v=X-T.tN,d=T.cr*T.cr+T.ci*T.ci;const p={x:(u*T.cr+v*T.ci)/d,y:(v*T.cr-u*T.ci)/d,rx:g.rx,src:'user',mpp:T.s};p.inside=inReg(p,g.rx);cand.push(p)}
-  D.xfs.forEach((xf,i)=>{
-    if(!(i>0&&xf.kind===2)||(g&&g.rx===i))return;const m=xf.m,lx=Y*1000,ly=X*1000;
-    const p={x:m[0]*lx+m[2]*ly+m[4],y:m[1]*lx+m[3]*ly+m[5],rx:i,src:'sfc',mpp:1/(xf.s*1000)};p.inside=inReg(p,i);cand.push(p);
-  });
-  return cand.find(p=>p.inside)||cand[0]||null;
+// a coordinate on the sheet in figure rx (mpp: metres per sheet mm)
+function xyToSheet(X,Y,rx){
+  const g=S.geo;if(g&&g.rx===rx){const T=geoFit(g);if(T){const u=Y-T.tE,v=X-T.tN,d=T.cr*T.cr+T.ci*T.ci;return{x:(u*T.cr+v*T.ci)/d,y:(v*T.cr-u*T.ci)/d,rx,src:'user',mpp:T.s}}}
+  const xf=rx>0&&D.xfs[rx];if(xf&&xf.kind===2){const m=xf.m,lx=Y*1000,ly=X*1000;return{x:m[0]*lx+m[2]*ly+m[4],y:m[1]*lx+m[3]*ly+m[5],rx,src:'sfc',mpp:1/(xf.s*1000)}}
+  return null;
+}
+// where a coordinate lies on the sheet; prefers a system whose part of the sheet contains it (and then the figure pref)
+function sheetPointAt(X,Y,pref){
+  if(!D)return null;
+  const inReg=(p,rx)=>{const bb=rx>0?(D.regions.find(q=>q.rx===rx)||{}).bb:D.fit;return!!bb&&p.x>=bb[0]&&p.x<=bb[2]&&p.y>=bb[1]&&p.y<=bb[3]};
+  const rxs=[];if(S.geo&&geoFit(S.geo))rxs.push(S.geo.rx);D.xfs.forEach((xf,i)=>{if(i>0&&xf.kind===2&&!(S.geo&&S.geo.rx===i))rxs.push(i)});
+  const cand=[];for(const rx of rxs){const p=xyToSheet(X,Y,rx);if(p){p.inside=inReg(p,rx);cand.push(p)}}
+  return(pref!=null&&cand.find(p=>p.rx===pref&&p.inside))||cand.find(p=>p.inside)||(pref!=null&&cand.find(p=>p.rx===pref))||cand[0]||null;
 }
 const hasCoords=()=>!!(S.geo||(D&&D.xfs.some((x,i)=>i>0&&x.kind===2)));
 const coordSrc=c=>c.src==='user'?'2点で合わせた座標':'図面の座標'+(c.name?'（'+c.name+'）':'');
 function coordReadout(ro,rv,rs){
-  const tg=currentTarget(),rx=resolveRx(tg);
-  if(S.coordMode==='set'){
+  const tg=currentTarget(),rx=resolveRx(tg),m=S.coordMode;
+  if(m==='set'){
     rv.className='rv small';rv.textContent=S.gA?'基準点2に照準を合わせる':'基準点1に照準を合わせる';
     rs.textContent=S.gA?'基準点1 X '+fmtC(S.gA.X)+'  Y '+fmtC(S.gA.Y)+' · 「置く」で座標を入力':'座標のわかる点（杭・IPなど）で「置く」';return;
   }
-  if(S.coordMode==='elev'){rv.className='rv small';rv.textContent='基準高の点に照準を合わせる';rs.textContent='高さのわかる点（DL・計画高など）で「置く」';return}
+  if(m==='elev'){rv.className='rv small';rv.textContent='基準高の点に照準を合わせる';rs.textContent='高さのわかる点（DL・計画高など）で「置く」';return}
+  if(m==='gpsfix'){rv.className='rv small';rv.textContent='いま立っている場所に照準を合わせる';rs.classList.add('wrap');rs.textContent=GPS.fix?'杭など、図面で位置がわかる場所で「置く」\nGPSの位置のずれを補正します':'GPSの現在地を待っています…';return}
+  if(m==='cl'){
+    const ch=clPickAt();rv.className='rv small';
+    if(!ch){rv.textContent='中心線に照準を合わせる';rs.textContent='道路などの中心線を選びます（線をタップしても選べます）';return}
+    const f=realLenFn(ch.rx);let L=0;if(f){const q=ch.pts;for(let i=2;i<q.length;i+=2)L+=f(q[i]-q[i-2],q[i+1]-q[i-1])}
+    rv.textContent='この線を中心線にする';rs.classList.add('wrap');rs.textContent=(f?'長さ '+fmtC(L)+' m':'縮尺がわかりません')+(ch.prims.length>1?'（'+ch.prims.length+'本の線がつながっています）':'')+'\n「置く」で決定 · 線をタップしても選べます';return;
+  }
+  if(m==='clo'){
+    const g=S.clPend?clGeomOf(S.clPend):null;rv.className='rv small';rv.textContent='測点がわかる点に照準を合わせる';
+    rs.classList.add('wrap');rs.textContent=(g?'中心線 全長 '+fmtC(g.len)+' m\n':'')+'No.0（BP）など、測点がわかる点で「置く」';return;
+  }
+  if(m==='sta'){
+    const st=staAt(tg.x,tg.y,rx);
+    if(!st){rv.className='rv small';rv.textContent=!S.cl?'中心線が未設定です':!clGeom()?'測点を計算できません':'中心線のある図に照準を合わせる';rs.textContent=!S.cl?'「測点」を押して中心線を選んでください':!clGeom()?'縮尺がわかりません（右上の「縮尺」で指定できます）':'中心線：'+figName(S.cl.rx);ro.classList.add('warn');return}
+    rv.className='rv coord';rv.textContent=fmtSta(st.s,st.g.pitch)+'\n'+fmtOff(st.o);
+    const c=coordAt(tg.x,tg.y,rx),e=elevAt(tg.x,tg.y,rx);rs.classList.add('wrap');
+    rs.textContent='追加距離 '+fmtC(st.s)+' m'+(st.ext?' · 中心線の延長上':'')+(S.snap?' · '+KNAME[S.snap.kind]:'')+(c||e?'\n'+(c?'X '+fmtC(c.X)+'  Y '+fmtC(c.Y):'')+(e?(c?'  ':'')+'EL '+fmtC(e.H):''):'');
+    return;
+  }
   const c=coordAt(tg.x,tg.y,rx),e=elevAt(tg.x,tg.y,rx);
   if(!c&&!e){rv.className='rv small';rv.textContent='座標・基準高が未設定です';rs.textContent='「設定」から、座標は2点・基準高は1点で合わせられます';ro.classList.add('warn');return}
   const L=[];if(c)L.push('X '+fmtC(c.X),'Y '+fmtC(c.Y));if(e)L.push('EL '+fmtC(e.H));
   rv.className='rv coord';rv.textContent=L.join('\n');
-  rs.textContent=(S.snap?KNAME[S.snap.kind]+' · ':'')+(c?coordSrc(c):'')+(e?(c?' · ':'')+'基準高から '+fmtSigned(e.dh)+' m':'');
+  const st=staAt(tg.x,tg.y,rx);if(st)rs.classList.add('wrap');
+  rs.textContent=(S.snap?KNAME[S.snap.kind]+' · ':'')+(c?coordSrc(c):'')+(e?(c?' · ':'')+'基準高から '+fmtSigned(e.dh)+' m':'')+(st?'\n'+fmtSta(st.s,st.g.pitch)+' '+fmtOffS(st.o):'');
 }
-const fmtSigned=v=>(v>=0?'+':'−')+fmtC(Math.abs(v));
-function coordPlace(p){
+const fmtSigned=v=>(v>-5e-4?'+':'−')+fmtC(Math.abs(v));
+function coordPlace(p,sx,sy){
+  if(S.coordMode==='cl'){clPlace(sx,sy);return}
+  if(S.coordMode==='clo'){cloPlace(p);return}
+  if(S.coordMode==='sta'){staPlace(p);return}
+  if(S.coordMode==='gpsfix'){gpsFixPlace(p);return}
   if(S.coordMode==='set'){
     if(S.gA&&S.gA.rx!==p.rx){toast('2点は同じ図（部分図）の中で選んでください',2600);return}
     if(S.gA&&Math.hypot(p.x-S.gA.x,p.y-S.gA.y)*V.z<12){toast('基準点1と同じ位置です');return}
@@ -1608,13 +1654,13 @@ function coordPlace(p){
   sfx('done');
 }
 // points that were read from the 2-point setting follow it when it changes
-function refreshCoordNotes(){for(const q of S.notes){if(q.t!=='coord'||q.src!=='user')continue;const c=coordAt(q.x,q.y,q.rx);if(c&&c.src==='user'){q.X=c.X;q.Y=c.Y}}}
-const coordSnapshot=()=>S.notes.filter(n=>n.t==='coord'&&n.src==='user').map(n=>[n.id,n.X,n.Y]);
+function refreshCoordNotes(){for(const q of S.notes){const sta=q.t==='sta';if(!(q.t==='coord'||sta)||!(q.src==='user'||(sta&&q.X==null)))continue;const c=coordAt(q.x,q.y,q.rx);if(c&&(c.src==='user'||sta)){q.X=c.X;q.Y=c.Y;if(sta)q.src=c.src}}}
+const coordSnapshot=()=>S.notes.filter(n=>(n.t==='coord'&&n.src==='user')||n.t==='sta').map(n=>[n.id,n.X,n.Y,n.src]);
 function applyGeo(g){
   const T=geoFit(g),dW=Math.hypot(g.B[0]-g.A[0],g.B[1]-g.A[1]);
   if(!T||!(dW>0)){toast('2点の座標が同じです。入力を確かめてください',2800);S.gA=null;readoutSoon();return}
   pushUndo({op:'geo',before:S.geo,prev:coordSnapshot()});
-  S.geo=g;S.gA=null;refreshCoordNotes();setCoordMode('read');notesChanged();
+  S.geo=g;S.gA=null;refreshCoordNotes();refreshStaNotes();setCoordMode(lastCoordMode==='sta'&&S.cl?'sta':'read');notesChanged();gpsLocate(true);
   // check against the drawing's own scale
   const m=measure({x:g.a[0],y:g.a[1],rx:g.rx},{x:g.b[0],y:g.b[1],rx:g.rx});
   if(m.unscaled&&!S.manual){toast('座標を合わせました（縮尺 1:'+Math.round(T.s*1000)+' 相当）',3200);sfx('done');return}
@@ -1641,7 +1687,7 @@ function applyElev(p,H,k){
   if(!(k>0)){toast('縦の縮尺を入れてください（例 1:100 なら 100）',2800);return}
   pushUndo({op:'elev',before:S.elev?JSON.parse(JSON.stringify(S.elev)):null,rx:p.rx,prev:elevSnapshot(p.rx)});
   S.elev=Object.assign({},S.elev||{});S.elev[p.rx]={p:[p.x,p.y],H,k};
-  refreshElevNotes(p.rx);setCoordMode('read');notesChanged();
+  refreshElevNotes(p.rx);setCoordMode(lastCoordMode==='sta'&&S.cl?'sta':'read');notesChanged();
   toast('基準高を合わせました（EL '+fmtC(H)+'・縦 1:'+(+k.toFixed(3))+'）',2800);sfx('done');buzz([10,40,16]);
 }
 const figName=rx=>rx>0&&D&&D.xfs[rx]?D.xfs[rx].name:'用紙';
@@ -1649,20 +1695,33 @@ function cfgStatus(){
   const gp=D?D.xfs.filter((x,i)=>i>0&&x.kind===2).map(x=>x.name):[];
   const xy=S.geo?'2点で合わせた座標（'+figName(S.geo.rx)+'）\n基準点1  X '+fmtC(S.geo.A[0])+'  Y '+fmtC(S.geo.A[1])+'\n基準点2  X '+fmtC(S.geo.B[0])+'  Y '+fmtC(S.geo.B[1]):gp.length?'図面に入っている座標（測地座標系：'+gp.join('、')+'）':'なし';
   const el=Object.entries(S.elev||{}).map(([rx,e])=>figName(+rx)+'：EL '+fmtC(e.H)+'（縦 1:'+(+(+e.k).toFixed(3))+'）');
-  return{xy,el};
+  const g=clGeom();let cl='なし';
+  if(S.cl){if(!g)cl=figName(S.cl.rx)+'（縮尺がわからないため測点を計算できません）';else{const a=staOf(g,0),z=staOf(g,g.len);cl=figName(S.cl.rx)+(S.cl.L?'・'+S.cl.L:'')+'\n'+fmtSta(Math.min(a,z),g.pitch)+' 〜 '+fmtSta(Math.max(a,z),g.pitch)+'\n全長 '+fmtC(g.len)+' m・ピッチ '+(+g.pitch.toFixed(3))+' m\n'+(S.cl.auto?'図面の測点（No.の文字と目盛り '+S.cl.auto+'か所）から合わせました':'指定した点の測点で合わせました')}}
+  return{xy,el,cl};
 }
-function clearGeo(){pushUndo({op:'geo',before:S.geo,prev:coordSnapshot()});S.geo=null;S.gA=null;notesChanged();readoutSoon();toast('座標の設定を消しました（↶で戻せます）')}
+function clearGeo(){pushUndo({op:'geo',before:S.geo,prev:coordSnapshot()});S.geo=null;S.gA=null;refreshStaNotes();gpsLocate(true);notesChanged();readoutSoon();toast('座標の設定を消しました（↶で戻せます）')}
 function clearElev(){pushUndo({op:'elev',before:S.elev,rx:null,prev:[]});S.elev=null;notesChanged();readoutSoon();requestFrame();toast('基準高を消しました（↶で戻せます）')}
 function openCfg(){
-  if(!D)return;const b=$('#cfgBody');const st=cfgStatus();
-  b.innerHTML='<div class="list"><button class="item" id="cfgXY" type="button"><span class="ib coord">座標</span><span class="it"><b>2点で座標を合わせる</b><small>X・Yがわかる2点（杭・IPなど）を指定します</small></span></button>'+
-    '<button class="item" id="cfgEL" type="button"><span class="ib elev">基準高</span><span class="it"><b>1点で基準高を合わせる</b><small>高さがわかる1点（DL・計画高など）を指定します。同じ図の中の点の高さがわかります</small></span></button></div>'+
-    '<div class="sect">いまの設定</div><dl class="kv"><dt>座標</dt><dd style="white-space:pre-line">'+esc(st.xy)+'</dd><dt>基準高</dt><dd>'+(st.el.length?st.el.map(esc).join('<br>'):'なし')+'</dd></dl>'+
-    ((S.geo||st.el.length)?'<div class="row">'+(S.geo?'<button class="btn small" id="cfgXYClr" type="button">2点の座標設定を消す</button>':'')+(st.el.length?'<button class="btn small" id="cfgELClr" type="button">基準高を消す</button>':'')+'</div>':'');
-  $('#cfgXY').onclick=()=>{closeSheets();setCoordMode('set')};
-  $('#cfgEL').onclick=()=>{closeSheets();setCoordMode('elev')};
+  if(!D)return;const b=$('#cfgBody');const st=cfgStatus(),zone=LS.get('gpsZone',0)|0,off=gpsOffset();
+  let h='<div class="list"><button class="item" id="cfgXY" type="button"><span class="ib coord">座標</span><span class="it"><b>2点で座標を合わせる</b><small>X・Yがわかる2点（杭・IPなど）を指定します</small></span></button>'+
+    '<button class="item" id="cfgEL" type="button"><span class="ib elev">基準高</span><span class="it"><b>1点で基準高を合わせる</b><small>高さがわかる1点（DL・計画高など）を指定します。同じ図の中の点の高さがわかります</small></span></button>'+
+    '<button class="item" id="cfgCL" type="button"><span class="ib sta">測点</span><span class="it"><b>'+(S.cl?'中心線を選び直す':'中心線を選ぶ')+'</b><small>道路などの中心線を選ぶと、照準の位置や現在地の測点（No.○+○○）と中心からの距離がわかります</small></span></button></div>'+
+    '<div class="sect">いまの設定</div><dl class="kv"><dt>座標</dt><dd style="white-space:pre-line">'+esc(st.xy)+'</dd><dt>基準高</dt><dd>'+(st.el.length?st.el.map(esc).join('<br>'):'なし')+'</dd><dt>中心線</dt><dd style="white-space:pre-line">'+esc(st.cl)+'</dd></dl>';
+  if(S.cl)h+='<div class="row"><button class="btn small" id="cfgFlip" type="button">測点の向きを反転</button><button class="btn small" id="cfgRef" type="button">測点を合わせ直す</button><button class="btn small" id="cfgCLClr" type="button">中心線を消す</button></div>';
+  if(S.geo||st.el.length)h+='<div class="row">'+(S.geo?'<button class="btn small" id="cfgXYClr" type="button">2点の座標設定を消す</button>':'')+(st.el.length?'<button class="btn small" id="cfgELClr" type="button">基準高を消す</button>':'')+'</div>';
+  h+='<div class="sect">GPS（現在地）</div><div class="setrow" style="gap:10px">座標系<select id="cfgZone" aria-label="平面直角座標系">'+
+    '<option value="0">自動'+(GPS.fix&&GPS.auto&&GPS.zone?'（いまは第'+ROMAN[GPS.zone]+'系）':'（図面の座標から判定）')+'</option>'+
+    ZONE_AREA.map((a,i)=>i?'<option value="'+i+'"'+(zone===i?' selected':'')+'>第'+ROMAN[i]+'系　'+a+'</option>':'').join('')+'</select></div>'+
+    (off?'<div class="setrow" style="gap:10px"><span>ずれ補正中<small style="display:block;color:var(--dim);font:600 12px/1.4 var(--f-num)">ΔX '+fmtSigned(off.dX)+'  ΔY '+fmtSigned(off.dY)+' m</small></span><button class="btn small" id="cfgOffClr" type="button">補正を消す</button></div>':'')+
+    '<p class="note" style="margin:0">右下の<b style="color:#5b9dff">現在地ボタン</b>で、スマホのGPSの位置を図面に出します（精度は数m）。「自動」は図面の座標に合う系を選びます。杭など位置がわかる点の上に立って「ずれ補正」すると、その付近の精度が上がります。</p>';
+  b.innerHTML=h;
+  const toCoord=m=>{closeSheets();if(S.tool!=='coord')setTool('coord');setCoordMode(m)};
+  $('#cfgXY').onclick=()=>toCoord('set');$('#cfgEL').onclick=()=>toCoord('elev');$('#cfgCL').onclick=()=>toCoord('cl');
+  if(S.cl){$('#cfgFlip').onclick=()=>{flipCl();openCfg()};$('#cfgRef').onclick=()=>{S.clPend=null;toCoord('clo')};$('#cfgCLClr').onclick=()=>{clearCl();openCfg()}}
   if(S.geo)$('#cfgXYClr').onclick=()=>{clearGeo();openCfg()};
   if(st.el.length)$('#cfgELClr').onclick=()=>{clearElev();openCfg()};
+  $('#cfgZone').onchange=e=>{const v=+e.target.value||0;LS.set('gpsZone',v);gpsLocate(true);toast(v?'第'+ROMAN[v]+'系で現在地を計算します':'座標系を自動で判定します');sfx('tap')};
+  if(off)$('#cfgOffClr').onclick=()=>{gpsSetOffset(null);gpsLocate(true);openCfg();toast('GPSの補正を消しました')};
   openSheet('cfgSheet');sfx('tap');
 }
 // the known points behind the settings, plus each 基準高 as a level line (while the coordinate or slope tools are in use)
@@ -1718,7 +1777,7 @@ function parseGrade(t,kind){
 }
 function setGradeButton(){const b=$('#dmGrade');if(b)b.textContent=S.grade?'勾配 '+gradeLabel():'勾配';barH()}
 // the drafting bar may wrap onto two rows; the buttons on the left sit above it
-function barH(){const b=$('#draftbar');if(b&&!b.hidden)document.documentElement.style.setProperty('--bar-h',b.offsetHeight+'px')}
+function barH(){const b=S.tool==='coord'?$('#coordbar'):$('#draftbar');if(b&&!b.hidden)document.documentElement.style.setProperty('--bar-h',b.offsetHeight+'px')}
 function openGrade(){
   const b=$('#gradeBody');let kind=(S.grade&&S.grade.kind)||'ratio';
   const render=()=>{
@@ -1743,13 +1802,17 @@ function openGrade(){
 }
 
 function setCoordMode(m){
-  if(m==='find'){findCoord();return}
+  if(m==='find'){if(S.coordMode==='sta'&&S.cl)findSta();else findCoord();return}
   if(m==='sima'){openSima();return}
   if(m==='cfg'){openCfg();return}
-  S.coordMode=m;S.gA=null;const on=m==='read'?'read':'cfg';$$('#coordbar .dm[data-cm]').forEach(b=>b.classList.toggle('on',b.dataset.cm===on));
+  if(m==='sta'&&!S.cl)m='cl';
+  if(m!=='clo')S.clPend=null;if(m==='cl')clPick={D:null,i:-2,ch:null};if(m==='gpsfix')gpsUnfollow();
+  S.coordMode=m;S.gA=null;if(m==='read'||m==='sta')lastCoordMode=m;coordBarUI();
   if(m==='set')toast('座標のわかる点に照準を合わせて「置く」',2400);else if(m==='elev')toast('高さのわかる点に照準を合わせて「置く」',2400);
+  else if(m==='cl')toast('中心線に照準を合わせて「置く」',2400);else if(m==='clo')toast('No.0 など、測点がわかる点で「置く」',2600);else if(m==='gpsfix')toast('いま立っている場所に照準を合わせて「置く」',2600);
   readoutSoon();requestFrame();
 }
+function coordBarUI(){const m=S.coordMode,on=m==='read'?'read':(m==='sta'||m==='cl'||m==='clo')?'sta':'cfg';$$('#coordbar .dm[data-cm]').forEach(b=>b.classList.toggle('on',b.dataset.cm===on))}
 function findCoord(){
   if(!D)return;
   if(!hasCoords()){toast('座標が未設定です。先に「設定」で合わせてください',2600);openCfg();return}
@@ -1771,20 +1834,30 @@ let numCb=null,numRows=[];
 function openNumSheet(o){
   numCb=o.cb;numRows=o.rows;$('#cTitle').textContent=o.title;$('#cHint').textContent=o.hint||'';$('#cOk').textContent=o.ok||'決定';
   const box=$('#cRows');
-  box.innerHTML=o.rows.map((r,i)=>'<div class="cin"><label for="cR'+i+'">'+esc(r.label)+(r.sub?'<small>'+esc(r.sub)+'</small>':'')+'</label>'+(r.pm?'<button class="pm" type="button" data-i="'+i+'" aria-label="符号を切り替え">±</button>':'')+(r.pre?'<span class="cpre">'+esc(r.pre)+'</span>':'')+'<input type="text" id="cR'+i+'" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="'+esc(r.ph||'')+'" value="'+esc(r.val!=null?r.val:'')+'"></div>').join('');
+  box.innerHTML=o.rows.map((r,i)=>{
+    const lab=(r.choice?'<label':'<label for="cR'+i+'"')+(r.small?' class="sm"':'')+'>'+esc(r.label)+(r.sub?'<small>'+esc(r.sub)+'</small>':'')+'</label>';
+    if(r.choice)return'<div class="cin">'+lab+'<div class="seg" id="cR'+i+'">'+r.choice.map(([v,l])=>'<button type="button" data-v="'+v+'" class="'+(String(v)===String(r.val)?'on':'')+'">'+esc(l)+'</button>').join('')+'</div></div>';
+    return'<div class="cin">'+lab+(r.lr?'<div class="seg" data-lr="'+i+'"><button type="button" data-s="L">左</button><button type="button" data-s="R" class="on">右</button></div>':'')+(r.pm?'<button class="pm" type="button" data-i="'+i+'" aria-label="符号を切り替え">±</button>':'')+(r.pre?'<span class="cpre">'+esc(r.pre)+'</span>':'')+'<input type="text" id="cR'+i+'" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="'+esc(r.ph||'')+'" value="'+esc(r.val!=null?r.val:'')+'"></div>';
+  }).join('');
   $$('.pm',box).forEach(bt=>bt.onclick=()=>{const i=$('#cR'+bt.dataset.i);const v=normNum(i.value).trim();i.value=v.startsWith('-')?v.slice(1):'-'+v;sfx('tap')});
-  o.rows.forEach((r,i)=>{const inp=$('#cR'+i);
-    inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const nx=$('#cR'+(i+1));if(nx)nx.focus();else $('#cOk').click()}};
+  $$('.seg',box).forEach(sg=>sg.onclick=e=>{const bt=e.target.closest('button');if(!bt)return;$$('button',sg).forEach(x=>x.classList.toggle('on',x===bt));sfx('tap')});
+  const next=i=>{let j=i+1;while(numRows[j]&&numRows[j].choice)j++;return numRows[j]?$('#cR'+j):null};
+  o.rows.forEach((r,i)=>{if(r.choice)return;const inp=$('#cR'+i);
+    inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const nx=next(i);if(nx)nx.focus();else $('#cOk').click()}};
     if(r.pair)inp.oninput=e=>{const v=normNum(e.target.value);const m=v.match(/[-+]?\d+(?:\.\d+)?/g);if(m&&m.length===2&&/[\sYy\/／、;]/.test(v)&&$('#cR'+(i+1))){inp.value=m[0];$('#cR'+(i+1)).value=m[1]}};
+    if(r.sta)inp.oninput=e=>{const v=normNum(e.target.value).replace(/^\s*N[Oo0]\s*\.?\s*/,''),m=/^\s*(\d+)\s*\+\s*([\d.]*)\s*$/.exec(v),nx=$('#cR'+(i+1));if(m&&nx&&!numRows[i+1].choice){inp.value=m[1];nx.value=m[2];nx.focus()}};
   });
-  openSheet('coordSheet');setTimeout(()=>{try{const i=$('#cR0');i.focus({preventScroll:true});i.select()}catch(e){}},280);
+  openSheet('coordSheet');setTimeout(()=>{try{const i=$('#cR0');if(i&&i.tagName==='INPUT'){i.focus({preventScroll:true});i.select()}}catch(e){}},280);
 }
 $('#cOk').addEventListener('click',()=>{
   const out=[];
   for(let i=0;i<numRows.length;i++){
-    const r=numRows[i],t=$('#cR'+i).value,v=parseNum(t);
+    const r=numRows[i];
+    if(r.choice){const bt=$('#cR'+i+' button.on'),v=bt?bt.dataset.v:String(r.val);out.push(isNaN(+v)?v:+v);continue}
+    const t=$('#cR'+i).value,v=parseNum(r.sta?normNum(t).replace(/^\s*N[Oo0]\s*\.?\s*/,''):t);
     if(normNum(t).trim()===''&&r.opt){out.push(null);continue}
-    if(!isFinite(v)||(r.pos&&!(v>0))){toast(r.label+' を数字で入れてください');try{$('#cR'+i).focus()}catch(e){}return}
+    if(!isFinite(v)||(r.pos&&!(v>0))||(r.int&&!(Number.isInteger(v)&&v>=0))){toast(r.label+(r.int?' は 0 以上の整数で入れてください':' を数字で入れてください'));try{$('#cR'+i).focus()}catch(e){}return}
+    if(r.lr){const bt=$('#cRows [data-lr="'+i+'"] button.on');out.push(bt&&bt.dataset.s==='L'?-Math.abs(v):Math.abs(v));continue}
     out.push(v);
   }
   const cb=numCb;numCb=null;closeSheets();if(cb)cb(out);
@@ -1824,7 +1897,7 @@ function sjisEncode(str){
   return new Uint8Array(out);
 }
 const simaField=v=>String(v==null?'':v).replace(/[,\r\n\t]/g,' ').trim();
-function coordRows(){const cs=S.notes.filter(n=>n.t==='coord');return cs.map((n,i)=>({n,name:n.name||('P'+(i+1)),X:n.X,Y:n.Y,h:n.h}))}
+function coordRows(){let k=0;return S.notes.filter(n=>n.t==='coord'||(n.t==='sta'&&n.X!=null&&isFinite(n.X))).map(n=>{if(n.t==='coord')k++;return{n,name:n.name||(n.t==='sta'?staName(n):'P'+k),X:n.X,Y:n.Y,h:n.h}})}
 // SIMA coordinate data: G00 header, A00 … A01 records … A99
 function simaText(site,rows){
   const L=['G00,03,'+simaField(site)+',','Z00,座標データ,','A00,'];
@@ -1868,9 +1941,9 @@ function openSima(){
 }
 function renderSima(){
   const b=$('#simaBody');const rows=coordRows();
-  if(!rows.length){b.innerHTML='<div class="empty">まだ座標の点がありません。<br>「座標」ツールの「読む」で照準を合わせて「置く」と、点が追加されます。「探す」で座標を入れて追加することもできます。</div>';return}
+  if(!rows.length){b.innerHTML='<div class="empty">まだ座標の点がありません。<br>「座標」ツールの「読む」や「測点」で照準を合わせて「置く」と、点が追加されます。「探す」で座標や測点を入れて追加することもできます。</div>';return}
   let h='<div class="setrow" style="gap:10px">現場名<input type="text" id="sSite" autocomplete="off" style="max-width:230px;font-family:var(--f-ui)" value="'+esc(siteName())+'"></div><div class="list">';
-  rows.forEach(r=>{const off=simaOff.has(r.n.id);h+='<div class="srow'+(off?' off':'')+'" data-id="'+r.n.id+'"><div class="l1"><input type="checkbox" aria-label="書き出す"'+(off?'':' checked')+'><input type="text" class="sn" aria-label="点名" autocomplete="off" style="font-family:var(--f-ui)" value="'+esc(r.name)+'"><input type="text" class="sh" inputmode="decimal" aria-label="標高" placeholder="標高" autocomplete="off" value="'+(r.h!=null?fmtC(r.h):'')+'"></div><div class="sxy">X '+fmtC(r.X)+'　Y '+fmtC(r.Y)+'</div></div>'});
+  rows.forEach(r=>{const off=simaOff.has(r.n.id);h+='<div class="srow'+(off?' off':'')+'" data-id="'+r.n.id+'"><div class="l1"><input type="checkbox" aria-label="書き出す"'+(off?'':' checked')+'><input type="text" class="sn" aria-label="点名" autocomplete="off" style="font-family:var(--f-ui)" value="'+esc(r.name)+'"><input type="text" class="sh" inputmode="decimal" aria-label="標高" placeholder="標高" autocomplete="off" value="'+(r.h!=null?fmtC(r.h):'')+'"></div><div class="sxy">X '+fmtC(r.X)+'　Y '+fmtC(r.Y)+((st=>st&&!(r.n.t==='sta'&&!r.n.name)?'<br>'+esc(staLine(st)):'')(noteSta(r.n)))+'</div></div>'});
   h+='</div><p class="note" style="margin:0">X（北）・Y（東）・標高はm単位です。点名と標高はここで直せます（標高は空欄でもかまいません）。SIMAの座標データ（Shift_JIS）で保存するので、杭ナビなどの座標取り込みでそのまま読み込めます。</p>';
   const can=!window.claude&&navigator.canShare&&(()=>{try{return navigator.canShare({files:[new File(['x'],'a.sim',{type:'application/octet-stream'})]})}catch(e){return false}})();
   h+='<div class="row"><button class="btn small" id="sCsv" type="button">CSVで保存</button>'+(can?'<button class="btn small" id="sShare" type="button">共有…</button>':'')+'<span style="flex:1"></span><button class="btn primary" id="sSave" type="button" style="flex:0 1 auto">SIMAで保存（'+(rows.length-rows.filter(r=>simaOff.has(r.n.id)).length)+'点）</button></div>';
@@ -1898,6 +1971,471 @@ function drawGeoPts(ctx){
     ctx.fillStyle='#1a1300';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,0,17.5);ctx.restore();
   }
 }
+
+/* ---------- 中心線と測点: a centreline taken from the drawing gives the station (No.n+d) and the offset of any point ---------- */
+const STA_COL='#d58cff',STA_INK='#2a0838',GPS_COL='#3d8bff';
+let lastCoordMode='read';
+// real metres for a sheet vector in figure rx: the drawing's scale (or the manual one), else the 2-point coordinates
+function realLenFn(rx){
+  if(!D)return null;
+  if(S.manual>0){const k=S.manual/1000;return(dx,dy)=>Math.hypot(dx,dy)*k}
+  const xf=rx>0&&D.xfs[rx];if(xf){const iv=xf.inv;return(dx,dy)=>Math.hypot(iv[0]*dx+iv[2]*dy,iv[1]*dx+iv[3]*dy)/1000}
+  const T=S.geo&&S.geo.rx===rx?geoFit(S.geo):null;if(T){const k=T.s;return(dx,dy)=>Math.hypot(dx,dy)*k}
+  return null;
+}
+const primPts=i=>{const o=D.P.off[i]*2;return D.pts.subarray(o,o+2*D.P.n[i])};
+// open lines of one layer in one figure, indexed by their end points
+function endIndex(L,rx){
+  const key=L+':'+rx;if(D._eix&&D._eix.key===key)return D._eix;
+  const P=D.P,pts=D.pts,cs=.1,m=new Map();
+  const put=(x,y,i,e)=>{const k=Math.floor(x/cs)+','+Math.floor(y/cs);let a=m.get(k);if(!a)m.set(k,a=[]);a.push(i,e)};
+  for(let i=0;i<D.np;i++){if(P.L[i]!==L||P.rx[i]!==rx||(P.fl[i]&5)||P.n[i]<2)continue;const o=P.off[i]*2,n=P.n[i];put(pts[o],pts[o+1],i,0);put(pts[o+2*n-2],pts[o+2*n-1],i,1)}
+  return D._eix={key,m,cs,tol:.05};
+}
+// unit direction leaving prim i at its end e (0: first point, 1: last point)
+function endDir(i,e){
+  const q=primPts(i),n=q.length/2,k0=e?n-1:0,x=q[2*k0],y=q[2*k0+1];
+  for(let s=1;s<n;s++){const k=e?n-1-s:s,dx=x-q[2*k],dy=y-q[2*k+1],l=Math.hypot(dx,dy);if(l>1e-7)return[dx/l,dy/l]}
+  return[1,0];
+}
+// the centreline through prim p0: joined end to end with lines of the same layer that carry on smoothly (same line style first)
+function chainFrom(p0){
+  const P=D.P,L=P.L[p0],rx=P.rx[p0],st=P.st[p0],ix=endIndex(L,rx),used=new Set([p0]),parts=[{i:p0,rev:false}];
+  const grow=atEnd=>{
+    for(let guard=0;guard<20000;guard++){
+      const cur=atEnd?parts[parts.length-1]:parts[0],e=atEnd?(cur.rev?0:1):(cur.rev?1:0);
+      const q=primPts(cur.i),n=q.length/2,x=q[e?2*n-2:0],y=q[e?2*n-1:1],u=endDir(cur.i,e),gx=Math.floor(x/ix.cs),gy=Math.floor(y/ix.cs);
+      let best=null,bs=Infinity;
+      for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){
+        const list=ix.m.get((gx+a)+','+(gy+b));if(!list)continue;
+        for(let k=0;k<list.length;k+=2){
+          const j=list[k],je=list[k+1];if(used.has(j))continue;
+          const qj=primPts(j),nj=qj.length/2;if(Math.hypot(qj[je?2*nj-2:0]-x,qj[je?2*nj-1:1]-y)>ix.tol)continue;
+          const w=endDir(j,je),dev=Math.acos(clamp(-(u[0]*w[0]+u[1]*w[1]),-1,1))/D2R,same=P.st[j]===st;
+          if(dev>(same?60:12))continue;const sc=dev+(same?0:30);if(sc<bs){bs=sc;best={j,je}}
+        }
+      }
+      if(!best)return;used.add(best.j);
+      const part={i:best.j,rev:atEnd?best.je===1:best.je===0};if(atEnd)parts.push(part);else parts.unshift(part);
+    }
+  };
+  if(!(P.fl[p0]&1)){grow(true);grow(false)}
+  const out=[],sp=[],pc=parts.map(pt=>(P.fl[pt.i]&2)?1:0);
+  parts.forEach((pt,j)=>{
+    const q=primPts(pt.i),n=q.length/2;
+    for(let s=0;s<n;s++){const k=pt.rev?n-1-s:s,x=q[2*k],y=q[2*k+1],m=out.length;
+      if(m){const d=Math.hypot(out[m-2]-x,out[m-1]-y);if(d<1e-9||(s===0&&d<=ix.tol))continue;sp.push(j)}
+      out.push(x,y)}
+    if((P.fl[pt.i]&1)&&n>2){out.push(q[0],q[1]);sp.push(j)}
+  });
+  return{pts:out,sp,pc,prims:parts.map(p=>p.i),rx,L};
+}
+// chainage (real m) at every vertex of a centreline; cached per centreline object and scale.
+// Curves come as chords: each vertex inside a curve gets the normal that bisects its chords, so between two vertices the
+// normal turns smoothly and every chord stands for its circular arc — exact for arcs, very close for clothoids and splines.
+const clCache=new WeakMap();
+function clGeomOf(cl){
+  if(!cl||!D||!cl.pts||cl.pts.length<4)return null;
+  const key=S.manual+'|'+(S.geo&&S.geo.rx===cl.rx?[S.geo.a,S.geo.b,S.geo.A,S.geo.B].join(','):'');
+  const hit=clCache.get(cl);if(hit&&hit.D===D&&hit.key===key)return hit.g;
+  const f=realLenFn(cl.rx);let g=null;
+  if(f){
+    const q=cl.pts,n=q.length/2,ns=n-1,sp=cl.sp&&cl.sp.length===ns?cl.sp:null,pc=cl.pc||[];
+    const ux=new Float64Array(ns),uy=new Float64Array(ns),cl2=new Float64Array(ns);
+    for(let i=0;i<ns;i++){const vx=q[2*i+2]-q[2*i],vy=q[2*i+3]-q[2*i+1],l=Math.hypot(vx,vy);cl2[i]=l;if(l>0){ux[i]=vx/l;uy[i]=vy/l}else if(i){ux[i]=ux[i-1];uy[i]=uy[i-1]}else{ux[i]=1;uy[i]=0}}
+    const turn=k=>Math.atan2(ux[k-1]*uy[k]-uy[k-1]*ux[k],ux[k-1]*ux[k]+uy[k-1]*uy[k]);   // signed, at inner vertex k
+    const rot=(x,y,a)=>{const c=Math.cos(a),s=Math.sin(a);return[x*c-y*s,x*s+y*c]};
+    const curve=i=>!!(sp&&pc[sp[i]]);
+    // the tangent at each vertex where the line runs on smoothly (null: a corner — each side keeps its own perpendicular)
+    const T=new Array(n).fill(null);
+    for(let k=0;k<n;k++){
+      if(k===0){if(curve(0)&&ns>1&&sp[1]===sp[0])T[0]=rot(ux[0],uy[0],-turn(1)/2)}
+      else if(k===n-1){if(curve(ns-1)&&ns>1&&sp[ns-2]===sp[ns-1])T[k]=rot(ux[ns-1],uy[ns-1],turn(ns-1)/2)}
+      else if(sp&&sp[k-1]===sp[k]){if(pc[sp[k]]||Math.abs(turn(k))<1e-4)T[k]=[ux[k-1]+ux[k],uy[k-1]+uy[k]]}
+      else if(sp){
+        const tA=curve(k-1)&&k>=2&&sp[k-2]===sp[k-1]?rot(ux[k-1],uy[k-1],turn(k-1)/2):[ux[k-1],uy[k-1]];
+        const tB=curve(k)&&k+1<ns&&sp[k+1]===sp[k]?rot(ux[k],uy[k],-turn(k+1)/2):[ux[k],uy[k]];
+        if(Math.abs(Math.atan2(tA[0]*tB[1]-tA[1]*tB[0],tA[0]*tB[0]+tA[1]*tB[1]))<=2*D2R)T[k]=[tA[0]+tB[0],tA[1]+tB[1]];
+      }
+    }
+    const na=new Float64Array(2*ns),nb=new Float64Array(2*ns),th=new Float64Array(ns),rs=new Float64Array(ns),cum=new Float64Array(n);
+    const nrm=t=>{const l=Math.hypot(t[0],t[1])||1;return[-t[1]/l,t[0]/l]};
+    let sl=0,i0=-1,i1=-1;
+    for(let i=0;i<ns;i++){
+      const pp=[-uy[i],ux[i]],a=T[i]?nrm(T[i]):pp,b=T[i+1]?nrm(T[i+1]):pp;
+      na[2*i]=a[0];na[2*i+1]=a[1];nb[2*i]=b[0];nb[2*i+1]=b[1];
+      let t=Math.atan2(a[0]*b[1]-a[1]*b[0],a[0]*b[0]+a[1]*b[1]);if(Math.abs(t)<1e-9)t=0;th[i]=t;
+      const k=t?Math.abs(t/2/Math.sin(t/2)):1;rs[i]=t?cl2[i]/(2*Math.sin(t/2)):0;   // arc / chord, signed radius
+      const L=f(q[2*i+2]-q[2*i],q[2*i+3]-q[2*i+1])*k;cum[i+1]=cum[i]+L;sl+=cl2[i]*k;if(L>0){if(i0<0)i0=i;i1=i}
+    }
+    if(i0>=0){
+      g={q,n,cum,len:cum[n-1],sl,f,i0,i1,na,nb,th,rs,cl:cl2,rx:cl.rx,dir:cl.dir===-1?-1:1,pitch:cl.pitch>0?cl.pitch:20,v0:0,cref:0};
+      const r=cl.ref;if(r){const ri=clamp(r.i|0,0,n-2);g.v0=r.v;g.cref=cum[ri]+clFrac(g,ri,+r.t||0)*(cum[ri+1]-cum[ri])}
+    }
+  }
+  clCache.set(cl,{D,key,g});return g;
+}
+const clGeom=()=>clGeomOf(S.cl);
+const staOf=(g,c)=>g.v0+g.dir*(c-g.cref);
+const chOf=(g,v)=>g.cref+g.dir*(v-g.v0);
+// chord parameter t ↔ fraction of the segment's (arc) length
+function clFrac(g,i,t){const th=g.th[i];if(!th||t<0||t>1)return t;const ax=g.na[2*i],ay=g.na[2*i+1],nx=ax+t*(g.nb[2*i]-ax),ny=ay+t*(g.nb[2*i+1]-ay);return Math.atan2(ax*ny-ay*nx,ax*nx+ay*ny)/th}
+function clT(g,i,fr){const th=g.th[i];if(!th||fr<0||fr>1)return fr;const ax=g.na[2*i],ay=g.na[2*i+1],dx=g.nb[2*i]-ax,dy=g.nb[2*i+1]-ay,tp=Math.tan(fr*th),den=(ax*dy-ay*dx)-tp*(ax*dx+ay*dy);return den?tp/den:fr}
+// the curve point of segment i at chord parameter t (the chord bulged out to its arc) and the normal there (left of the drawing direction)
+function clSegPt(g,i,t){
+  const q=g.q,ax=q[2*i],ay=q[2*i+1],vx=q[2*i+2]-ax,vy=q[2*i+3]-ay,c=g.cl[i]||1;let x=ax+vx*t,y=ay+vy*t,nx,ny;
+  if(t<0||t>1){nx=-vy/c;ny=vx/c}   // straight on past the ends
+  else{nx=g.na[2*i]+t*(g.nb[2*i]-g.na[2*i]);ny=g.na[2*i+1]+t*(g.nb[2*i+1]-g.na[2*i+1]);const m=Math.hypot(nx,ny)||1;nx/=m;ny/=m;
+    const th=g.th[i];if(th){const R=Math.abs(g.rs[i]),xx=(t-.5)*c,b=(c*c/4-xx*xx)/(Math.sqrt(Math.max(0,R*R-xx*xx))+R*Math.cos(th/2)),k=th>0?-b:b;x+=nx*k;y+=ny*k}}
+  return{x,y,nx,ny};
+}
+// nearest point of the centreline along its normals (past its ends: on their extension); o > 0 is right of the direction of increasing stations
+function clProject(g,x,y){
+  const q=g.q;let best=null,bd=Infinity,fb=null,fd=Infinity;
+  for(let i=g.i0;i<=g.i1;i++){
+    const ax=q[2*i],ay=q[2*i+1],vx=q[2*i+2]-ax,vy=q[2*i+3]-ay,l2=vx*vx+vy*vy;if(!l2)continue;
+    const Qx=x-ax,Qy=y-ay,ts=(Qx*vx+Qy*vy)/l2,tc=ts<0?0:ts>1?1:ts,ex=Qx-vx*tc,ey=Qy-vy*tc,dd=ex*ex+ey*ey;
+    if(dd<fd){fd=dd;fb={i,t:tc,raw:ts}}
+    let t=ts;
+    if(g.th[i]){   // on the line through C(t) along the interpolated normal: a quadratic in t
+      const nax=g.na[2*i],nay=g.na[2*i+1],dnx=g.nb[2*i]-nax,dny=g.nb[2*i+1]-nay;
+      const a=-(vx*dny-vy*dnx),b=(Qx*dny-Qy*dnx)-(vx*nay-vy*nax),c=Qx*nay-Qy*nax;t=NaN;
+      if(Math.abs(a)<1e-15){if(Math.abs(b)>1e-15)t=-c/b}
+      else{const D=b*b-4*a*c;if(D>=0){const r=Math.sqrt(D),qq=-.5*(b+(b<0?-r:r)),t2=qq?c/qq:NaN;t=t2>=-1e-9&&t2<=1+1e-9?t2:qq/a}}
+    }
+    if(t>=-1e-9&&t<=1+1e-9){t=clamp(t,0,1);const F=clSegPt(g,i,t),d=(x-F.x)*(x-F.x)+(y-F.y)*(y-F.y);if(d<bd){bd=d;best={i,t,F}}}
+  }
+  if(!fb)return null;
+  let sel,ext=0;
+  if(best&&Math.sqrt(bd)<=Math.sqrt(fd)*1.05+.01)sel=best;
+  else if(fb.raw<0&&fb.i===g.i0){sel={i:fb.i,t:fb.raw};ext=-1}
+  else if(fb.raw>1&&fb.i===g.i1){sel={i:fb.i,t:fb.raw};ext=1}
+  else sel=fb;
+  const i=sel.i,t=sel.t,F=sel.F||clSegPt(g,i,t),c=g.cum[i]+clFrac(g,i,t)*(g.cum[i+1]-g.cum[i]),lo=(x-F.x)*F.nx+(y-F.y)*F.ny,on=Math.hypot(x-F.x,y-F.y)<.005;
+  return{i,t,c,s:staOf(g,c),o:on?0:(lo<0?1:-1)*g.dir*g.f(x-F.x,y-F.y),ext:ext*g.dir,px:F.x,py:F.y,ux:F.ny,uy:-F.nx,d:Math.hypot(x-F.x,y-F.y)};
+}
+function staAt(x,y,rx){if(!S.cl||rx!==S.cl.rx)return null;const g=clGeom();if(!g)return null;const p=clProject(g,x,y);if(p)p.g=g;return p}
+// the sheet point at station v (m) and offset o (m, + right); past the ends along their extension
+function staPointOf(g,v,o){
+  const c=chOf(g,v),cum=g.cum;let i=g.i0;
+  if(c>=cum[g.i1+1])i=g.i1;
+  else if(c>cum[g.i0]){let lo=g.i0,hi=g.i1+1;while(hi-lo>1){const m=(lo+hi)>>1;if(cum[m]<=c)lo=m;else hi=m}i=lo}
+  const seg=cum[i+1]-cum[i],F=clSegPt(g,i,clT(g,i,seg>0?(c-cum[i])/seg:0));let x=F.x,y=F.y;
+  if(o){const nx=-g.dir*F.nx,ny=-g.dir*F.ny,k=g.f(nx,ny)||1;x+=nx*o/k;y+=ny*o/k}   // right of the direction of travel
+  return{x,y,rx:g.rx,ext:c<cum[g.i0]-1e-9?-g.dir:c>cum[g.i1+1]+1e-9?g.dir:0};
+}
+const staPoint=(v,o)=>{const g=clGeom();return g?staPointOf(g,v,o):null};
+// No.12+5.234 (pitch p, dec decimals); before No.0: No.0−d
+function fmtSta(v,p,dec){
+  dec=dec==null?3:dec;p=p>0?p:20;if(!isFinite(v))return'—';const e=.5*Math.pow(10,-dec);
+  if(v<-e)return'No.0−'+(-v).toFixed(dec);
+  const n=Math.floor((v+e)/p),d=v-n*p;return'No.'+n+(d>=e?'+'+d.toFixed(dec):'');
+}
+const fmtOff=(o,dec)=>{dec=dec==null?3:dec;return Math.abs(o)<.5*Math.pow(10,-dec)?'中心':(o>0?'右 ':'左 ')+Math.abs(o).toFixed(dec)+' m'};
+const fmtOffS=o=>Math.abs(o)<5e-4?'中心':(o>0?'右':'左')+fmtC(Math.abs(o));
+const staPitch=n=>(S.cl&&S.cl.pitch)||n.p||20;
+const staName=n=>fmtSta(n.s,staPitch(n))+(Math.abs(n.o)>=5e-4?' '+fmtOffS(n.o):'');
+const staLine=st=>fmtSta(st.s,st.p)+' '+fmtOffS(st.o);
+const srcText=s=>s==='user'?'2点で合わせた座標':s==='gps'?'GPSの現在地':'図面の座標';
+// the station of a placed point: stored for 測点 points, worked out for coordinate points
+function noteSta(n){if(n.t==='sta')return{s:n.s,o:n.o,ext:n.ext,p:staPitch(n)};if(n.t==='coord'){const st=staAt(n.x,n.y,n.rx);return st?{s:st.s,o:st.o,ext:st.ext,p:st.g.pitch}:null}return null}
+const fmtDist=m=>m>=1000?(m/1000).toFixed(m>=10000?0:1)+' km':Math.round(m)+' m';
+// station labels in the drawing ("No.12", "No.12+5.5", full width too)
+const STA_RE=/(?:^|[^A-Za-z])N[Oo0]\s*\.?\s*(\d{1,4})(?:\s*\+\s*(\d+(?:\.\d+)?))?/;
+function parseStaText(s){let t=String(s);try{t=t.normalize('NFKC')}catch(e){}const m=STA_RE.exec(t);return m?{n:+m[1],d:m[2]?+m[2]:0}:null}
+function textCenter(t){const ca=Math.cos(t.a),sa=Math.sin(t.a),b=t.bp-1,dx=t.w*(.5-[0,.5,1][b%3]),dy=t.h*(.5-[0,.5,1][(b/3)|0]);return[t.x+ca*dx-sa*dy,t.y+sa*dx+ca*dy]}
+// station labels beside the centreline, each pinned to the tick line drawn across it when there is one
+function staLabels(g,own){
+  const out=[];own=new Set(own||[]);
+  for(const t of D.texts){
+    if(t.rx!==g.rx)continue;const v=parseStaText(t.s);if(!v)continue;
+    const c=textCenter(t),p=clProject(g,c[0],c[1]);if(!p||p.ext||p.d>Math.max(8*t.h+2,12))continue;
+    const r=Math.max(t.w*.75,3*t.h,2);let tick=null,bd=Infinity;
+    for(const sg of collectSegs(p.px,p.py,r)){
+      if(sg.p<0||own.has(sg.p))continue;const ex=sg.bx-sg.ax,ey=sg.by-sg.ay,el=Math.hypot(ex,ey);if(!(el>0))continue;
+      for(let k=Math.max(g.i0,p.i-4);k<=Math.min(g.i1,p.i+4);k++){
+        const ax=g.q[2*k],ay=g.q[2*k+1],vx=g.q[2*k+2]-ax,vy=g.q[2*k+3]-ay,vl=Math.hypot(vx,vy),den=vx*ey-vy*ex;
+        if(!(vl>0)||Math.abs(den)<.85*vl*el)continue;   // only lines crossing at more than ~58°
+        const qx=sg.ax-ax,qy=sg.ay-ay,s1=(qx*ey-qy*ex)/den,s2=(qx*vy-qy*vx)/den;if(s1<-1e-9||s1>1+1e-9||s2<-1e-9||s2>1+1e-9)continue;
+        const cc=g.cum[k]+clFrac(g,k,s1)*(g.cum[k+1]-g.cum[k]),dd=Math.abs(cc-p.c);if(dd<bd){bd=dd;tick=cc}
+      }
+    }
+    out.push({n:v.n,d:v.d,c:tick!=null?tick:p.c,exact:tick!=null});
+  }
+  return out;
+}
+// pitch, direction and the station at chainage 0 that the most labels agree on
+function staFit(labs,exact){
+  let best=null;
+  for(const p of[20,10,25,50,100,40,30,5])for(const dir of[1,-1]){
+    const offs=labs.map(l=>l.n*p+l.d-dir*l.c),tol=exact?Math.max(.05,p*.005):p*.3;
+    for(let a=0;a<offs.length;a++){
+      const ins=[],vs=new Set();for(let b=0;b<offs.length;b++)if(Math.abs(offs[b]-offs[a])<=tol){ins.push(offs[b]);vs.add(labs[b].n*p+labs[b].d)}
+      const sc=vs.size*10-(p===20?0:1);
+      if(!best||sc>best.sc){ins.sort((u,w)=>u-w);best={sc,p,dir,off:ins[ins.length>>1],distinct:vs.size}}
+    }
+  }
+  return best;
+}
+const staSnapshot=()=>S.notes.filter(n=>n.t==='sta').map(n=>[n.id,n.s,n.o,n.ext,n.p]);
+function refreshStaNotes(){for(const n of S.notes){if(n.t!=='sta')continue;const st=staAt(n.x,n.y,n.rx);if(!st)continue;n.s=st.s;n.o=st.o;n.p=st.g.pitch;if(st.ext)n.ext=st.ext;else delete n.ext}}
+function setCl(cl){pushUndo({op:'cl',before:S.cl,prev:staSnapshot()});S.cl=cl;S.clPend=null;refreshStaNotes();notesChanged();gpsLocate(true);readoutSoon();requestFrame()}
+function clearCl(){if(!S.cl)return;setCl(null);toast('中心線を消しました（↶で戻せます）')}
+function flipCl(){if(!S.cl)return;setCl(Object.assign({},S.cl,{id:uid(),dir:-(S.cl.dir||1),auto:0}));toast('測点の向きを反転しました（↶で戻せます）',2400)}
+// the chain under the reticle (or a tap) while choosing the centreline
+let clPick={D:null,i:-2,ch:null};
+function clPickAt(sx,sy){if(!D)return null;const i=primAt(sx!=null?sx:RC.x,sy!=null?sy:RC.y,26);if(clPick.D!==D||i!==clPick.i)clPick={D,i,ch:i>=0?chainFrom(i):null};return clPick.ch}
+function screenArrow(ux,uy){const k=((Math.round(Math.atan2(uy,ux)/(Math.PI/4))%8)+8)%8;return['→','↗','↑','↖','←','↙','↓','↘'][k]}
+function clPlace(sx,sy){
+  const ch=clPickAt(sx,sy);if(!ch){toast('中心線に照準を合わせてください（線をタップしても選べます）',2600);sfx('erase');return}
+  if(!realLenFn(ch.rx)){dialog('縮尺がわかりません','この図は縮尺がわからないため、測点（距離）を計算できません。\n右上の「縮尺」で縮尺を指定するか、「設定」で座標を2点で合わせてください。');return}
+  const cl={id:uid(),rx:ch.rx,L:(D.layers[ch.L]||{}).name||'',pts:ch.pts.map(v=>Math.round(v*1e6)/1e6),sp:ch.sp,pc:ch.pc,np:ch.prims.length,dir:1,pitch:(S.cl&&S.cl.pitch)||20,ref:null,auto:0};
+  const g=clGeomOf(cl);if(!g){toast('この線は長さがありません');return}
+  sfx('place');buzz(12);
+  // the drawing's own stations: "No.n" labels pinned to their tick lines
+  const labs=staLabels(g,ch.prims),ex=labs.filter(l=>l.exact);
+  const fit=ex.length>=2?staFit(ex,true):null;
+  if(fit&&fit.distinct>=2){
+    Object.assign(cl,{dir:fit.dir,pitch:fit.p,ref:{i:0,t:0,v:fit.off},auto:fit.distinct});
+    setCl(cl);setCoordMode('sta');const g2=clGeom(),a=staOf(g2,0),b=staOf(g2,g2.len);
+    toast('図面の測点から合わせました（'+fmtSta(Math.min(a,b),g2.pitch,0)+' 〜 '+fmtSta(Math.max(a,b),g2.pitch,0)+'）',3400);sfx('done');buzz([10,40,16]);return;
+  }
+  const loose=labs.length>=2?staFit(labs,false):null;
+  S.clPend=cl;S.clLabs=labs;S.clFit=loose&&loose.distinct>=2?loose:null;setCoordMode('clo');
+}
+// a point of known station on the centreline (pending or the current one)
+function cloPlace(p){
+  const cl=S.clPend||S.cl;if(!cl){setCoordMode('cl');return}
+  const g=clGeomOf(cl);if(!g){toast('縮尺がわからないため測点を計算できません',2800);return}
+  if(p.rx!==cl.rx){toast('中心線のある図の中で選んでください',2600);return}
+  const pr=clProject(g,p.x,p.y);if(!pr||pr.d*V.z>40){toast('中心線の上の点（測点の位置）を選んでください',2600);sfx('erase');return}
+  effects.push({x:pr.px,y:pr.py,t0:now(),c:STA_COL});sfx('place');buzz(12);
+  const labs=S.clPend?(S.clLabs||[]):staLabels(g,[]);
+  let lab=null,bd=Infinity;for(const l of labs){const d=Math.abs(l.c-pr.c);if(d<bd){bd=d;lab=l}}if(lab&&bd>Math.max(g.pitch*.4,2))lab=null;
+  const fit=S.clPend?S.clFit:null,dir=fit?fit.dir:(cl.dir||1),pitch=fit?fit.p:g.pitch;
+  openNumSheet({title:'この点の測点',hint:'この点の測点を入れてください（No.3 なら 3、No.3+12.5 なら 3 と 12.5）。'+(lab?'近くの文字「No.'+lab.n+(lab.d?'+'+lab.d:'')+'」を入れてあります。':'')+'向きは、測点の数字が大きくなる方向です。',ok:'決定',
+    rows:[{label:'No.',ph:'例 3',val:lab?String(lab.n):'',sta:true,int:true},{label:'＋',sub:'m',ph:'例 12.500（なければ空欄）',opt:true,val:lab&&lab.d?String(lab.d):''},{label:'ピッチ',sub:'m',ph:'20',val:String(+pitch.toFixed(3)),pos:true},{label:'増える向き',small:true,choice:[[1,screenArrow(pr.ux,pr.uy)+' の向き'],[-1,screenArrow(-pr.ux,-pr.uy)+' の向き']],val:dir}],
+    cb:([n,d,pt,dr])=>{
+      const v=n*pt+(d||0),nc=Object.assign({},cl,{id:uid(),ref:{i:pr.i,t:pr.t,v},pitch:pt,dir:dr===-1?-1:1,auto:0});
+      setCl(nc);setCoordMode('sta');sfx('done');buzz([10,40,16]);
+      // the drawing's labels as a check
+      const g2=clGeom();let bad=0,good=0;if(g2)for(const l of labs){const w=l.n*pt+l.d;if(Math.abs(staOf(g2,l.c)-w)<=Math.max(pt*.3,1))good++;else bad++}
+      if(bad>=2&&bad>good)dialog('図面の測点と合っていないようです','近くにある測点の文字（No.○）と、計算した測点が '+bad+' か所で合いません。\n入れた測点・ピッチ・向きを確かめてください（↶で戻せます）。');
+      else toast('測点を合わせました（この点 '+fmtSta(v,pt)+'）',2600);
+    }});
+}
+function staPlace(p){
+  const st=staAt(p.x,p.y,p.rx);if(!st){toast(S.cl?'中心線のある図の中で照準を合わせてください':'中心線が未設定です',2400);return}
+  effects.push({x:p.x,y:p.y,t0:now(),c:STA_COL});buzz([10,40,16]);
+  const n={id:uid(),t:'sta',x:p.x,y:p.y,rx:p.rx,s:st.s,o:st.o,p:st.g.pitch,ts:Date.now()};if(st.ext)n.ext=st.ext;
+  const c=coordAt(p.x,p.y,p.rx);if(c){n.X=c.X;n.Y=c.Y;n.src=c.src}
+  const e=elevAt(p.x,p.y,p.rx);if(e){n.h=e.H;n.hsrc='elev'}
+  addNote(n);sfx('done');
+}
+// 測点で探す: station + offset → a point (with coordinates when the drawing has them), e.g. for setting out
+function findSta(){
+  const g=clGeom();if(!g){toast('中心線が未設定です');setCoordMode('cl');return}
+  const tg=currentTarget(),st=staAt(tg.x,tg.y,resolveRx(tg)),n0=st&&st.s>=0?Math.floor((st.s+5e-4)/g.pitch):null;
+  openNumSheet({title:'測点で探す',hint:'測点と中心からの距離を入れると、その位置へ移動して印をつけます'+(hasCoords()?'（座標も出るので、SIMAで書き出せます）':'')+'。',ok:'この位置へ移動',
+    rows:[{label:'No.',ph:'例 12',val:n0!=null?String(n0):'',sta:true,int:true},{label:'＋',sub:'m',ph:'例 5.000（なければ空欄）',opt:true},{label:'中心から',small:true,sub:'m',lr:true,ph:'中心なら空欄',opt:true}],
+    cb:([n,d,o])=>{
+      const v=n*g.pitch+(d||0),p=staPointOf(g,v,o||0);if(!p)return;
+      const z=clamp(W*.8/Math.max(1e-9,30*g.sl/g.len),zMin(),Z_MAX);flyTo({cx:p.x,cy:p.y-(H/2-RC.y)/z,z},420);
+      const nn={id:uid(),t:'sta',x:p.x,y:p.y,rx:p.rx,s:v,o:o||0,p:g.pitch,ts:Date.now()};if(p.ext)nn.ext=p.ext;
+      const c=coordAt(p.x,p.y,p.rx);if(c){nn.X=c.X;nn.Y=c.Y;nn.src=c.src}const e=elevAt(p.x,p.y,p.rx);if(e){nn.h=e.H;nn.hsrc='elev'}
+      addNote(nn);sfx('done');toast(staName(nn)+' に印をつけました'+(p.ext?'（中心線の延長上）':''),2600);
+    }});
+}
+// the centreline in violet with its stations (coordinate tool)
+function drawClLine(ctx,q,o){
+  const n=q.length/2;if(n<2)return;ctx.save();ctx.lineCap='round';ctx.lineJoin='round';ctx.globalAlpha=o.alpha||1;
+  ctx.beginPath();for(let i=0;i<n;i++){const s=toScreen(q[2*i],q[2*i+1]);i?ctx.lineTo(s[0],s[1]):ctx.moveTo(s[0],s[1])}
+  ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=o.hi?8:6;ctx.stroke();if(o.dash)ctx.setLineDash([10,6]);ctx.strokeStyle=STA_COL;ctx.lineWidth=o.hi?4:2.6;ctx.stroke();ctx.restore();
+}
+function drawClTicks(ctx,g){
+  const p=g.pitch,sp=g.sl/g.len*V.z*p;if(!(sp>=5))return;   // px between stations
+  let step=1;for(const k of[1,2,5,10,25,50,100,250,500]){step=k;if(sp*k>=46)break}
+  const q=g.q,cum=g.cum;ctx.save();ctx.font='700 11px "Chakra Petch","BIZ UDPGothic",sans-serif';ctx.textBaseline='middle';ctx.textAlign='left';ctx.lineCap='round';
+  for(let i=g.i0;i<=g.i1;i++){
+    const c0=cum[i],c1=cum[i+1];if(!(c1>c0))continue;
+    const a=toScreen(q[2*i],q[2*i+1]),b=toScreen(q[2*i+2],q[2*i+3]);
+    if(Math.max(a[0],b[0])<-60||Math.min(a[0],b[0])>W+60||Math.max(a[1],b[1])<-60||Math.min(a[1],b[1])>H+60)continue;
+    const va=staOf(g,c0),vb=staOf(g,c1),lo=Math.min(va,vb),hi=Math.max(va,vb);
+    for(let m=Math.ceil(lo/p-1e-9);m*p<=hi+1e-9;m++){
+      const c=chOf(g,m*p);if(c<c0-1e-9||(c>=c1-1e-9&&i<g.i1))continue;   // a tick on a shared vertex: once
+      const F=clSegPt(g,i,clT(g,i,(c-c0)/(c1-c0))),s=toScreen(F.x,F.y),x=s[0],y=s[1];if(x<-30||x>W+30||y<-30||y>H+30)continue;
+      const major=m%step===0;if(!major&&sp<8)continue;const tl=major?9:5,nx=F.nx,ny=-F.ny;   // normal on screen
+      ctx.beginPath();ctx.moveTo(x-nx*tl,y-ny*tl);ctx.lineTo(x+nx*tl,y+ny*tl);ctx.strokeStyle='rgba(0,0,0,.55)';ctx.lineWidth=4;ctx.stroke();ctx.strokeStyle=STA_COL;ctx.lineWidth=2;ctx.stroke();
+      if(major&&m>=0){
+        const t2='No.'+m,w=ctx.measureText(t2).width+10,rnx=-g.dir*nx,rny=-g.dir*ny,dd=13+Math.abs(rnx)*w/2+Math.abs(rny)*9;   // on the right of the direction of travel
+        const lx=x+rnx*dd-w/2,ly=y+rny*dd-9;ctx.fillStyle='rgba(12,17,23,.88)';rr(ctx,lx,ly,w,18,5);ctx.fill();ctx.fillStyle=STA_COL;ctx.fillText(t2,lx+5,ly+9.5);
+      }
+    }
+  }
+  ctx.restore();
+}
+function drawClLayer(ctx){
+  const m=S.coordMode;
+  if(m==='cl'){const g=clGeom();if(g)drawClLine(ctx,g.q,{alpha:.35});const ch=clPickAt();if(ch)drawClLine(ctx,ch.pts,{dash:true,hi:true});return}
+  if(m==='clo'&&S.clPend){drawClLine(ctx,S.clPend.pts,{dash:true});return}
+  const g=clGeom();if(g){drawClLine(ctx,g.q,{});drawClTicks(ctx,g)}
+}
+function drawStaMark(ctx,x,y,n,sel,pop){
+  ctx.save();ctx.translate(x,y);ctx.scale(pop,pop);ctx.lineJoin='round';
+  const mark=()=>{ctx.beginPath();ctx.moveTo(0,-7.5);ctx.lineTo(7.5,0);ctx.lineTo(0,7.5);ctx.lineTo(-7.5,0);ctx.closePath()};
+  ctx.lineWidth=4.5;ctx.strokeStyle='rgba(0,0,0,.6)';mark();ctx.stroke();ctx.lineWidth=2;ctx.strokeStyle=STA_COL;mark();ctx.stroke();ctx.fillStyle=STA_COL;ctx.beginPath();ctx.arc(0,0,1.8,0,Math.PI*2);ctx.fill();
+  ctx.font='600 11.5px "Chakra Petch","BIZ UDPGothic",sans-serif';
+  const tag=n.name||fmtSta(n.s,staPitch(n)),val=fmtOffS(n.o),tw=ctx.measureText(tag).width+12,w=tw+ctx.measureText(val).width+14,h=21,lx=11,ly=-h-9;
+  ctx.fillStyle='rgba(12,17,23,.93)';rr(ctx,lx,ly,w,h,6);ctx.fill();
+  ctx.save();rr(ctx,lx,ly,w,h,6);ctx.clip();ctx.fillStyle=STA_COL;ctx.fillRect(lx,ly,tw,h);ctx.restore();
+  ctx.lineWidth=sel?2.5:1.2;ctx.strokeStyle=sel?'#fff':STA_COL;rr(ctx,lx,ly,w,h,6);ctx.stroke();
+  ctx.textBaseline='middle';ctx.textAlign='left';ctx.fillStyle=STA_INK;ctx.fillText(tag,lx+6,ly+h/2+.5);ctx.fillStyle='#f4e8ff';ctx.fillText(val,lx+tw+7,ly+h/2+.5);
+  ctx.restore();return[x+lx*pop,y+ly*pop,w*pop,h*pop];
+}
+
+/* ---------- GPS: the phone's position on the drawing (JGD2011 平面直角座標系; the zone is the one that fits the drawing's coordinates) ---------- */
+const ZONES=[null,[33,129.5],[33,131],[36,132+1/6],[33,133.5],[36,134+1/3],[36,136],[36,137+1/6],[36,138.5],[36,139+5/6],[40,140+5/6],[44,140.25],[44,142.25],[44,144.25],[26,142],[26,127.5],[26,124],[26,131],[20,136],[26,154]];
+const ROMAN=['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX'];
+const ZONE_AREA=['','長崎・鹿児島の一部の島','福岡・佐賀・熊本・大分・宮崎・鹿児島','山口・島根・広島','香川・愛媛・徳島・高知','兵庫・鳥取・岡山','京都・大阪・福井・滋賀・三重・奈良・和歌山','石川・富山・岐阜・愛知','新潟・長野・山梨・静岡','東京・福島・栃木・茨城・埼玉・千葉・群馬・神奈川','青森・秋田・山形・岩手・宮城','北海道 西部','北海道 中央部','北海道 東部','東京都 小笠原','沖縄 本島など','沖縄 宮古・八重山','沖縄 大東','東京都 沖ノ鳥島','東京都 南鳥島'];
+// latitude/longitude (JGD2011 ≈ GPS) → plane rectangular X (north), Y (east) in metres (国土地理院の計算式, GRS80)
+function llToXY(lat,lon,zone){
+  const o=ZONES[zone],m0=.9999,a=6378137,n=1/(2*298.257222101-1),p=lat*D2R,l=lon*D2R,p0=o[0]*D2R,l0=o[1]*D2R;
+  const n2=n*n,n3=n2*n,n4=n3*n,n5=n4*n;
+  const A=[1+n2/4+n4/64,-1.5*(n-n3/8-n5/64),15/16*(n2-n4/4),-35/48*(n3-5/16*n5),315/512*n4,-693/1280*n5];
+  const k=m0*a/(1+n),Ab=k*A[0];let S0=A[0]*p0;for(let j=1;j<=5;j++)S0+=A[j]*Math.sin(2*j*p0);S0*=k;
+  const al=[0,n/2-2/3*n2+5/16*n3+41/180*n4-127/288*n5,13/48*n2-3/5*n3+557/1440*n4+281/630*n5,61/240*n3-103/140*n4+15061/26880*n5,49561/161280*n4-179/168*n5,34729/80640*n5];
+  const e=2*Math.sqrt(n)/(1+n),t=Math.sinh(Math.atanh(Math.sin(p))-e*Math.atanh(e*Math.sin(p))),tb=Math.sqrt(1+t*t),lc=Math.cos(l-l0),ls=Math.sin(l-l0);
+  const xi=Math.atan(t/lc),eta=Math.atanh(ls/tb);let x=xi,y=eta;
+  for(let j=1;j<=5;j++){x+=al[j]*Math.sin(2*j*xi)*Math.cosh(2*j*eta);y+=al[j]*Math.cos(2*j*xi)*Math.sinh(2*j*eta)}
+  return{X:Ab*x-S0,Y:Ab*y};
+}
+const GPS={on:false,follow:false,id:null,fix:null,hist:[],XY:null,p:null,sta:null,zone:0,auto:true,dist:0,far:false,first:false,err:0,off:null,nocoord:false};
+const GPS_NOTE={id:'__gps',t:'gps'};
+const GEO_OPT={enableHighAccuracy:true,maximumAge:1000,timeout:30000};
+// the drawing's coordinate extent (all figures that have coordinates)
+function coordBox(){
+  if(!D)return null;const rxs=[];if(S.geo)rxs.push(S.geo.rx);D.xfs.forEach((x,i)=>{if(i>0&&x.kind===2&&!(S.geo&&S.geo.rx===i))rxs.push(i)});
+  let b=null;
+  for(const rx of rxs){const r=rx>0?(D.regions.find(q=>q.rx===rx)||{}).bb:D.fit;if(!r)continue;
+    for(const[x,y]of[[r[0],r[1]],[r[2],r[1]],[r[0],r[3]],[r[2],r[3]]]){const c=coordAt(x,y,rx);if(!c)continue;if(!b)b=[c.X,c.Y,c.X,c.Y];else{b[0]=Math.min(b[0],c.X);b[1]=Math.min(b[1],c.Y);b[2]=Math.max(b[2],c.X);b[3]=Math.max(b[3],c.Y)}}}
+  return b;
+}
+const boxDist=(b,X,Y)=>Math.hypot(Math.max(b[0]-X,0,X-b[2]),Math.max(b[1]-Y,0,Y-b[3]));
+function gpsOffset(){if(!D)return null;const o=LS.get('gpsoff:'+D.hash,null);return o&&isFinite(o.dX)&&isFinite(o.dY)?o:null}
+function gpsSetOffset(o){if(!D)return;if(o)LS.set('gpsoff:'+D.hash,o);else LS.del('gpsoff:'+D.hash)}
+// place the last fix on the current drawing
+function gpsLocate(quiet){
+  GPS.p=null;GPS.sta=null;GPS.XY=null;GPS.raw=null;GPS.nocoord=false;
+  const f=GPS.fix;if(!GPS.on||!f||!D){gpsUI();requestFrame();return}
+  const box=coordBox();if(!box){GPS.nocoord=true;gpsUI();requestFrame();return}
+  const zset=LS.get('gpsZone',0)|0,zs=zset>=1&&zset<=19?[zset]:ZONES.map((z,i)=>i).slice(1);let best=null,bd=Infinity;
+  for(const z of zs){const q=llToXY(f.lat,f.lon,z);if(!isFinite(q.X+q.Y))continue;const d=boxDist(box,q.X,q.Y);if(d<bd){bd=d;best=q;GPS.zone=z}}
+  if(!best){gpsUI();return}
+  GPS.auto=!(zset>=1&&zset<=19);GPS.dist=bd;GPS.far=bd>Math.max(300,.5*Math.hypot(box[2]-box[0],box[3]-box[1]));GPS.raw=best;
+  const off=gpsOffset();GPS.off=off;GPS.XY={X:best.X+(off?off.dX:0),Y:best.Y+(off?off.dY:0)};
+  GPS.p=sheetPointAt(GPS.XY.X,GPS.XY.Y,S.cl?S.cl.rx:null);
+  GPS.sta=GPS.p?staAt(GPS.p.x,GPS.p.y,GPS.p.rx):null;
+  if(!quiet)gpsFollow(false);
+  gpsUI();requestFrame();
+}
+function gpsFollow(firstFix){
+  if(!GPS.follow||!GPS.p||GPS.far||ptrs.size)return;
+  let z=V.z;if(firstFix){const want=W*GPS.p.mpp/120;if(z<want)z=Math.min(want,Z_MAX)}   // first fix: about 120 m across the screen
+  else{const sp=toScreen(GPS.p.x,GPS.p.y);if(Math.hypot(sp[0]-RC.x,sp[1]-RC.y)<6)return}
+  flyTo({cx:GPS.p.x,cy:GPS.p.y-(H/2-RC.y)/z,z},firstFix?450:350);
+}
+function gpsOnFix(pos){
+  const c=pos.coords,t=Date.now();   // time of arrival (device clocks and fix stamps can disagree)
+  GPS.fix={lat:c.latitude,lon:c.longitude,acc:c.accuracy||0,hd:c.heading,sp:c.speed,t};GPS.err=0;
+  GPS.hist.push(GPS.fix);while(GPS.hist.length>1&&t-GPS.hist[0].t>15000)GPS.hist.shift();
+  const firstFix=!GPS.first;GPS.first=true;gpsLocate(true);
+  if(GPS.nocoord){if(firstFix)dialog('現在地を図面に出せません','この図面には座標が設定されていません。\n図面に座標が入っていない場合は、「座標」→「設定」で2点の座標を合わせてください。');return}
+  if(!GPS.p)return;
+  if(GPS.far){if(GPS.follow){GPS.follow=false;gpsUI()}if(firstFix){dialog('現在地が図面の範囲の外です','図面の座標の範囲から約 '+fmtDist(GPS.dist)+' 離れています（第'+ROMAN[GPS.zone]+'系'+(GPS.auto?'・自動で判定':'')+'）。\n現場に着くと図面の上に出ます。離れすぎている場合は「座標」→「設定」で系番号を確かめてください。')}return}
+  if(firstFix)sfx('done');
+  gpsFollow(firstFix);
+}
+function gpsOnErr(e){
+  const code=e&&e.code;
+  if(code===1){gpsStop();dialog('位置情報が使えません',window.claude?'この画面（Claudeの中）では位置情報を使えないことがあります。\nホーム画面に追加したWeb版で開くと、GPSで現在地を出せます。':'位置情報の利用が許可されていません。\nスマホの設定やブラウザで、このページの位置情報を「許可」にしてください。');return}
+  if(GPS.fix){requestFrame();return}   // lost for a moment: keep the last fix (marked when it gets old)
+  GPS.err=code||2;gpsUI();toast(code===3?'現在地を待っています（空の見える場所で）':'現在地を取得できません。屋外でお試しください',3000);
+}
+function gpsWatch(){if(GPS.id!=null)return;try{GPS.id=navigator.geolocation.watchPosition(gpsOnFix,gpsOnErr,GEO_OPT)}catch(e){gpsOnErr({code:2})}}
+function gpsUnwatch(){if(GPS.id!=null){try{navigator.geolocation.clearWatch(GPS.id)}catch(e){}GPS.id=null}}
+function gpsStart(){
+  if(!D)return;
+  if(!('geolocation' in navigator)){dialog('現在地が使えません','この端末・ブラウザでは位置情報を使えません。');return}
+  if(!hasCoords()){dialog('座標の設定が必要です','現在地を図面に出すには、図面の座標が必要です。\n図面に座標が入っていない場合は、「座標」→「設定」で2点の座標（X・Y）を合わせてください。');return}
+  GPS.on=true;GPS.follow=true;GPS.first=false;GPS.fix=null;GPS.hist=[];GPS.err=0;gpsWatch();gpsUI();toast('現在地を探しています…',2200);sfx('tap');requestFrame();
+}
+function gpsStop(){gpsUnwatch();Object.assign(GPS,{on:false,follow:false,fix:null,hist:[],p:null,sta:null,XY:null});if(S.sel==='__gps')select(null);gpsUI();requestFrame()}
+function gpsUnfollow(){if(GPS.follow){GPS.follow=false;gpsUI()}}
+function gpsUI(){
+  const b=$('#gpsBtn');if(!b)return;b.hidden=!D;
+  b.classList.toggle('on',GPS.on);b.classList.toggle('follow',GPS.on&&GPS.follow);b.classList.toggle('wait',GPS.on&&!GPS.fix);
+  b.setAttribute('aria-label',!GPS.on?'現在地を表示（GPS）':GPS.follow?'現在地の表示を止める':'現在地へ移動');
+  if(S.sel==='__gps'){if(GPS.on)select(GPS_NOTE);else select(null)}
+}
+// average of the last seconds of fixes (for the offset correction), in the zone in use
+function gpsRawAvg(){const h=GPS.hist.filter(f=>GPS.fix&&GPS.fix.t-f.t<=10000);if(!h.length||!GPS.zone)return null;let X=0,Y=0;for(const f of h){const q=llToXY(f.lat,f.lon,GPS.zone);X+=q.X;Y+=q.Y}return{X:X/h.length,Y:Y/h.length,n:h.length}}
+function gpsFixPlace(p){
+  const c=coordAt(p.x,p.y,p.rx);if(!c){toast('座標のある図の中で選んでください',2400);return}
+  const raw=gpsRawAvg();if(!raw){toast('GPSの現在地がまだ取れていません',2400);return}
+  const o={dX:c.X-raw.X,dY:c.Y-raw.Y,t:Date.now()},d=Math.hypot(o.dX,o.dY);
+  if(d>500){dialog('ずれが大きすぎます','GPSの位置と指定した点が約 '+fmtDist(d)+' 離れています。\n立っている場所と同じ点を選んだか、系番号（「設定」）が合っているか確かめてください。');return}
+  gpsSetOffset(o);effects.push({x:p.x,y:p.y,t0:now(),c:GPS_COL});sfx('done');buzz([10,40,16]);
+  toast('GPSのずれを補正しました（'+d.toFixed(1)+' m）',2800);setCoordMode(lastCoordMode==='sta'&&S.cl?'sta':'read');gpsLocate(true);
+}
+function gpsPut(){
+  if(!GPS.p||!GPS.XY){toast('現在地がまだ取れていません');return}
+  const p=GPS.p,d=new Date(),hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'),st=staAt(p.x,p.y,p.rx);
+  const n=st?{id:uid(),t:'sta',x:p.x,y:p.y,rx:p.rx,s:st.s,o:st.o,p:st.g.pitch,X:GPS.XY.X,Y:GPS.XY.Y,src:'gps',name:'現在地 '+hm,ts:Date.now()}:{id:uid(),t:'coord',x:p.x,y:p.y,rx:p.rx,X:GPS.XY.X,Y:GPS.XY.Y,src:'gps',name:'現在地 '+hm,ts:Date.now()};
+  if(st&&st.ext)n.ext=st.ext;const e=elevAt(p.x,p.y,p.rx);if(e){n.h=e.H;n.hsrc='elev'}
+  addNote(n);effects.push({x:p.x,y:p.y,t0:now(),c:GPS_COL});sfx('done');buzz([10,40,16]);toast('現在地に点を置きました（'+hm+'）',2200);
+}
+// travel direction on screen from the GPS heading (only while moving)
+function gpsHeading(){
+  const f=GPS.fix;if(!f||f.hd==null||!isFinite(f.hd)||!(f.sp>.7)||!GPS.XY||!GPS.p)return null;
+  const X=GPS.XY.X,Y=GPS.XY.Y,rx=GPS.p.rx,p0=xyToSheet(X,Y,rx),pn=xyToSheet(X+1,Y,rx),pe=xyToSheet(X,Y+1,rx);if(!p0||!pn||!pe)return null;
+  const a=f.hd*D2R,vx=Math.sin(a)*(pe.x-p0.x)+Math.cos(a)*(pn.x-p0.x),vy=Math.sin(a)*(pe.y-p0.y)+Math.cos(a)*(pn.y-p0.y),l=Math.hypot(vx,vy);
+  return l>0?[vx/l,-vy/l]:null;
+}
+function drawGps(ctx){
+  if(!GPS.on||!D||!GPS.p)return;
+  const p=GPS.p,s=toScreen(p.x,p.y),f=GPS.fix;
+  if(s[0]<-10||s[0]>W+10||s[1]<TOPH-10||s[1]>H-DOCKH+10){gpsEdge(ctx,s);return}
+  ctx.save();
+  const R=f&&p.mpp>0?f.acc/p.mpp*V.z:0;
+  if(R>10){ctx.beginPath();ctx.arc(s[0],s[1],Math.min(R,3*Math.hypot(W,H)),0,Math.PI*2);ctx.fillStyle='rgba(61,139,255,.13)';ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle='rgba(61,139,255,.6)';ctx.stroke()}
+  const hd=gpsHeading();if(hd){ctx.beginPath();ctx.moveTo(s[0]+hd[0]*25,s[1]+hd[1]*25);ctx.lineTo(s[0]-hd[1]*10,s[1]+hd[0]*10);ctx.lineTo(s[0]+hd[1]*10,s[1]-hd[0]*10);ctx.closePath();ctx.fillStyle='rgba(61,139,255,.8)';ctx.fill()}
+  ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=6;ctx.beginPath();ctx.arc(s[0],s[1],9.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.shadowBlur=0;
+  ctx.beginPath();ctx.arc(s[0],s[1],6.8,0,Math.PI*2);ctx.fillStyle=GPS_COL;ctx.fill();
+  const L1=GPS.sta?fmtSta(GPS.sta.s,GPS.sta.g.pitch,1)+'  '+fmtOff(GPS.sta.o,1):'X '+GPS.XY.X.toFixed(1)+'  Y '+GPS.XY.Y.toFixed(1);
+  const old=f&&Date.now()-f.t>30000,L2=(old?'更新待ち · ':'')+'±'+(f?Math.max(1,Math.round(f.acc)):'?')+' m'+(GPS.off?' · 補正中':'')+(GPS.sta&&GPS.sta.ext?' · 延長上':'');
+  ctx.font='700 11px "BIZ UDPGothic",sans-serif';const tag='現在地',tw=ctx.measureText(tag).width+12;
+  ctx.font='600 12px "Chakra Petch","BIZ UDPGothic",sans-serif';const w=Math.max(ctx.measureText(L1).width,ctx.measureText(L2).width)+tw+16,h=36;
+  let lx=s[0]+15,ly=s[1]-h-11;if(lx+w>W-6)lx=s[0]-15-w;if(ly<TOPH+2)ly=s[1]+14;
+  ctx.fillStyle='rgba(12,17,23,.94)';rr(ctx,lx,ly,w,h,7);ctx.fill();
+  ctx.save();rr(ctx,lx,ly,w,h,7);ctx.clip();ctx.fillStyle=GPS_COL;ctx.fillRect(lx,ly,tw,h);ctx.restore();
+  ctx.lineWidth=S.sel==='__gps'?2.5:1.2;ctx.strokeStyle=S.sel==='__gps'?'#fff':GPS_COL;rr(ctx,lx,ly,w,h,7);ctx.stroke();
+  ctx.textBaseline='middle';ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='700 11px "BIZ UDPGothic",sans-serif';ctx.fillText(tag,lx+tw/2,ly+h/2+.5);
+  ctx.textAlign='left';ctx.font='600 12px "Chakra Petch","BIZ UDPGothic",sans-serif';ctx.fillStyle='#e8f0ff';ctx.fillText(L1,lx+tw+8,ly+10.5);ctx.fillStyle=old||(f&&f.acc>30)?'#ffb35c':'#a9bfdc';ctx.fillText(L2,lx+tw+8,ly+h-9.5);
+  ctx.restore();labelHits.push({r:[lx,ly,w,h],id:'__gps'});
+}
+// off screen: an arrow on the edge pointing at the position, with the distance
+function gpsEdge(ctx,s){
+  const cx=W/2,cy=(TOPH+H-DOCKH)/2,hw=W/2-28,hh=(H-DOCKH-TOPH)/2-28;if(hw<=0||hh<=0)return;
+  const ang=Math.atan2(s[1]-cy,s[0]-cx),ca=Math.cos(ang),sa=Math.sin(ang),k=Math.min(Math.abs(ca)>1e-9?hw/Math.abs(ca):Infinity,Math.abs(sa)>1e-9?hh/Math.abs(sa):Infinity),x=cx+ca*k,y=cy+sa*k;
+  const q=toSheet(cx,cy),dm=Math.hypot(GPS.p.x-q[0],GPS.p.y-q[1])*GPS.p.mpp;
+  ctx.save();ctx.translate(x,y);ctx.rotate(ang);ctx.beginPath();ctx.moveTo(15,0);ctx.lineTo(-7,-10);ctx.lineTo(-2,0);ctx.lineTo(-7,10);ctx.closePath();ctx.lineJoin='round';ctx.lineWidth=2.5;ctx.strokeStyle='#fff';ctx.stroke();ctx.fillStyle=GPS_COL;ctx.fill();ctx.restore();
+  ctx.save();ctx.font='700 11.5px "BIZ UDPGothic",sans-serif';const t='現在地 '+fmtDist(dm),w=ctx.measureText(t).width+14;
+  const tx=clamp(x-ca*34-w/2,6,W-w-6),ty=clamp(y-sa*30-10,TOPH+4,H-DOCKH-26);
+  ctx.fillStyle='rgba(12,17,23,.92)';rr(ctx,tx,ty,w,21,6);ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle=GPS_COL;ctx.stroke();ctx.fillStyle='#e8f0ff';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(t,tx+7,ty+11);ctx.restore();
+  labelHits.push({r:[tx,ty,w,21],id:'__gps'});
+}
+document.addEventListener('visibilitychange',()=>{if(!GPS.on)return;if(document.visibilityState==='hidden')gpsUnwatch();else gpsWatch()});
+setInterval(()=>{if(GPS.on&&GPS.fix)requestFrame()},10000);   // the label notices an old fix
 
 /* =========================================================
    readout / chip / hint UI
@@ -1958,7 +2496,8 @@ function undo(){
   else if(u.op==='hide'){setHidden(u.i,false)}
   else if(u.op==='unhideAll'){u.list.forEach(i=>{D.hid[i]=1;dirtyPrim(D,i)});invalidateAll()}
   else if(u.op==='elev'){S.elev=u.before;u.prev.forEach(([id,v])=>{const q=S.notes.find(n=>n.id===id);if(q){if(q.t==='elev')q.H=v;else q.h=v}});readoutSoon();requestFrame()}
-  else if(u.op==='geo'){S.geo=u.before;S.gA=null;u.prev.forEach(([id,X,Y])=>{const q=S.notes.find(n=>n.id===id);if(q){q.X=X;q.Y=Y}});readoutSoon()}
+  else if(u.op==='geo'){S.geo=u.before;S.gA=null;u.prev.forEach(([id,X,Y,src])=>{const q=S.notes.find(n=>n.id===id);if(q){q.X=X;q.Y=Y;if(q.t==='sta')q.src=src}});refreshStaNotes();gpsLocate(true);readoutSoon()}
+  else if(u.op==='cl'){S.cl=u.before;S.clPend=null;u.prev.forEach(([id,s0,o,ext,p])=>{const q=S.notes.find(n=>n.id===id);if(q){q.s=s0;q.o=o;q.ext=ext;q.p=p}});if(S.coordMode==='sta'&&!S.cl)setCoordMode('read');gpsLocate(true);readoutSoon()}
   if(S.sel)select(S.notes.find(n=>n.id===S.sel)||null);
   sfx('undo');toast('元に戻しました');notesChanged();
 }
@@ -2000,7 +2539,7 @@ function scheduleSave(){if(!D||D.noSave)return;clearTimeout(saveTimer);saveTimer
 function flushSave(){
   clearTimeout(saveTimer);saveTimer=0;if(!D||D.noSave)return;
   const hidden=[];for(let i=0;i<D.hid.length;i++)if(D.hid[i])hidden.push(i);
-  saveQ.set(D.hash,{kind:'drawing',name:D.name,hash:D.hash,size:D.size,updatedAt:Date.now(),manual:S.manual||0,notes:cleanNotes(S.notes),hidden,geo:S.geo?{rx:S.geo.rx,a:S.geo.a,b:S.geo.b,A:S.geo.A,B:S.geo.B}:null,elev:S.elev&&Object.keys(S.elev).length?S.elev:null});
+  saveQ.set(D.hash,{kind:'drawing',name:D.name,hash:D.hash,size:D.size,updatedAt:Date.now(),manual:S.manual||0,notes:cleanNotes(S.notes),hidden,geo:S.geo?{rx:S.geo.rx,a:S.geo.a,b:S.geo.b,A:S.geo.A,B:S.geo.B}:null,elev:S.elev&&Object.keys(S.elev).length?S.elev:null,cl:S.cl||null});
   pumpSave();
 }
 async function pumpSave(){
@@ -2069,7 +2608,7 @@ async function hashBytes(buf){
    ========================================================= */
 const DOCS=[];let CUR=null;
 const PARSE_BUDGET=650000,MAX_PARSED=10,SNAP_KEEP=3;
-function newDoc(o){return{id:uid(),name:o.name||'図面',hash:o.hash,size:o.size||0,sample:!!o.sample,buf:o.buf||null,cached:o.cached,D:null,job:null,err:null,notes:[],undo:[],manual:0,geo:null,elev:null,view:null,hidden:null,vis:null,loaded:false,loadP:null,used:0,snap:null,shown:false,title:''}}
+function newDoc(o){return{id:uid(),name:o.name||'図面',hash:o.hash,size:o.size||0,sample:!!o.sample,buf:o.buf||null,cached:o.cached,D:null,job:null,err:null,notes:[],undo:[],manual:0,geo:null,elev:null,cl:null,view:null,hidden:null,vis:null,loaded:false,loadP:null,used:0,snap:null,shown:false,title:''}}
 function estCost(x){const d=x.D;return d?d.np+d.texts.length*2+(d.pts.length>>3):Math.max(500,(x.size||0)/80)}
 function ensureParsed(doc){
   if(doc.D)return Promise.resolve(true);
@@ -2139,14 +2678,14 @@ function clearSnaps(){DOCS.forEach(x=>x.snap=null)}
 function stash(){
   const c=CUR;if(!c)return;
   if(saveTimer)flushSave();
-  c.notes=S.notes;c.undo=S.undo;c.manual=S.manual;c.geo=S.geo;c.elev=S.elev;
+  c.notes=S.notes;c.undo=S.undo;c.manual=S.manual;c.geo=S.geo;c.elev=S.elev;c.cl=S.cl;
   if(D&&c.D===D){
     c.view={cx:V.cx,cy:V.cy,z:V.z,fitZ};
     if(snapView&&lastBaseMs>=26){const fresh=!needBase&&!job&&snapView.cx===V.cx&&snapView.cy===V.cy&&snapView.z===V.z;c.snap={canvas:base,view:snapView,fresh,theme:settings.theme,w:base.width,h:base.height,ms:lastBaseMs};base=freshBase();bctx=base.getContext('2d');trimSnaps()}
     else c.snap=null;
   }
 }
-function resetTransient(){S.mA=null;S.areaPts=[];S.snap=null;S.dA=null;S.dBase=null;S.gA=null;S.dLen=null;lastSnapKey='';effects.length=0;fly.on=false;inertia.on=false;updateAreaBar();select(null)}
+function resetTransient(){S.mA=null;S.areaPts=[];S.snap=null;S.dA=null;S.dBase=null;S.gA=null;S.dLen=null;lastSnapKey='';S.clPend=null;if(S.coordMode!=='read'&&!(S.coordMode==='sta'&&S.cl))S.coordMode=S.cl&&lastCoordMode==='sta'?'sta':'read';coordBarUI();effects.length=0;fly.on=false;inertia.on=false;updateAreaBar();select(null)}
 let actSeq=0;
 async function activate(doc,opt={}){
   if(!doc||DOCS.indexOf(doc)<0)return false;
@@ -2155,7 +2694,7 @@ async function activate(doc,opt={}){
   stash();
   CUR=doc;doc.used=now();saveTabs();renderTabs();
   if(!doc.D){
-    D=null;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;S.geo=doc.geo||null;S.elev=doc.elev||null;resetTransient();updateUndo();renderTitle();invalidateAll();
+    D=null;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;S.geo=doc.geo||null;S.elev=doc.elev||null;S.cl=doc.cl||null;resetTransient();updateUndo();renderTitle();invalidateAll();
     const lt=setTimeout(()=>{if(CUR===doc&&!doc.D)showLoading(doc.name)},140);
     const ok=await ensureParsed(doc);clearTimeout(lt);
     if(seq!==actSeq)return ok;
@@ -2168,7 +2707,7 @@ async function activate(doc,opt={}){
   show(doc);return true;
 }
 function show(doc){
-  D=doc.D;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;S.geo=doc.geo||null;S.elev=doc.elev||null;resetTransient();updateUndo();hideLoading();
+  D=doc.D;S.notes=doc.notes;S.undo=doc.undo;S.manual=doc.manual;S.geo=doc.geo||null;S.elev=doc.elev||null;S.cl=doc.cl||null;resetTransient();updateUndo();hideLoading();
   if(!doc.shown){doc.shown=true;if(D.bg&&!LS.get('themeChosen',false)){const th=(.2126*D.bg[0]+.7152*D.bg[1]+.0722*D.bg[2])>128?'light':'dark';if(th!==settings.theme){settings.theme=th;colCache.clear();clearSnaps()}}}
   renderTitle();
   if(doc.view){V.cx=doc.view.cx;V.cy=doc.view.cy;V.z=doc.view.z;fitZ=doc.view.fitZ}else fitView();
@@ -2179,7 +2718,7 @@ function show(doc){
   if(aiming())updateSnap();requestFrame();toolHint();readoutSoon();renderChip();renderTabs();
   if(!$('#menuSheet').hidden)renderMenu();
   if(!doc.loaded)loadNotes(doc);
-  trimParsed();schedulePreload();
+  trimParsed();schedulePreload();gpsLocate(true);
 }
 function loadNotes(doc){
   if(doc.loadP)return doc.loadP;
@@ -2192,6 +2731,7 @@ function loadNotes(doc){
       if(!(cur?S.manual:doc.manual)&&saved.manual>0){doc.manual=saved.manual;if(cur)S.manual=saved.manual}
       if(saved.geo&&saved.geo.a&&saved.geo.B&&!(cur?S.geo:doc.geo)){doc.geo=saved.geo;if(cur)S.geo=saved.geo}
       if(saved.elev&&typeof saved.elev==='object'&&!(cur?S.elev:doc.elev)){doc.elev=saved.elev;if(cur)S.elev=saved.elev}
+      if(saved.cl&&Array.isArray(saved.cl.pts)&&!(cur?S.cl:doc.cl)){doc.cl=saved.cl;if(cur){S.cl=saved.cl;gpsLocate(true)}}
       if(Array.isArray(saved.hidden)&&saved.hidden.length){
         if(doc.D){const d=doc.D;saved.hidden.forEach(i=>{if(i>=0&&i<d.np&&!d.hid[i]){d.hid[i]=1;dirtyPrim(d,i)}});if(cur)invalidateAll()}
         else doc.hidden=(doc.hidden||[]).concat(saved.hidden);
@@ -2289,12 +2829,12 @@ function exampleNotes(){
 async function openSample(){const s=DOCS.find(x=>x.sample);if(s)return activate(s);return openBuffer(new TextEncoder().encode(sampleSFC()).buffer,'サンプル図面（架空）',{sample:true,hash:'sample-v1'})}
 function renderTitle(){
   const doc=CUR;$('#fname').textContent=doc?doc.name:(D?D.name:'—');
-  if(!D){$('#fmeta').innerHTML=doc?(doc.err?'開けませんでした':'図面を解析しています…'):'&nbsp;';renderChip();return}
+  if(!D){$('#fmeta').innerHTML=doc?(doc.err?'開けませんでした':'図面を解析しています…'):'&nbsp;';renderChip();gpsUI();return}
   const parts=[];if(doc&&doc.title&&doc.name.indexOf(doc.title)<0)parts.push(doc.title);if(D.sheet.label)parts.push(D.sheet.label);
   const sc=[...new Set(D.xfs.slice(1).map(x=>ratioText(x.s)))];if(sc.length)parts.push(sc.slice(0,3).join(' / ')+(sc.length>3?' …':''));
   if(D.sample)parts.unshift('<b>サンプル</b>');
   $('#fmeta').innerHTML=parts.map(p=>p.startsWith('<b>')?p:esc(p)).join(' · ')||'&nbsp;';
-  renderChip();
+  renderChip();gpsUI();
 }
 
 /* ---------- tab strip ---------- */
@@ -2353,9 +2893,9 @@ cv.addEventListener('pointerdown',e=>{
 });
 cv.addEventListener('pointermove',e=>{
   const p=ptrs.get(e.pointerId);if(!p)return;const[x,y]=pos(e);p.x=x;p.y=y;if(!p.moved&&Math.hypot(x-p.x0,y-p.y0)>8)p.moved=true;if(!G)return;
-  if(G.type==='pinch'&&ptrs.size>=2){const[a,b]=[...ptrs.values()];const d=Math.hypot(b.x-a.x,b.y-a.y)||1,mx=(a.x+b.x)/2,my=(a.y+b.y)/2;const z=clamp(G.v0.z*d/G.d0,zMin(),Z_MAX);V.z=z;V.cx=G.anchor[0]-(mx-W/2)/z;V.cy=G.anchor[1]+(my-H/2)/z;viewChanged()}
+  if(G.type==='pinch'&&ptrs.size>=2){gpsUnfollow();const[a,b]=[...ptrs.values()];const d=Math.hypot(b.x-a.x,b.y-a.y)||1,mx=(a.x+b.x)/2,my=(a.y+b.y)/2;const z=clamp(G.v0.z*d/G.d0,zMin(),Z_MAX);V.z=z;V.cx=G.anchor[0]-(mx-W/2)/z;V.cy=G.anchor[1]+(my-H/2)/z;viewChanged()}
   else if(G.id!==e.pointerId)return;
-  else if(G.type==='single'){if(!p.moved)return;V.cx=G.v0.cx-(x-p.x0)/V.z;V.cy=G.v0.cy+(y-p.y0)/V.z;G.hist.push([x,y,now()]);if(G.hist.length>8)G.hist.shift();viewChanged()}
+  else if(G.type==='single'){if(!p.moved)return;gpsUnfollow();V.cx=G.v0.cx-(x-p.x0)/V.z;V.cy=G.v0.cy+(y-p.y0)/V.z;G.hist.push([x,y,now()]);if(G.hist.length>8)G.hist.shift();viewChanged()}
   else if(G.type==='pen'){const q=toSheet(x,y),s=G.stroke.pts;if(Math.hypot((q[0]-s[s.length-2])*V.z,(q[1]-s[s.length-1])*V.z)>=1.5){s.push(q[0],q[1]);requestFrame()}}
   else if(G.type==='erase'){G.last=[x,y];eraseAt(x,y);requestFrame()}
 });
@@ -2370,7 +2910,7 @@ function endPtr(e){
   }
 }
 cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
-cv.addEventListener('wheel',e=>{e.preventDefault();if(!D)return;const[x,y]=pos(e);zoomAt(x,y,Math.exp(-e.deltaY*.0018),false)},{passive:false});
+cv.addEventListener('wheel',e=>{e.preventDefault();if(!D)return;gpsUnfollow();const[x,y]=pos(e);zoomAt(x,y,Math.exp(-e.deltaY*.0018),false)},{passive:false});
 document.addEventListener('gesturestart',e=>e.preventDefault());
 function settle(){needBase=true;requestFrame()}
 function startInertia(h){if(h.length<2)return;const a=h[0],b=h[h.length-1];const dt=b[2]-a[2];if(dt<=0||now()-b[2]>90)return;const vx=(b[0]-a[0])/dt,vy=(b[1]-a[1])/dt;if(Math.hypot(vx,vy)<.3)return;Object.assign(inertia,{on:true,vx,vy,t:now()});requestFrame()}
@@ -2388,8 +2928,9 @@ function onTap(x,y){
   else if(S.tool==='memo'){const q=toSheet(x,y);openMemo({id:uid(),t:'pin',x:q[0],y:q[1],text:'',c:'#ff5b3a',ts:Date.now()},true)}
 }
 function hitTest(x,y,labelsOnly){
+  if(!labelsOnly&&GPS.on&&GPS.p){const p=toScreen(GPS.p.x,GPS.p.y);if(Math.hypot(x-p[0],y-p[1])<18)return GPS_NOTE}   // the blue dot itself
   for(const n of [...S.notes].reverse()){if(n.t!=='pin')continue;const p=toScreen(n.x,n.y);if(Math.hypot(x-p[0],y-(p[1]-24))<17)return n}
-  for(const l of labelHits){const r=l.r;if(x>=r[0]-6&&x<=r[0]+r[2]+6&&y>=r[1]-6&&y<=r[1]+r[3]+6)return S.notes.find(n=>n.id===l.id)||null}
+  for(const l of labelHits){const r=l.r;if(x>=r[0]-6&&x<=r[0]+r[2]+6&&y>=r[1]-6&&y<=r[1]+r[3]+6)return l.id==='__gps'?GPS_NOTE:(S.notes.find(n=>n.id===l.id)||null)}
   if(labelsOnly)return null;
   for(const n of [...S.notes].reverse()){
     if(n.t==='dist'||n.t==='line'){const a=toScreen(n.a[0],n.a[1]),b=toScreen(n.b[0],n.b[1]);if(distSeg(x,y,a,b)<11)return n}
@@ -2406,7 +2947,7 @@ function inPoly(x,y,q){let c=false;const n=q.length/2;for(let i=0,j=n-1;i<n;j=i+
 function placePoint(tg,sx,sy){
   if(!D)return;const p={x:tg.x,y:tg.y,kind:tg.kind||0,rx:resolveRx(tg)};
   if(S.tool==='draft'){draftPlace(p,sx,sy);readoutSoon();requestFrame();return}
-  if(S.tool==='coord'){coordPlace(p);readoutSoon();requestFrame();return}
+  if(S.tool==='coord'){coordPlace(p,sx,sy);readoutSoon();requestFrame();return}
   effects.push({x:p.x,y:p.y,t0:now()});buzz(12);
   if(S.tool==='measure'){
     if(!S.mA){S.mA=p;sfx('place')}
@@ -2429,10 +2970,10 @@ function eraseAt(x,y){
   for(const n of [...S.notes].reverse()){if(n.t!=='ink')continue;const q=n.pts;let prev=toScreen(q[0],q[1]);for(let i=2;i<q.length;i+=2){const c=toScreen(q[i],q[i+1]);if(distSeg(x,y,prev,c)<16){deleteNote(n.id);sfx('erase');buzz(8);return}prev=c}}
 }
 function setTool(t){
-  if(t===S.tool&&t!=='pan'){if(t==='measure'&&S.mA){S.mA=null;readoutSoon();requestFrame();toast('始点を取り消しました')}if(t==='draft'&&(S.dA||S.dBase)){S.dA=null;S.dBase=null;readoutSoon();requestFrame();toast('作図を取り消しました')}if(t==='coord'&&S.gA){S.gA=null;readoutSoon();requestFrame();toast('基準点を取り消しました')}return}
+  if(t===S.tool&&t!=='pan'){if(t==='measure'&&S.mA){S.mA=null;readoutSoon();requestFrame();toast('始点を取り消しました')}if(t==='draft'&&(S.dA||S.dBase)){S.dA=null;S.dBase=null;readoutSoon();requestFrame();toast('作図を取り消しました')}if(t==='coord'){if(S.gA){S.gA=null;readoutSoon();requestFrame();toast('基準点を取り消しました')}else if(['cl','clo','gpsfix','set','elev'].includes(S.coordMode)){setCoordMode(lastCoordMode==='sta'&&S.cl?'sta':'read');toast('取り消しました')}}return}
   S.tool=t;$('#app').dataset.tool=t;S.mA=null;S.areaPts=[];S.dA=null;S.dBase=null;S.dLen=null;S.snap=null;lastSnapKey='';if(S.sel)select(null);
   $$('.tool').forEach(b=>b.classList.toggle('on',b.dataset.tool===t));
-  $('#fab').hidden=!aiming();$('#areabar').hidden=t!=='area';$('#penbar').hidden=t!=='pen';$('#draftbar').hidden=t!=='draft';$('#coordbar').hidden=t!=='coord';if(t==='coord')setCoordMode('read');if(t==='draft')barH();
+  $('#fab').hidden=!aiming();$('#areabar').hidden=t!=='area';$('#penbar').hidden=t!=='pen';$('#draftbar').hidden=t!=='draft';$('#coordbar').hidden=t!=='coord';if(t==='coord')setCoordMode(lastCoordMode==='sta'&&S.cl?'sta':'read');if(t==='draft'||t==='coord')barH();
   if(t!=='pen'){S.eraser=false;$('#eraserBtn').classList.remove('on')}
   updateAreaBar();if(aiming())updateSnap();toolHint();readoutSoon();renderChip();requestFrame();sfx('tool');
 }
@@ -2441,6 +2982,15 @@ function setTool(t){
 function select(n){
   S.sel=n?n.id:null;const c=$('#selcard');
   if(!n){c.hidden=true;readoutSoon();toolHint();requestFrame();return}
+  c.classList.toggle('col',n.t==='gps');
+  if(n.t==='gps'){
+    const f=GPS.fix;let v,sb='';
+    if(!f)v='現在地を探しています…';else if(!GPS.XY)v=GPS.nocoord?'この図面には座標がありません':'—';
+    else{v=GPS.sta?fmtSta(GPS.sta.s,GPS.sta.g.pitch,2)+'\n'+fmtOff(GPS.sta.o,2):'X '+GPS.XY.X.toFixed(2)+'\nY '+GPS.XY.Y.toFixed(2);
+      sb=(GPS.sta?'X '+GPS.XY.X.toFixed(2)+'  Y '+GPS.XY.Y.toFixed(2)+' · ':'')+'精度 ±'+Math.max(1,Math.round(f.acc))+' m · 第'+ROMAN[GPS.zone]+'系'+(GPS.auto?'（自動）':'')+(GPS.off?' · ずれ補正中':'')+(GPS.far?' · 図面の範囲外（約 '+fmtDist(GPS.dist)+'）':'')}
+    c.innerHTML='<div class="sbody"><div class="stitle">現在地（GPS）</div><div class="sval memo" style="font-family:var(--f-num)">'+esc(v)+'</div>'+(sb?'<div class="ssub">'+esc(sb)+'</div>':'')+'</div><div class="sacts"><button class="btn small" data-act="gpsPut" type="button">ここに点を置く</button><button class="btn small" data-act="gpsFix" type="button">ずれ補正</button><button class="btn small danger" data-act="gpsStop" type="button">止める</button><button class="ibtn" data-act="close" type="button" aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>';
+    c.hidden=false;$('#readout').hidden=true;$('#hint').hidden=true;requestFrame();return;
+  }
   let title='',val='',sub='',acts='';
   const pinIdx=S.notes.filter(x=>x.t==='pin').indexOf(n)+1;
   if(n.t==='pin'){title='メモ '+pinIdx;val='<div class="sval memo">'+(esc(n.text)||'<span style="color:var(--dim)">（文字なし）</span>')+'</div>';acts='<button class="btn small" data-act="edit" type="button">編集</button>'}
@@ -2450,18 +3000,21 @@ function select(n){
   else if(n.t==='elev'){title='高さ'+(n.name?' '+esc(n.name):'');val='<div class="sval">EL '+fmtC(n.H)+' m</div>';const e=elevAt(n.x,n.y,n.rx);sub=e?'基準高 EL '+fmtC(e.ref.H)+' から '+fmtSigned(e.dh)+' m':'基準高から求めた高さ';acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else if(n.t==='line'){title=DRAFT_NAMES[n.k]||'直線';val='<div class="sval">'+fmtLen(n.v)+'</div>';sub=(n.k==='perp'?'基準線までの距離 · ':'')+esc(n.sc==='図上'?'図上の長さ':n.sc+'で換算');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else if(n.t==='circle'){title='円';val='<div class="sval">R '+fmtLen(n.v)+'</div>';sub='直径 '+fmtLen(n.v*2)+' · '+esc(n.sc);acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
-  else if(n.t==='coord'){title='座標 '+esc(n.name||('P'+(S.notes.filter(x=>x.t==='coord').indexOf(n)+1)))+(n.h!=null?' · 標高 '+fmtC(n.h):'');val='<div class="sval memo" style="font-family:var(--f-num)">X '+fmtC(n.X)+'\nY '+fmtC(n.Y)+'</div>';sub=esc(n.src==='user'?'2点で合わせた座標':'図面の座標');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
+  else if(n.t==='coord'){title='座標 '+esc(n.name||('P'+(S.notes.filter(x=>x.t==='coord').indexOf(n)+1)))+(n.h!=null?' · 標高 '+fmtC(n.h):'');val='<div class="sval memo" style="font-family:var(--f-num)">X '+fmtC(n.X)+'\nY '+fmtC(n.Y)+'</div>';sub=esc(srcText(n.src))+((st=>st?' · '+esc(staLine(st)):'')(noteSta(n)));acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
+  else if(n.t==='sta'){title='測点'+(n.name?' '+esc(n.name):'')+(n.h!=null?' · 標高 '+fmtC(n.h):'');val='<div class="sval memo" style="font-family:var(--f-num)">'+esc(fmtSta(n.s,staPitch(n)))+'\n'+esc(fmtOff(n.o))+'</div>';sub='追加距離 '+fmtC(n.s)+' m'+(n.ext?' · 中心線の延長上':'')+(n.X!=null?' · X '+fmtC(n.X)+'  Y '+fmtC(n.Y):'');acts='<button class="btn small" data-act="copy" type="button">コピー</button>'}
   else{title='手書き';val='<div class="sval memo">赤ペンの書き込み</div>'}
   c.innerHTML='<div class="sbody"><div class="stitle">'+title+'</div>'+val+(sub?'<div class="ssub">'+sub+'</div>':'')+'</div><div class="sacts">'+acts+'<button class="btn small danger" data-act="del" type="button">削除</button><button class="ibtn" data-act="close" type="button" aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>';
   c.hidden=false;$('#readout').hidden=true;$('#hint').hidden=true;requestFrame();
 }
 $('#selcard').addEventListener('click',e=>{
-  const b=e.target.closest('[data-act]');if(!b)return;const n=S.notes.find(x=>x.id===S.sel);if(!n){select(null);return}
+  const b=e.target.closest('[data-act]');if(!b)return;
+  if(S.sel==='__gps'){const a=b.dataset.act;if(a==='close')select(null);else if(a==='gpsPut')gpsPut();else if(a==='gpsFix'){select(null);if(S.tool!=='coord')setTool('coord');setCoordMode('gpsfix')}else if(a==='gpsStop'){gpsStop();toast('現在地の表示を止めました')}return}
+  const n=S.notes.find(x=>x.id===S.sel);if(!n){select(null);return}
   const a=b.dataset.act;
   if(a==='close')select(null);
   else if(a==='del'){deleteNote(n.id);sfx('erase');toast('削除しました（↶で戻せます）')}
   else if(a==='edit')openMemo(n,false);
-  else if(a==='copy')copyText(n.t==='elev'?'EL='+fmtC(n.H):n.t==='line'&&n.k==='grade'?n.g+'  L='+fmtLen(n.v)+'（水平 '+fmtLen(n.dx||0)+'・高低差 '+fmtLen(n.dy||0)+'）':n.t==='coord'?'X='+fmtC(n.X)+' Y='+fmtC(n.Y):n.t==='dist'||n.t==='line'?fmtLen(n.v):n.t==='circle'?'R '+fmtLen(n.v):fmtArea(n.v));
+  else if(a==='copy')copyText(n.t==='elev'?'EL='+fmtC(n.H):n.t==='line'&&n.k==='grade'?n.g+'  L='+fmtLen(n.v)+'（水平 '+fmtLen(n.dx||0)+'・高低差 '+fmtLen(n.dy||0)+'）':n.t==='sta'?staName(n)+(n.X!=null?'  X='+fmtC(n.X)+' Y='+fmtC(n.Y):''):n.t==='coord'?'X='+fmtC(n.X)+' Y='+fmtC(n.Y):n.t==='dist'||n.t==='line'?fmtLen(n.v):n.t==='circle'?'R '+fmtLen(n.v):fmtArea(n.v));
 });
 
 /* ---------- memo editor ---------- */
@@ -2495,12 +3048,12 @@ function renderMenu(){
   const b=$('#menuBody');
   if(!D){b.innerHTML='<div class="empty">図面を開くと使えます</div>';return}
   if(menuTab==='notes'){
-    const pins=S.notes.filter(n=>n.t==='pin'),coords=S.notes.filter(n=>n.t==='coord');let h='<div class="row"><button class="btn small" id="mCopy" type="button">テキストでコピー</button><button class="btn small" id="mImg" type="button">画像で保存</button>'+(coords.length?'<button class="btn small" id="mSima" type="button">SIMA出力</button>':'')+'<span style="flex:1"></span><button class="btn small danger" id="mClear" type="button">'+(clearArmed?'もう一度押すと全部削除':'すべて削除')+'</button></div>';
+    const pins=S.notes.filter(n=>n.t==='pin'),coords=S.notes.filter(n=>n.t==='coord'),simaN=coordRows().length;let h='<div class="row"><button class="btn small" id="mCopy" type="button">テキストでコピー</button><button class="btn small" id="mImg" type="button">画像で保存</button>'+(simaN?'<button class="btn small" id="mSima" type="button">SIMA出力</button>':'')+'<span style="flex:1"></span><button class="btn small danger" id="mClear" type="button">'+(clearArmed?'もう一度押すと全部削除':'すべて削除')+'</button></div>';
     if(!S.notes.length)h+='<div class="empty">まだメモはありません。<br>下のツールで寸法・面積・メモ・ペンを使うと、ここに一覧が出ます。</div>';
-    else{h+='<div class="list">';S.notes.forEach(n=>{let ib='',it='';if(n.t==='pin'){ib='<span class="ib memo">メモ'+(pins.indexOf(n)+1)+'</span>';it=esc(n.text)||'（文字なし）'}else if(n.t==='dist'){ib='<span class="ib">寸法</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+esc(n.sc)+'</small>'}else if(n.t==='area'){ib='<span class="ib">面積</span>';it='<span class="num">'+fmtArea(n.v)+'</span><small>周長 '+fmtLen(n.per||0)+' · '+esc(n.sc)+'</small>'}else if(n.t==='line'&&n.k==='grade'){ib='<span class="ib draft">作図</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>勾配線 '+esc(n.g||'')+' · 水平 '+fmtLen(n.dx||0)+' · 高低差 '+fmtLen(n.dy||0)+'</small>'}else if(n.t==='elev'){ib='<span class="ib elev">高さ</span>';it='<span class="num">EL '+fmtC(n.H)+'</span><small>'+(n.name?esc(n.name)+' · ':'')+'基準高から求めた高さ</small>'}else if(n.t==='line'){ib='<span class="ib draft">作図</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+(DRAFT_NAMES[n.k]||'直線')+' · '+esc(n.sc)+'</small>'}else if(n.t==='circle'){ib='<span class="ib draft">作図</span>';it='<span class="num">R '+fmtLen(n.v)+'</span><small>円 · 直径 '+fmtLen(n.v*2)+' · '+esc(n.sc)+'</small>'}else if(n.t==='coord'){ib='<span class="ib coord">'+esc(n.name||('P'+(coords.indexOf(n)+1)))+'</span>';it='<span class="num">X '+fmtC(n.X)+'<br>Y '+fmtC(n.Y)+'</span><small>'+(n.src==='user'?'2点で合わせた座標':'図面の座標')+'</small>'}else{ib='<span class="ib ink">ペン</span>';it='手書きの書き込み'}h+='<button class="item" data-id="'+n.id+'" type="button">'+ib+'<span class="it">'+it+'</span></button>'});h+='</div>'}
+    else{h+='<div class="list">';S.notes.forEach(n=>{let ib='',it='';if(n.t==='pin'){ib='<span class="ib memo">メモ'+(pins.indexOf(n)+1)+'</span>';it=esc(n.text)||'（文字なし）'}else if(n.t==='dist'){ib='<span class="ib">寸法</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+esc(n.sc)+'</small>'}else if(n.t==='area'){ib='<span class="ib">面積</span>';it='<span class="num">'+fmtArea(n.v)+'</span><small>周長 '+fmtLen(n.per||0)+' · '+esc(n.sc)+'</small>'}else if(n.t==='line'&&n.k==='grade'){ib='<span class="ib draft">作図</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>勾配線 '+esc(n.g||'')+' · 水平 '+fmtLen(n.dx||0)+' · 高低差 '+fmtLen(n.dy||0)+'</small>'}else if(n.t==='elev'){ib='<span class="ib elev">高さ</span>';it='<span class="num">EL '+fmtC(n.H)+'</span><small>'+(n.name?esc(n.name)+' · ':'')+'基準高から求めた高さ</small>'}else if(n.t==='line'){ib='<span class="ib draft">作図</span>';it='<span class="num">'+fmtLen(n.v)+'</span><small>'+(DRAFT_NAMES[n.k]||'直線')+' · '+esc(n.sc)+'</small>'}else if(n.t==='circle'){ib='<span class="ib draft">作図</span>';it='<span class="num">R '+fmtLen(n.v)+'</span><small>円 · 直径 '+fmtLen(n.v*2)+' · '+esc(n.sc)+'</small>'}else if(n.t==='coord'){ib='<span class="ib coord">'+esc(n.name||('P'+(coords.indexOf(n)+1)))+'</span>';it='<span class="num">X '+fmtC(n.X)+'<br>Y '+fmtC(n.Y)+'</span><small>'+(n.name?esc(n.name)+' · ':'')+esc(srcText(n.src))+((st=>st?' · '+esc(staLine(st)):'')(noteSta(n)))+'</small>'}else if(n.t==='sta'){ib='<span class="ib sta">測点</span>';it='<span class="num">'+esc(fmtSta(n.s,staPitch(n)))+'<br>'+esc(fmtOff(n.o))+'</span><small>'+(n.name?esc(n.name)+' · ':'')+'追加距離 '+fmtC(n.s)+' m'+(n.X!=null?' · X '+fmtC(n.X)+' Y '+fmtC(n.Y):'')+'</small>'}else{ib='<span class="ib ink">ペン</span>';it='手書きの書き込み'}h+='<button class="item" data-id="'+n.id+'" type="button">'+ib+'<span class="it">'+it+'</span></button>'});h+='</div>'}
     h+='<p class="note">'+storeText()+'</p>';
     b.innerHTML=h;
-    $('#mCopy').onclick=()=>copyText(notesText());$('#mImg').onclick=()=>{closeSheets();exportImage()};if(coords.length)$('#mSima').onclick=()=>openSima();
+    $('#mCopy').onclick=()=>copyText(notesText());$('#mImg').onclick=()=>{closeSheets();exportImage()};if(simaN)$('#mSima').onclick=()=>openSima();
     $('#mClear').onclick=()=>{if(!S.notes.length)return;if(!clearArmed){clearArmed=true;renderMenu();setTimeout(()=>{clearArmed=false;if(menuTab==='notes'&&!$('#menuSheet').hidden)renderMenu()},3000);return}clearArmed=false;pushUndo({op:'clear',notes:S.notes.slice()});S.notes=[];select(null);notesChanged();toast('すべて削除しました（↶で戻せます）')};
     $$('.item[data-id]',b).forEach(el=>el.onclick=()=>{const n=S.notes.find(x=>x.id===el.dataset.id);if(!n)return;closeSheets();focusNote(n)});
   }else if(menuTab==='layers'){
@@ -2518,7 +3071,7 @@ function renderMenu(){
     const parts=D.xfs.slice(1);h+='<div class="sect">部分図と縮尺</div>';
     h+=parts.length?'<dl class="kv">'+parts.map(x=>'<dt>'+esc(x.name)+'</dt><dd class="n">'+ratioText(x.s)+(x.kind===2?'（測地座標）':'')+'</dd>').join('')+'</dl>':'<p class="note">部分図がないため、計測は図上の寸法になります。縮尺は右上の「縮尺」から指定できます。</p>';
     const st=cfgStatus();
-    h+='<div class="sect">座標・基準高</div><dl class="kv"><dt>座標</dt><dd style="white-space:pre-line">'+esc(st.xy)+'</dd><dt>基準高</dt><dd>'+(st.el.length?st.el.map(esc).join('<br>'):'なし')+'</dd></dl>'+((S.geo||st.el.length)?'<div class="row">'+(S.geo?'<button class="btn small" id="gClear" type="button">2点の座標設定を消す</button>':'')+(st.el.length?'<button class="btn small" id="eClear" type="button">基準高を消す</button>':'')+'</div>':'');
+    h+='<div class="sect">座標・基準高・測点</div><dl class="kv"><dt>座標</dt><dd style="white-space:pre-line">'+esc(st.xy)+'</dd><dt>基準高</dt><dd>'+(st.el.length?st.el.map(esc).join('<br>'):'なし')+'</dd><dt>中心線</dt><dd style="white-space:pre-line">'+esc(st.cl)+'</dd></dl>'+((S.geo||st.el.length)?'<div class="row">'+(S.geo?'<button class="btn small" id="gClear" type="button">2点の座標設定を消す</button>':'')+(st.el.length?'<button class="btn small" id="eClear" type="button">基準高を消す</button>':'')+'</div>':'');
     const sk=Object.entries(D.skipped||{});
     h+='<div class="sect">内容</div><dl class="kv">'+kv('線・図形',D.np.toLocaleString('ja-JP')+' 本',true)+kv('文字',D.texts.length.toLocaleString('ja-JP')+' 件',true)+kv('読み込み',Math.round(D.parseMs)+' ms',true)+kv('未対応',sk.map(([k,v])=>k.replace('_feature','')+' ×'+v).join(', '))+'</dl>';
     b.innerHTML=h;
@@ -2533,11 +3086,11 @@ let clearArmed=false;
 function storeText(){return Store.mode==='cloud'?'メモと書き込みは、あなたのアカウントに図面ごとに保存されます（他の人からは見えません）。':Store.mode==='local'?'メモと書き込みは、この端末のブラウザに保存されます（他の人からは見えません）。ブラウザのデータを消すと消えるので、大事なメモは「画像で保存」か「テキストでコピー」でも残してください。':Store.mode==='none'?'この画面ではメモを保存できません。画像やテキストで書き出してください。':'保存先を確認しています…'}
 function notesText(){
   const pins=S.notes.filter(n=>n.t==='pin'),coords=S.notes.filter(n=>n.t==='coord');const lines=['【図面】'+D.name];let k=0;
-  S.notes.forEach(n=>{if(n.t==='pin')lines.push('・メモ'+(pins.indexOf(n)+1)+'：'+(n.text||'（文字なし）').replace(/\n/g,' '));else if(n.t==='dist')lines.push('・寸法：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='area')lines.push('・面積：'+fmtArea(n.v)+'　周長 '+fmtLen(n.per||0)+'（'+n.sc+'）');else if(n.t==='line'&&n.k==='grade')lines.push('・勾配線 '+n.g+'：L='+fmtLen(n.v)+'（水平 '+fmtLen(n.dx||0)+'・高低差 '+fmtLen(n.dy||0)+'）');else if(n.t==='elev')lines.push('・高さ：EL='+fmtC(n.H)+(n.name?'（'+n.name+'）':''));else if(n.t==='line')lines.push('・'+(DRAFT_NAMES[n.k]||'直線')+'：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='circle')lines.push('・円：R '+fmtLen(n.v)+'　直径 '+fmtLen(n.v*2)+'（'+n.sc+'）');else if(n.t==='coord')lines.push('・座標'+(n.name||('P'+(coords.indexOf(n)+1)))+'：X='+fmtC(n.X)+' Y='+fmtC(n.Y)+(n.h!=null?' H='+fmtC(n.h):'')+'（'+(n.src==='user'?'2点で合わせた座標':'図面の座標')+'）');else k++});
+  S.notes.forEach(n=>{if(n.t==='pin')lines.push('・メモ'+(pins.indexOf(n)+1)+'：'+(n.text||'（文字なし）').replace(/\n/g,' '));else if(n.t==='dist')lines.push('・寸法：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='area')lines.push('・面積：'+fmtArea(n.v)+'　周長 '+fmtLen(n.per||0)+'（'+n.sc+'）');else if(n.t==='line'&&n.k==='grade')lines.push('・勾配線 '+n.g+'：L='+fmtLen(n.v)+'（水平 '+fmtLen(n.dx||0)+'・高低差 '+fmtLen(n.dy||0)+'）');else if(n.t==='elev')lines.push('・高さ：EL='+fmtC(n.H)+(n.name?'（'+n.name+'）':''));else if(n.t==='line')lines.push('・'+(DRAFT_NAMES[n.k]||'直線')+'：'+fmtLen(n.v)+'（'+n.sc+'）');else if(n.t==='circle')lines.push('・円：R '+fmtLen(n.v)+'　直径 '+fmtLen(n.v*2)+'（'+n.sc+'）');else if(n.t==='coord')lines.push('・座標'+(n.name||('P'+(coords.indexOf(n)+1)))+'：X='+fmtC(n.X)+' Y='+fmtC(n.Y)+(n.h!=null?' H='+fmtC(n.h):'')+'（'+srcText(n.src)+'）'+((st=>st?' '+staLine(st):'')(noteSta(n))));else if(n.t==='sta')lines.push('・測点'+(n.name?'（'+n.name+'）':'')+'：'+fmtSta(n.s,staPitch(n))+' '+fmtOff(n.o)+'（追加距離 '+fmtC(n.s)+' m'+(n.X!=null?'　X='+fmtC(n.X)+' Y='+fmtC(n.Y):'')+(n.h!=null?' H='+fmtC(n.h):'')+'）');else k++});
   if(k)lines.push('・手書き '+k+'件');return lines.join('\n');
 }
 function focusNote(n){
-  let bb;if(n.t==='pin'||n.t==='coord'||n.t==='elev')bb=[n.x,n.y,n.x,n.y];else if(n.t==='dist'||n.t==='line')bb=[Math.min(n.a[0],n.b[0]),Math.min(n.a[1],n.b[1]),Math.max(n.a[0],n.b[0]),Math.max(n.a[1],n.b[1])];else if(n.t==='circle')bb=[n.c[0]-n.r,n.c[1]-n.r,n.c[0]+n.r,n.c[1]+n.r];else{const q=n.pts;bb=[Infinity,Infinity,-Infinity,-Infinity];for(let i=0;i<q.length;i+=2){bb[0]=Math.min(bb[0],q[i]);bb[1]=Math.min(bb[1],q[i+1]);bb[2]=Math.max(bb[2],q[i]);bb[3]=Math.max(bb[3],q[i+1])}}
+  let bb;if(n.t==='pin'||n.t==='coord'||n.t==='elev'||n.t==='sta')bb=[n.x,n.y,n.x,n.y];else if(n.t==='dist'||n.t==='line')bb=[Math.min(n.a[0],n.b[0]),Math.min(n.a[1],n.b[1]),Math.max(n.a[0],n.b[0]),Math.max(n.a[1],n.b[1])];else if(n.t==='circle')bb=[n.c[0]-n.r,n.c[1]-n.r,n.c[0]+n.r,n.c[1]+n.r];else{const q=n.pts;bb=[Infinity,Infinity,-Infinity,-Infinity];for(let i=0;i<q.length;i+=2){bb[0]=Math.min(bb[0],q[i]);bb[1]=Math.min(bb[1],q[i+1]);bb[2]=Math.max(bb[2],q[i]);bb[3]=Math.max(bb[3],q[i+1])}}
   const sw=bb[2]-bb[0],sh=bb[3]-bb[1],avail=Math.max(80,H-TOPH-DOCKH);
   let z=(sw>0||sh>0)?Math.min(W*.6/Math.max(sw,1e-9),avail*.5/Math.max(sh,1e-9)):Math.max(V.z,fitZ*3);
   z=clamp(z,zMin(),Z_MAX);const cx=(bb[0]+bb[2])/2,cy=(bb[1]+bb[3])/2;
@@ -2556,7 +3109,7 @@ function openScale(){
   $('#scaleSet').onclick=()=>{const v=parseFloat($('#scaleIn').value);if(v>0){setManual(Math.round(v*100)/100);closeSheets()}else toast('縮尺の数字を入れてください')};
   openSheet('scaleSheet');
 }
-function setManual(n){S.manual=n||0;renderChip();readoutSoon();scheduleSave();toast(n?'縮尺 1:'+n+' で計測します':'図面の縮尺で自動換算します');sfx('tap')}
+function setManual(n){S.manual=n||0;refreshStaNotes();gpsLocate(true);requestFrame();renderChip();readoutSoon();scheduleSave();toast(n?'縮尺 1:'+n+' で計測します':'図面の縮尺で自動換算します');sfx('tap')}
 
 /* ---------- export / copy ---------- */
 async function exportImage(){
@@ -2651,7 +3204,12 @@ $('#eraserBtn').addEventListener('click',()=>{S.eraser=!S.eraser;$('#eraserBtn')
 $$('#draftbar .dm').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.dm==='grade'&&(!S.grade||S.draftMode==='grade')){openGrade();return}S.draftMode=b.dataset.dm;S.dA=null;S.dBase=null;S.dLen=null;$$('#draftbar .dm').forEach(x=>x.classList.toggle('on',x===b));readoutSoon();requestFrame();sfx('tap')}));
 setGradeButton();
 $('#numBtn').addEventListener('click',()=>{audioWake();openLenInput()});
-$$('#coordbar .dm').forEach(b=>b.addEventListener('click',()=>{audioWake();setCoordMode(b.dataset.cm);sfx('tap')}));
+$$('#coordbar .dm').forEach(b=>b.addEventListener('click',()=>{audioWake();if(b.dataset.cm==='sta'&&S.coordMode==='sta'){toast('中心線を選び直すときは「設定」から',2200);return}setCoordMode(b.dataset.cm);sfx('tap')}));
+$('#gpsBtn').addEventListener('click',()=>{audioWake();
+  if(!GPS.on){gpsStart();return}
+  if(!GPS.follow){GPS.follow=true;gpsUI();if(GPS.p&&!GPS.far)gpsFollow(false);else if(GPS.far)toast('現在地は図面の範囲の外です（約 '+fmtDist(GPS.dist)+'）',2600);else toast('現在地を探しています…');sfx('tap');return}
+  gpsStop();toast('現在地の表示を止めました');sfx('tap');
+});
 $('#draftColor').addEventListener('click',()=>{const i=(DRAFT_COLORS.indexOf(S.draftColor)+1)%DRAFT_COLORS.length;S.draftColor=DRAFT_COLORS[i];$('#draftColor').style.setProperty('--c',S.draftColor==='auto'?'linear-gradient(135deg,#fff 50%,#111 50%)':S.draftColor);requestFrame();sfx('tap')});
 
 // HUD sizes decide where the reticle sits; re-run when the tab strip appears or goes
@@ -2669,7 +3227,7 @@ function resize(){
 }
 window.addEventListener('resize',resize);
 if(window.visualViewport){const vv=window.visualViewport;const kb=()=>{const k=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);document.documentElement.style.setProperty('--kb',k+'px')};vv.addEventListener('resize',kb);vv.addEventListener('scroll',kb)}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#dialog').hidden)$('#dialog').hidden=true;else if(!$('#imgview').hidden)$('#imgview').hidden=true;else if(!$('#backdrop').hidden)closeSheets();else if(S.sel)select(null);else if(S.dA||S.dBase||S.mA||S.gA){S.dA=null;S.dBase=null;S.mA=null;S.gA=null;readoutSoon();requestFrame()}}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#dialog').hidden)$('#dialog').hidden=true;else if(!$('#imgview').hidden)$('#imgview').hidden=true;else if(!$('#backdrop').hidden)closeSheets();else if(S.sel)select(null);else if(S.dA||S.dBase||S.mA||S.gA){S.dA=null;S.dBase=null;S.mA=null;S.gA=null;readoutSoon();requestFrame()}else if(S.tool==='coord'&&['cl','clo','gpsfix','set','elev'].includes(S.coordMode))setCoordMode(lastCoordMode==='sta'&&S.cl?'sta':'read')}});
 
 /* ---------- boot ---------- */
 async function boot(){
@@ -2693,7 +3251,7 @@ async function boot(){
 }
 // start a parsing worker while idle so the first real file opens without delay
 function warm(){setTimeout(()=>{if(PW.ok!==false&&!PW.pool.length)PW.spawn()},1200)}
-window.__zs={get D(){return D},get CUR(){return CUR},DOCS,activate,openFiles,openCached,closeDoc,closeAll,get perf(){return{lastBaseMs,job:!!job,needBase}},S,V,RC,select,viewChanged,openBuffer,openSample,setTool,placePoint,currentTarget,snapAt,toScreen,toSheet,measure,parseSFC:Parser.parseSFC,buildModel:Parser.buildModel,flatten:Parser.flatten,Parser,PW,sampleSFC,finishArea,settings,Store,Cache};
+window.__zs={get D(){return D},get CUR(){return CUR},DOCS,activate,openFiles,openCached,closeDoc,closeAll,get perf(){return{lastBaseMs,job:!!job,needBase}},S,V,RC,select,viewChanged,openBuffer,openSample,setTool,placePoint,currentTarget,snapAt,toScreen,toSheet,measure,parseSFC:Parser.parseSFC,buildModel:Parser.buildModel,flatten:Parser.flatten,Parser,PW,sampleSFC,finishArea,settings,Store,Cache,clProject,staPointOf,GPS,gpsOnFix,gpsLocate,llToXY,chainFrom,staAt,staPoint,clGeom,clGeomOf,staLabels,staFit,setCoordMode,fmtSta,coordRows,primAt,get coordMode(){return S.coordMode}};
 boot();
 if('serviceWorker' in navigator&&!window.claude&&/^https?:$/.test(location.protocol)){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
 })();
