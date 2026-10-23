@@ -145,7 +145,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 #welcome{position:absolute;z-index:7;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(var(--dock-h) + 12px);margin-inline:auto;max-width:460px;max-height:calc(100% - var(--dock-h) - 24px);overflow:auto;background:var(--steel);border:1px solid var(--rule);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:16px;box-shadow:0 22px 60px rgba(0,0,0,.6);animation:rise .28s cubic-bezier(.2,1.2,.4,1)}
 @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 .brand{display:flex;align-items:center;gap:12px}
-.brand svg{width:44px;height:44px;flex:none}
+.brand>svg{width:44px;height:44px;flex:none}
 .brand h1{margin:0;font-size:22px;line-height:1.15;letter-spacing:.04em;text-wrap:balance}
 .brand p{margin:3px 0 0;font:600 10.5px/1 var(--f-num);letter-spacing:.24em;color:var(--dim)}
 .lead{margin:0;font-size:14px;line-height:1.65;color:#cfd8e0}
@@ -245,6 +245,63 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
 .srow .sh{flex:none;width:96px;height:40px}
 .srow .sxy{font:600 12.5px/1.4 var(--f-num);color:var(--dim);padding-left:30px;font-variant-numeric:tabular-nums}
 .pm{flex:none;width:46px;height:44px;border-radius:12px;border:1px solid var(--rule);background:var(--steel-2);font:700 17px/1 var(--f-num);touch-action:manipulation}
+
+/* ---- drawing library ---- */
+#libSheet{height:calc(92% - var(--kb));max-height:calc(92% - var(--kb))}
+.toprow .file{cursor:pointer}
+#fname::after{content:"";display:inline-block;width:6px;height:6px;margin:0 0 3px 7px;border-right:2px solid var(--dim);border-bottom:2px solid var(--dim);transform:rotate(45deg)}
+.lhead{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.crumbs{flex:1;min-width:0;display:flex;align-items:center;gap:1px;overflow-x:auto;scrollbar-width:none;white-space:nowrap}
+.crumbs::-webkit-scrollbar{display:none}
+.crumb{flex:none;display:flex;align-items:center;gap:6px;height:36px;max-width:56vw;padding:0 9px;border:0;border-radius:10px;background:transparent;color:var(--dim);font:700 14px/36px var(--f-ui);overflow:hidden;text-overflow:ellipsis;touch-action:manipulation}
+.crumb svg{width:20px;height:20px}
+.crumb.cur{color:var(--text);font-size:16.5px}
+button.crumb:not(.cur):active{background:var(--steel-2)}
+.csep{flex:none;color:#4a5d70;font-weight:700}
+.lsearch{position:relative;margin-bottom:12px}
+.lsearch>svg{position:absolute;left:12px;top:12px;width:20px;height:20px;color:var(--dim);pointer-events:none}
+.lsearch input{padding-left:42px;padding-right:44px;font:600 15px/1 var(--f-ui)}
+.lsearch .qx{position:absolute;right:4px;top:4px;width:36px;height:36px;border:0;border-radius:10px;background:transparent;color:var(--dim);display:grid;place-items:center}
+.lacts{display:flex;gap:8px;flex-wrap:wrap}
+.lacts .btn{flex:1 1 auto}
+.lacts .btn.small{flex:0 1 auto}
+.lacts .btn svg,.lempty svg{width:20px;height:20px}
+.frow,.lmain{display:flex;align-items:center;gap:12px;width:100%;min-width:0;text-align:left;touch-action:manipulation}
+.frow{padding:12px 12px;border-radius:12px;border:0;background:var(--steel-2)}
+.frow>svg:first-child,.lmain>svg:first-child{flex:none;width:26px;height:26px;color:var(--tape)}
+.frow .fn,.lmain .fn{min-width:0;flex:1;font-weight:700;font-size:14.5px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lmain .fn small{display:block;margin-top:3px;font:600 11.5px/1.3 var(--f-ui);color:var(--dim);white-space:normal}
+.fcount{flex:none;font:600 12.5px/1 var(--f-num);color:var(--dim)}
+svg.chev{flex:none;width:18px;height:18px;color:#4a5d70}
+.lrow{display:flex;align-items:center;gap:6px;padding:4px 4px 4px 12px;border-radius:12px;background:var(--steel-2)}
+.lmain{flex:1;padding:8px 0;border:0;background:transparent;color:inherit}
+.lmore{width:40px;height:40px;background:transparent;border-color:transparent}
+.lconf{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:12px;background:rgba(255,91,58,.1);border:1px solid rgba(255,91,58,.35);font-size:13px;line-height:1.55}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px}
+.dwg{display:flex;flex-direction:column;gap:5px;min-width:0;padding:7px 7px 9px;border-radius:13px;border:1px solid var(--rule);background:var(--steel-2);text-align:left;touch-action:manipulation;transition:transform .1s}
+.dwg:active{transform:scale(.97)}
+.dwg.cur{border-color:var(--tape);box-shadow:0 0 0 1px var(--tape) inset}
+.dwg.p21{opacity:.55}
+.dth{position:relative;display:block;aspect-ratio:1.414/1;border-radius:8px;background:#0b0f14;overflow:hidden}
+.dth img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .25s}
+.dth img.on{opacity:1}
+.dth img.on~.dph{display:none}
+.dph{position:absolute;inset:0;display:grid;place-items:center;color:#2f3d4b}
+.dph svg{width:46px;height:34px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.dph.txt{font:700 15px/1.2 var(--f-num);color:var(--dim);text-align:center}
+.dph.txt small{display:block;font:700 10.5px/1.3 var(--f-ui)}
+.dbad{position:absolute;left:5px;top:5px;display:flex;gap:4px}
+.dbad i{font:700 10px/1 var(--f-ui);font-style:normal;padding:4px 6px;border-radius:6px;background:var(--tape);color:var(--tape-ink)}
+.dbad i.o{background:var(--text);color:var(--steel)}
+.dbad i.m{background:var(--stake);color:#fff}
+.dtt{font-weight:700;font-size:13px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.dsub{font:600 11px/1.3 var(--f-num);color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lprog{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--steel-2);font-size:12.5px;line-height:1.5}
+.lprog b{color:var(--tape)}
+.lprog .bar{display:block;height:6px;border-radius:9px;background:var(--steel-3);overflow:hidden}
+.lprog .bar i{display:block;height:100%;background:var(--tape);transition:width .3s}
+.lempty{display:flex;flex-direction:column;gap:10px;padding:16px 14px;border-radius:14px;border:1px dashed var(--rule);font-size:13px;line-height:1.7;color:#cfd8e0}
+.lempty b{font-size:14.5px;color:var(--text)}
 
 /* ---- overlays ---- */
 #toast{position:absolute;z-index:20;left:50%;top:calc(var(--top-h) + 8px);transform:translate(-50%,-6px);max-width:calc(100% - 32px);padding:10px 16px;border-radius:999px;background:var(--text);color:var(--steel);font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -352,10 +409,11 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
     </div>
     <p class="lead">SXFのSFC図面をスマホで開いて、照準を合わせるだけで寸法や面積を確認。気づいたことはメモや赤ペンで書き込めます。</p>
     <div class="row">
-      <button class="btn primary" id="wOpen" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M3 7.5V18a1.5 1.5 0 0 0 1.5 1.5h15A1.5 1.5 0 0 0 21 18V9a1.5 1.5 0 0 0-1.5-1.5H12L10 5H4.5A1.5 1.5 0 0 0 3 6.5z"/></svg>図面ファイルを開く</button>
-      <button class="btn" id="wSample" type="button">サンプルで試す</button>
+      <button class="btn primary" id="wDir" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M3 7.5V18a1.5 1.5 0 0 0 1.5 1.5h15A1.5 1.5 0 0 0 21 18V9a1.5 1.5 0 0 0-1.5-1.5H12L10 5H4.5A1.5 1.5 0 0 0 3 6.5z"/></svg>フォルダを取り込む</button>
+      <button class="btn" id="wOpen" type="button">ファイルを開く</button>
     </div>
-    <p class="note" style="margin:-6px 0 0">複数のファイルをまとめて選べます。開いた図面は上のタブで切り替えられます。</p>
+    <div class="row" style="margin-top:-6px"><button class="btn" id="wLib" type="button" hidden>図面ライブラリ</button><button class="btn" id="wSample" type="button">サンプルで試す</button></div>
+    <p class="note" style="margin:-6px 0 0">フォルダごと取り込むと、中のフォルダもそのままの形で一覧から探せます（ZIPも可）。ファイルは複数まとめて選べて、開いた図面は上のタブで切り替えられます。</p>
     <div class="row" id="wTabsRow" hidden><button class="btn small" id="wCloseAll" type="button">開いている図面をすべて閉じる</button></div>
     <div class="tips">
       <div class="tip"><svg class="i" viewBox="0 0 24 24"><path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V12M11 11.5V5a1.5 1.5 0 0 1 3 0v6.5M14 11.5V7a1.5 1.5 0 0 1 3 0v7a6 6 0 0 1-6 6h-.5a6 6 0 0 1-4.6-2.2L4 15.4a1.5 1.5 0 0 1 2.3-1.9L8 15"/></svg>2本指で<br>拡大・移動</div>
@@ -379,6 +437,13 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
       <button class="tab" data-tab="settings" type="button">設定</button>
     </div>
     <div class="sbody" id="menuBody"></div>
+  </section>
+
+  <section class="sheet" id="libSheet" hidden aria-label="図面ライブラリ">
+    <div class="grab"></div>
+    <div class="lhead"><nav class="crumbs" id="libCrumbs" aria-label="いまの場所"></nav><button class="ibtn" type="button" data-close aria-label="閉じる"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="lsearch"><svg class="i" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input type="text" id="libQ" placeholder="図面名・ファイル名・フォルダ名で探す" autocomplete="off" spellcheck="false" enterkeyhint="search" aria-label="図面を探す"><button type="button" id="libQx" class="qx" hidden aria-label="検索をやめる"><svg class="i" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></svg></button></div>
+    <div class="sbody" id="libBody"></div>
   </section>
 
   <section class="sheet" id="memoSheet" hidden aria-label="メモ">
@@ -441,6 +506,7 @@ input[type=number],input[type=text]{height:44px;padding:0 12px;border-radius:12p
   <div id="imgview" hidden><img id="imgOut" alt="書き出した図面画像"><p>画像を長押しすると保存・共有できます。</p><button class="btn" id="imgClose" type="button" style="flex:0 0 auto;min-width:140px">閉じる</button></div>
   <div id="toast" role="status" aria-live="polite"></div>
   <input type="file" id="file" multiple hidden>
+  <input type="file" id="dirIn" webkitdirectory multiple hidden>
 </div>
 
 <script>
@@ -516,6 +582,13 @@ function parseParams(s,i){
     out.push(s.slice(st,i).trim());
   }
   return[out,i];
+}
+// title, number and scale (drawing_attribute_feature) and the sheet name: SXF keeps them at the end of a file
+function sfcMeta(text){
+  const o={},sv=v=>typeof v==='string'?v.trim():'';let m=/drawing_attribute_feature\s*\(/i.exec(text);
+  if(m){const p=parseParams(text,m.index+m[0].length-1)[0];o.ta=sv(p[3]);o.dn=sv(p[4]);o.sc=sv(p[6])}
+  m=/drawing_sheet_feature\s*\(/i.exec(text);if(m)o.ts=sv(parseParams(text,m.index+m[0].length-1)[0][0]);
+  return o;
 }
 function parseSFC(text){
   if(text.indexOf('/*SXF')<0){
@@ -767,7 +840,8 @@ function buckets(K,I,n){
   for(let i=0;i<n;i++){const q=slot.get(K[i]);items[fill[q]++]=I?I[i]:i}
   return{keys,start,items};
 }
-function index(G,M){
+// the area to show: the paper when most content lies on it, else the content (robust to stray far-off elements)
+function fitBox(G,M){
   const s=M.sheet;let sw=0,sh=0,slabel='';
   if(!s.synthetic){
     if(s.type===9||!SHEETS[s.type]){sw=s.x;sh=s.y;slabel='自由'}
@@ -794,6 +868,10 @@ function index(G,M){
     const inside=cb[0]>-sw*.25&&cb[1]>-sh*.25&&cb[2]<sw*1.25&&cb[3]<sh*1.25;
     fit=inside?[Math.min(0,cb[0]),Math.min(0,cb[1]),Math.max(sw,cb[2]),Math.max(sh,cb[3])]:cb;
   }
+  return{fit,sw,sh,slabel};
+}
+function index(G,M){
+  const s=M.sheet,fb=fitBox(G,M),sw=fb.sw,sh=fb.sh,slabel=fb.slabel,fit=fb.fit,P=G.P,np=G.np,bb=P.bb;
   const world={x0:fit[0],y0:fit[1],w:Math.max(1e-6,fit[2]-fit[0]),h:Math.max(1e-6,fit[3]-fit[1])};
   // batches by style/layer/tile; paths are built on the page, lazily
   const NT=6,ts=Math.max(world.w,world.h)/NT;const bm=new Map(),binfo=[],bOf=new Int32Array(np);
@@ -849,9 +927,37 @@ function transfers(R){
   for(const f of R.fills)for(const r of f.rings)add(r);
   return[...set];
 }
-return{sniff,decodeBytes,parseSFC,buildModel,flatten,index,run,transfers};
+return{sniff,decodeBytes,parseSFC,buildModel,flatten,index,run,transfers,fitBox,sfcMeta,parseParams};
 }
 const Parser=PARSER();
+// thumbnails for the library, in a worker of their own (PARSER comes along as source text)
+function THUMBW(){
+  const P=PARSER();
+  const col=rgb=>{let r=rgb[0],g=rgb[1],b=rgb[2];const lum=.2126*r+.7152*g+.0722*b;if(Math.max(r,g,b)<50){r=232;g=236;b=240}else if(lum<90){r+=(255-r)*.35;g+=(255-g)*.35;b+=(255-b)*.35}return'rgb('+(r|0)+','+(g|0)+','+(b|0)+')'};
+  self.onmessage=async e=>{
+    const m=e.data;if(!m||!m.buf)return;
+    try{
+      if(typeof OffscreenCanvas==='undefined')throw new Error('NOOC');
+      const M=P.buildModel(P.parseSFC(P.decodeBytes(m.buf))),G=P.flatten(M),fb=P.fitBox(G,M),f=fb.fit;
+      const W=m.w,H=m.h,cv=new OffscreenCanvas(W,H),ctx=cv.getContext('2d');if(!ctx)throw new Error('NOOC');
+      ctx.fillStyle='#0b0f14';ctx.fillRect(0,0,W,H);
+      const bw=Math.max(1e-6,f[2]-f[0]),bh=Math.max(1e-6,f[3]-f[1]),k=Math.min((W-6)/bw,(H-6)/bh);
+      ctx.setTransform(k,0,0,-k,W/2-(f[0]+f[2])/2*k,H/2+(f[1]+f[3])/2*k);
+      if(fb.sw>0){ctx.fillStyle='#0f151c';ctx.fillRect(0,0,fb.sw,fb.sh);ctx.lineWidth=1/k;ctx.strokeStyle='#2b3846';ctx.strokeRect(0,0,fb.sw,fb.sh)}
+      const on=L=>!M.layers[L]||M.layers[L].visible!==false;
+      for(const fl of G.fills){if(!on(fl.L))continue;ctx.beginPath();for(const r of fl.rings){ctx.moveTo(r[0],r[1]);for(let i=2;i<r.length;i+=2)ctx.lineTo(r[i],r[i+1]);ctx.closePath()}ctx.globalAlpha=.5;ctx.fillStyle=col(fl.rgb);ctx.fill('evenodd');ctx.globalAlpha=1}
+      const Q=G.P,pts=G.pts,by=new Map();
+      for(let i=0;i<G.np;i++){if(!on(Q.L[i]))continue;const st=Q.st[i];let a=by.get(st);if(!a)by.set(st,a=[]);a.push(i)}
+      ctx.lineWidth=.9/k;ctx.lineCap='round';ctx.lineJoin='round';const tol=.5/k;
+      for(const[st,list]of by){
+        ctx.beginPath();
+        for(const i of list){const o=Q.off[i]*2,n=Q.n[i];let lx=pts[o],ly=pts[o+1];ctx.moveTo(lx,ly);for(let j=1;j<n;j++){const x=pts[o+2*j],y=pts[o+2*j+1];if(j<n-1&&Math.abs(x-lx)<tol&&Math.abs(y-ly)<tol)continue;ctx.lineTo(x,y);lx=x;ly=y}if(Q.fl[i]&1)ctx.closePath()}
+        ctx.strokeStyle=col(G.styles[st].rgb);ctx.stroke();
+      }
+      self.postMessage({ok:true,blob:await cv.convertToBlob({type:'image/jpeg',quality:.72})});
+    }catch(err){self.postMessage({ok:false,err:String(err&&err.message||err)})}
+  };
+}
 
 /* ---------- parsing off the main thread: a small pool of workers built from PARSER's own source ---------- */
 const PW={
@@ -1267,6 +1373,7 @@ function frame(){
     mctx.setTransform(k,0,0,k,ox*dpr,oy*dpr);mctx.drawImage(base,0,0);mctx.setTransform(1,0,0,1,0,0);
   }else mctx.drawImage(base,0,0);
   drawNotes(mctx,W,H,dpr,V,false);drawLive(mctx);
+  if(thumbCap&&!needBase&&!job&&!busy)captureThumb();
   if(busy||needBase||costProbe)requestFrame();
 }
 function invalidateAll(){needBase=true;job=null;snapView=null;requestFrame()}
@@ -2518,6 +2625,7 @@ const Store={
   },
   async save(hash,body){
     await this.ready;LS.set('n:'+hash,body);
+    {const nc=noteCounts();if(body.notes.length)nc[hash]=body.notes.length;else delete nc[hash];LS.set('nc',nc)}
     const idx=LS.get('recent',[]).filter(r=>r.hash!==hash);idx.unshift({hash,name:body.name,updatedAt:body.updatedAt,count:body.notes.length});LS.set('recent',idx.slice(0,20));
     if(this.mode==='cloud'){
       try{await this.ref(hash).set(body)}catch(e){
@@ -2565,11 +2673,16 @@ const Cache={
     this.db=new Promise(res=>{
       let done=false;const fin=v=>{if(!done){done=true;res(v)}else if(v){try{v.close()}catch(e){}}};setTimeout(()=>fin(null),2500);
       try{
-        const r=indexedDB.open('zumen-scope',2);
+        const r=indexedDB.open('zumen-scope',3);
         r.onupgradeneeded=e=>{try{
           const db=r.result,tx=r.transaction;const files=db.objectStoreNames.contains('files')?tx.objectStore('files'):db.createObjectStore('files',{keyPath:'hash'});
           if(!db.objectStoreNames.contains('meta')){const meta=db.createObjectStore('meta',{keyPath:'hash'});
             if(e.oldVersion>=1){const c=files.openCursor();c.onsuccess=()=>{const k=c.result;if(!k)return;const v=k.value||{};if(v.hash)meta.put({hash:v.hash,name:v.name||'',size:v.buf?v.buf.byteLength:0,at:v.at||0});k.continue()}}}
+          // the drawing library: folders, their file records (no data), file data, thumbnails
+          if(!db.objectStoreNames.contains('libs'))db.createObjectStore('libs',{keyPath:'id'});
+          if(!db.objectStoreNames.contains('lfiles'))db.createObjectStore('lfiles',{keyPath:'k'}).createIndex('lib','lib');
+          if(!db.objectStoreNames.contains('lblobs'))db.createObjectStore('lblobs',{keyPath:'k'});
+          if(!db.objectStoreNames.contains('lthumbs'))db.createObjectStore('lthumbs',{keyPath:'k'});
         }catch(err){}};
         r.onsuccess=()=>{const db=r.result;db.onversionchange=()=>{try{db.close()}catch(e){}};fin(db)};r.onerror=()=>fin(null);r.onblocked=()=>fin(null);
       }catch(e){fin(null)}
@@ -2608,7 +2721,7 @@ async function hashBytes(buf){
    ========================================================= */
 const DOCS=[];let CUR=null;
 const PARSE_BUDGET=650000,MAX_PARSED=10,SNAP_KEEP=3;
-function newDoc(o){return{id:uid(),name:o.name||'図面',hash:o.hash,size:o.size||0,sample:!!o.sample,buf:o.buf||null,cached:o.cached,D:null,job:null,err:null,notes:[],undo:[],manual:0,geo:null,elev:null,cl:null,view:null,hidden:null,vis:null,loaded:false,loadP:null,used:0,snap:null,shown:false,title:''}}
+function newDoc(o){return{id:uid(),name:o.name||'図面',hash:o.hash,size:o.size||0,sample:!!o.sample,buf:o.buf||null,cached:o.cached,D:null,job:null,err:null,notes:[],undo:[],manual:0,geo:null,elev:null,cl:null,view:null,hidden:null,vis:null,loaded:false,loadP:null,used:0,snap:null,shown:false,title:o.title||'',lk:o.lk||null}}
 function estCost(x){const d=x.D;return d?d.np+d.texts.length*2+(d.pts.length>>3):Math.max(500,(x.size||0)/80)}
 function ensureParsed(doc){
   if(doc.D)return Promise.resolve(true);
@@ -2618,6 +2731,7 @@ function ensureParsed(doc){
       await null;
       try{
         let buf=doc.buf;
+        if(!buf&&doc.lk){try{buf=await Lib.bufByKey(doc.lk)}catch(e){}if(buf&&!doc.size)doc.size=buf.byteLength}
         if(!buf){const f=await Cache.get(doc.hash);if(f&&f.buf){buf=f.buf;if(!doc.size)doc.size=buf.byteLength}}
         if(!buf){doc.err='NOFILE';return false}
         doc.buf=buf;
@@ -2636,7 +2750,7 @@ function attach(doc,R){
   const d=makeD(R,{name:doc.name,size:doc.size,hash:doc.hash,sample:doc.sample});
   if(doc.vis&&doc.vis.length===d.vis.length)d.vis.set(doc.vis);
   if(doc.hidden){for(const i of doc.hidden)if(i>=0&&i<d.np)d.hid[i]=1;doc.hidden=null}
-  doc.D=d;doc.title=((d.info&&d.info.drawing)||d.sheet.name||'').trim();
+  doc.D=d;{const t=((d.info&&d.info.drawing)||d.sheet.name||'').trim();if(!doc.title||(t&&!GENERIC_SHEET.test(t)))doc.title=t}
   if(doc.cached===true&&doc.buf&&doc.buf.byteLength>2e6)doc.buf=null;   // big files are re-read from this device's copy if ever needed again
   if(!doc.used)doc.used=1;
   trimParsed();
@@ -2718,7 +2832,7 @@ function show(doc){
   if(aiming())updateSnap();requestFrame();toolHint();readoutSoon();renderChip();renderTabs();
   if(!$('#menuSheet').hidden)renderMenu();
   if(!doc.loaded)loadNotes(doc);
-  trimParsed();schedulePreload();gpsLocate(true);
+  trimParsed();schedulePreload();gpsLocate(true);thumbCap=null;wantCapture(doc);
 }
 function loadNotes(doc){
   if(doc.loadP)return doc.loadP;
@@ -2767,7 +2881,7 @@ function closeAll(){
   if(saveTimer)flushSave();DOCS.splice(0).forEach(x=>{x.D=null;x.snap=null;x.buf=null});preRun++;
   CUR=null;D=null;S.notes=[];S.undo=[];S.geo=null;S.elev=null;resetTransient();updateUndo();saveTabs();renderTabs();renderTitle();invalidateAll();showWelcome();
 }
-function saveTabs(){LS.set('tabs',DOCS.filter(x=>!x.sample&&x.cached!==false).map(x=>({hash:x.hash,name:x.name,size:x.size})));LS.set('activeTab',CUR&&!CUR.sample?CUR.hash:'')}
+function saveTabs(){LS.set('tabs',DOCS.filter(x=>!x.sample&&x.cached!==false).map(x=>x.lk?{hash:x.hash,name:x.name,size:x.size,lk:x.lk,title:x.title}:{hash:x.hash,name:x.name,size:x.size}));LS.set('activeTab',CUR&&!CUR.sample?CUR.hash:'')}
 function addDoc(o){
   const doc=newDoc(o);DOCS.push(doc);
   if(!o.sample&&o.buf&&!o.cached){
@@ -2867,7 +2981,7 @@ function drawTabs(){
 }
 $('#tabs').addEventListener('click',e=>{
   audioWake();
-  if(e.target.closest('.tadd')){pickFile();return}
+  if(e.target.closest('.tadd')){openLib(libLocOf(CUR));return}
   const t=e.target.closest('.ftab');if(!t)return;const doc=DOCS.find(x=>x.id===t.dataset.id);if(!doc)return;
   if(e.target.closest('.tx')){closeDoc(doc);sfx('erase');return}
   if(doc!==CUR){$('#welcome').hidden=true;activate(doc);sfx('tool');buzz(6)}
@@ -3161,6 +3275,472 @@ function sfx(k){if(!settings.sound||!AC)return;try{
 }catch(e){}}
 function buzz(p){if(!settings.haptic)return;try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
 
+/* =========================================================
+   図面ライブラリ: whole folders (and ZIPs) of drawings kept on this device and browsed like a file manager.
+   A folder becomes one library entry; its sub-folders stay as they are. Files are read only when opened.
+   ========================================================= */
+const SFC_RE=/\.(sfc|sfz)$/i,P21_RE=/\.p21$/i,ZIP_RE=/\.zip$/i,XML_RE=/(^|\/)DRAWING[A-Z]{0,2}\.XML$/i;
+const GENERIC_SHEET=/^(図面|図|sheet|drawing|layout|レイアウト|用紙)?\s*[-_－‐ー ]?\s*[0-9０-９]*$/i;
+const jaCmp=new Intl.Collator('ja',{numeric:true,sensitivity:'base'}).compare;
+const fmtMB=b=>b>=1e9?(b/1e9).toFixed(1)+' GB':b>=1e6?(b/1e6).toFixed(b>=1e8?0:1)+' MB':Math.max(1,Math.round(b/1e3))+' KB';
+const fmtMD=t=>{const d=new Date(t||0);return(d.getMonth()+1)+'/'+d.getDate()};
+const idle=()=>new Promise(r=>window.requestIdleCallback?requestIdleCallback(()=>r(),{timeout:150}):setTimeout(r,16));
+const ICON_FOLDER='<svg class="i" viewBox="0 0 24 24"><path d="M3 7.5V18a1.5 1.5 0 0 0 1.5 1.5h15A1.5 1.5 0 0 0 21 18V9a1.5 1.5 0 0 0-1.5-1.5H12L10 5H4.5A1.5 1.5 0 0 0 3 6.5z"/></svg>';
+const ICON_STACK='<svg class="i" viewBox="0 0 24 24"><path d="M3.5 8.2 12 4l8.5 4.2L12 12.4z"/><path d="m3.5 12.1 8.5 4.2 8.5-4.2"/><path d="m3.5 16 8.5 4.2 8.5-4.2"/></svg>';
+const ICON_CHEV='<svg class="i chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg>';
+const THUMB_PH='<span class="dph"><svg viewBox="0 0 48 34" aria-hidden="true"><rect x="1.5" y="1.5" width="45" height="31" rx="2"/><path d="M6 25 18 12l8 8 6-6 10 11"/><path d="M33 26h9M33 29h6"/></svg></span>';
+
+/* ---------- ZIP: read the central directory, then single entries on demand (stored or deflate) ---------- */
+function zipName(b){try{return new TextDecoder('utf-8',{fatal:true}).decode(b)}catch(e){}try{return new TextDecoder('shift_jis').decode(b)}catch(e){}let s='';for(const c of b)s+=String.fromCharCode(c);return s}
+const Zip={
+  async dir(blob){
+    const size=blob.size;if(!(size>=22))throw new Error('ZIP');
+    const tl=Math.min(size,65557),tv=new DataView(await blob.slice(size-tl).arrayBuffer());
+    let e=-1;for(let i=tl-22;i>=0;i--)if(tv.getUint32(i,true)===0x06054b50){e=i;break}
+    if(e<0)throw new Error('ZIP');
+    let n=tv.getUint16(e+10,true),cs=tv.getUint32(e+12,true),co=tv.getUint32(e+16,true);
+    if((n===0xffff||cs===0xffffffff||co===0xffffffff)&&e>=20&&tv.getUint32(e-20,true)===0x07064b50){   // zip64
+      const z=Number(tv.getBigUint64(e-12,true)),zv=new DataView(await blob.slice(z,z+56).arrayBuffer());
+      if(zv.getUint32(0,true)===0x06064b50){n=Number(zv.getBigUint64(32,true));cs=Number(zv.getBigUint64(40,true));co=Number(zv.getBigUint64(48,true))}
+    }
+    const ab=await blob.slice(co,co+cs).arrayBuffer(),dv=new DataView(ab),u8=new Uint8Array(ab),out=[];let p=0;
+    for(let k=0;k<n&&p+46<=dv.byteLength;k++){
+      if(dv.getUint32(p,true)!==0x02014b50)break;
+      const fl=dv.getUint16(p+8,true),m=dv.getUint16(p+10,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true);
+      let csz=dv.getUint32(p+20,true),usz=dv.getUint32(p+24,true),off=dv.getUint32(p+42,true),name=null;
+      let q=p+46+nl;const xe=q+xl;
+      while(q+4<=xe){
+        const id=dv.getUint16(q,true),sz=dv.getUint16(q+2,true),d=q+4;
+        if(id===1){let r=d;if(usz===0xffffffff){usz=Number(dv.getBigUint64(r,true));r+=8}if(csz===0xffffffff){csz=Number(dv.getBigUint64(r,true));r+=8}if(off===0xffffffff)off=Number(dv.getBigUint64(r,true))}
+        else if(id===0x7075&&sz>5){try{name=new TextDecoder('utf-8',{fatal:true}).decode(u8.subarray(d+5,d+sz))}catch(e){}}   // Info-ZIP unicode path
+        q=d+sz;
+      }
+      if(name==null){const nb=u8.subarray(p+46,p+46+nl);name=(fl&0x800)?new TextDecoder('utf-8').decode(nb):zipName(nb)}
+      out.push({name:name.replace(/\\/g,'/'),m,fl,cs:csz,us:usz,off});
+      p=xe+cl;
+    }
+    return out;
+  },
+  async read(blob,z){
+    if(!blob)throw new Error('NOFILE');
+    if(z.fl&1)throw new Error('ZIPENC');
+    const hv=new DataView(await blob.slice(z.off,z.off+30).arrayBuffer());if(hv.getUint32(0,true)!==0x04034b50)throw new Error('ZIP');
+    const s=z.off+30+hv.getUint16(26,true)+hv.getUint16(28,true),data=blob.slice(s,s+z.cs);
+    if(z.m===0)return data.arrayBuffer();
+    if(z.m!==8||typeof DecompressionStream==='undefined')throw new Error('ZIPMETHOD');
+    return new Response(data.stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();
+  }
+};
+
+/* ---------- storage: libraries, file records (no file data), file data, thumbnails ---------- */
+const cleanRec=r=>{const o={};for(const k in r)if(k[0]!=='_')o[k]=r[k];return o};
+const Lib={
+  mem:new Map(),      // key → Blob, while it is being saved (or when it could not be saved)
+  memLibs:[],         // libraries kept for this session only (no storage on this device)
+  libs:null,recs:new Map(),trees:new Map(),job:null,
+  async list(){
+    if(!this.libs){const r=await Cache.req(['libs'],'readonly',t=>t.objectStore('libs').getAll());const st=Array.isArray(r)?r:[];const ids=new Set(st.map(l=>l.id));this.libs=st.concat(this.memLibs.filter(l=>!ids.has(l.id))).sort((a,b)=>jaCmp(a.name,b.name)||a.at-b.at)}
+    return this.libs;
+  },
+  byId(id){return(this.libs||[]).find(l=>l.id===id)||null},
+  async files(id){
+    let r=this.recs.get(id);
+    if(!r){const a=await Cache.req(['lfiles'],'readonly',t=>t.objectStore('lfiles').index('lib').getAll(id));r=Array.isArray(a)?a:[];this.recs.set(id,r)}
+    return r;
+  },
+  async tree(id){
+    let T=this.trees.get(id);if(T)return T;
+    T=new Map();const node=d=>{let n=T.get(d);if(!n){n={dir:d,sub:new Map(),files:[],count:0,p21:0};T.set(d,n);if(d){const i=d.lastIndexOf('/');node(i>=0?d.slice(0,i):'').sub.set(d,n)}}return n};
+    node('');const recs=await this.files(id);
+    for(const r of recs){node(r.dir).files.push(r);let d=r.dir;for(;;){const t=T.get(d);if(r.p21)t.p21++;else t.count++;if(!d)break;const i=d.lastIndexOf('/');d=i>=0?d.slice(0,i):''}}
+    this.trees.set(id,T);return T;
+  },
+  async rec(k){const id=k.slice(0,k.indexOf(':'));return(await this.files(id)).find(r=>r.k===k)||null},
+  save(recs){recs=[].concat(recs);return Cache.req(['lfiles'],'readwrite',t=>{const s=t.objectStore('lfiles');recs.forEach(r=>s.put(cleanRec(r)))})},
+  async raw(key){const m=this.mem.get(key);if(m)return m;const r=await Cache.req(['lblobs'],'readonly',t=>t.objectStore('lblobs').get(key));return r?r.b:null},
+  async buf(r){
+    if(r.z)return Zip.read(await this.raw(r.zb),r.z);
+    const b=await this.raw(r.k);if(!b)return null;return b instanceof ArrayBuffer?b.slice(0):b.arrayBuffer();
+  },
+  async bufByKey(k){const r=await this.rec(k);return r?this.buf(r):null},
+  async remove(id){
+    const lo=id+':',hi=id+':￿',range=IDBKeyRange.bound(lo,hi);
+    await Cache.req(['libs','lfiles','lblobs','lthumbs'],'readwrite',t=>{t.objectStore('libs').delete(id);t.objectStore('lfiles').delete(range);t.objectStore('lblobs').delete(range);t.objectStore('lthumbs').delete(range)});
+    this.memLibs=this.memLibs.filter(l=>l.id!==id);this.libs=null;this.recs.delete(id);this.trees.delete(id);
+    for(const k of[...this.mem.keys()])if(k.startsWith(lo))this.mem.delete(k);
+    for(const[k,u]of Thumbs.urls)if(k.startsWith(lo)){if(u)URL.revokeObjectURL(u);Thumbs.urls.delete(k)}
+  }
+};
+// memo counts per drawing (by file hash), for the badges
+function noteCounts(){
+  let nc=LS.get('nc',null);
+  if(!nc){nc={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('zs:n:')){const b=LS.get(k.slice(3),null);if(b&&Array.isArray(b.notes)&&b.notes.length)nc[k.slice(5)]=b.notes.length}}}catch(e){}LS.set('nc',nc)}
+  return nc;
+}
+
+/* ---------- titles: DRAWING.XML (電子納品の図面管理ファイル), then the drawing's own attributes ---------- */
+function drawingXml(buf){
+  const out=new Map();let doc;
+  try{doc=new DOMParser().parseFromString(Parser.decodeBytes(buf).replace(/<!DOCTYPE[^>]*>/i,''),'application/xml')}catch(e){return out}
+  if(!doc||doc.getElementsByTagName('parsererror').length)return out;
+  for(const fe of Array.from(doc.getElementsByTagName('*'))){
+    if(!/図面ファイル名$/.test(fe.tagName))continue;const fn=(fe.textContent||'').trim(),par=fe.parentElement;if(!fn||!par)continue;
+    const kid=re=>{for(const c of Array.from(par.children))if(re.test(c.tagName))return(c.textContent||'').trim();return''};
+    out.set(fn.split(/[\\/]/).pop().toUpperCase(),{t:kid(/^図面名(称)?$/),dn:kid(/^図面番号$/),sc:kid(/^(図面)?(尺度|縮尺)$/)});
+  }
+  return out;
+}
+async function tailMeta(r){
+  let u,cut=false;
+  if(r.z){if(r.z.us>6e6)return null;const ab=await Lib.buf(r);const st=Math.max(0,ab.byteLength-65536);u=new Uint8Array(ab,st);cut=st>0}
+  else{const b=await Lib.raw(r.k);if(!b)return null;const n=b.size!=null?b.size:b.byteLength,st=Math.max(0,n-65536);u=new Uint8Array(b instanceof ArrayBuffer?b.slice(st):await b.slice(st).arrayBuffer());cut=st>0}
+  if(cut){const nl=u.indexOf(10);if(nl>=0)u=u.subarray(nl+1)}   // start on a whole line (and a whole character)
+  return Parser.sfcMeta(Parser.decodeBytes(u));
+}
+const recBase=r=>r.name.replace(/\.(sfc|sfz|p21)$/i,'');
+function recTitle(r){
+  const base=recBase(r).toUpperCase();
+  for(const t of[r.t,r.ta,r.ts]){const s=(t||'').trim();if(s&&!GENERIC_SHEET.test(s)&&s.toUpperCase()!==base)return s}
+  return recBase(r);
+}
+function recSub(r){const p=[];if(recTitle(r)!==recBase(r))p.push(r.name);if(r.sc)p.push(r.sc);return p.join(' · ')||r.name}
+
+/* ---------- import: a picked folder, a dropped folder, or a ZIP ---------- */
+let libQ=Promise.resolve();
+function libQueue(fn){const p=libQ.then(fn,fn);libQ=p.catch(()=>{});return p}
+async function libImport(name,kind,entries,zipBlob){
+  const id=uid(),recs=[],xmls=[],blobs=[],flat=[];
+  for(const en of entries){
+    // a ZIP inside the folder opens up like a folder of its own
+    if(ZIP_RE.test(en.path)&&en.file){
+      try{const zk=id+':'+en.path,dir=await Zip.dir(en.file),base=en.path.replace(/\.zip$/i,'');blobs.push({key:zk,blob:en.file});Lib.mem.set(zk,en.file);
+        for(const z of dir)if(!z.name.endsWith('/')&&!(z.fl&1))flat.push({path:base+'/'+z.name.replace(/^\/+/,''),size:z.us,z,zb:zk})}catch(e){}
+      continue;
+    }
+    flat.push(en);
+  }
+  if(zipBlob){const zk=id+':'+name+'.zip';blobs.push({key:zk,blob:zipBlob});Lib.mem.set(zk,zipBlob);flat.forEach(en=>{if(en.z&&!en.zb)en.zb=zk})}
+  for(const en of flat){
+    const path=en.path.replace(/\\/g,'/').replace(/^\/+/,''),segs=path.split('/'),nm=segs[segs.length-1];
+    if(!nm||segs.some(s=>s.startsWith('.')||s==='__MACOSX'))continue;
+    if(XML_RE.test(path)){xmls.push(Object.assign({},en,{path}));continue}
+    const p21=P21_RE.test(nm);if(!SFC_RE.test(nm)&&!p21)continue;
+    const k=id+':'+path,r={k,lib:id,path,dir:segs.slice(0,-1).join('/'),name:nm,size:en.size||0,mt:en.mt||0,at:0};
+    if(p21)r.p21=1;
+    if(en.z){r.z=en.z;r.zb=en.zb}else if(en.file&&!p21){blobs.push({key:k,blob:en.file});Lib.mem.set(k,en.file)}
+    recs.push(r);
+  }
+  const n=recs.filter(r=>!r.p21).length;
+  if(!n){blobs.forEach(b=>Lib.mem.delete(b.key));dialog('図面が見つかりません','「'+name+'」の中にSFCの図面（.sfc）がありませんでした。');return null}
+  const sig=n+':'+recs.reduce((a,r)=>a+(r.size||0),0);
+  const old=(await Lib.list()).find(l=>l.name===name&&l.sig===sig);
+  if(old){blobs.forEach(b=>Lib.mem.delete(b.key));toast('「'+name+'」は取り込み済みです',2400);openLib({lib:old.id,dir:''});return old}
+  const bytes=blobs.reduce((a,b)=>a+(b.blob.size||0),0);
+  const lib={id,name,kind,at:Date.now(),n,bytes,sig};
+  // drawing names from DRAWING.XML before anything is shown
+  const names=new Map();
+  for(const x of xmls){try{const buf=x.z?await Zip.read(await Lib.raw(x.zb),x.z):await x.file.arrayBuffer();for(const[f,m]of drawingXml(buf))names.set(f,m)}catch(e){}}
+  for(const r of recs){const m=names.get(r.name.toUpperCase());if(m){if(m.t)r.t=m.t;if(m.dn)r.dn=m.dn;if(m.sc)r.sc=m.sc}}
+  const ok=await Cache.req(['libs','lfiles'],'readwrite',t=>{t.objectStore('libs').put(lib);const s=t.objectStore('lfiles');recs.forEach(r=>s.put(r))});
+  if(!ok){lib.mem=1;Lib.memLibs.push(lib)}   // nowhere to keep it: this session only
+  Lib.libs=null;Lib.recs.set(id,recs);Lib.trees.delete(id);
+  try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}
+  Lib.job={id,name,total:blobs.length,done:0,phase:'save'};
+  await openLib({lib:id,dir:''});
+  let fail=0;
+  if(ok){
+    for(let i=0;i<blobs.length;i+=6){
+      const part=blobs.slice(i,i+6);
+      let done=await Cache.req(['lblobs'],'readwrite',t=>{const s=t.objectStore('lblobs');part.forEach(it=>s.put({k:it.key,b:it.blob}))});
+      if(done)part.forEach(it=>Lib.mem.delete(it.key));
+      else for(const it of part){   // one at a time, as plain bytes
+        let ab=null;try{ab=await it.blob.arrayBuffer()}catch(e){}
+        done=ab&&await Cache.req(['lblobs'],'readwrite',t=>t.objectStore('lblobs').put({k:it.key,b:ab}));
+        if(done)Lib.mem.delete(it.key);else fail++;
+      }
+      Lib.job.done=Math.min(blobs.length,i+part.length);libProgress();
+      if(fail>=3)break;   // out of space: the rest stays for this session only
+    }
+    if(fail||Lib.mem.size&&blobs.some(b=>Lib.mem.has(b.key))){lib.part=1;await Cache.req(['libs'],'readwrite',t=>t.objectStore('libs').put(lib));Lib.libs=null}
+  }
+  Lib.job.phase='meta';libProgress();
+  // titles, numbers and scales from the end of each drawing
+  let batch=[];
+  for(const r of recs){
+    if(r.p21)continue;
+    try{const m=await tailMeta(r);if(m)for(const key of['ta','ts','sc','dn'])if(m[key]&&!r[key])r[key]=m[key]}catch(e){}
+    r._h=undefined;batch.push(r);
+    if(batch.length>=16){if(ok)await Lib.save(batch);batch=[];renderLibSoon();await idle()}
+  }
+  if(batch.length&&ok)await Lib.save(batch);
+  Lib.job=null;if(!$('#libSheet').hidden)renderLib();
+  toast('「'+name+'」を取り込みました（図面 '+n+'枚）',2600);sfx('done');
+  if(fail||lib.mem)dialog('この端末に保存できませんでした',(lib.mem?'この画面では図面を保存できないため、':'端末の空き容量が足りないため、一部の図面は保存できませんでした。')+'今は開けますが、アプリを閉じると一覧から開けなくなります。');
+  return lib;
+}
+async function libImportZip(file){
+  let ents;try{ents=await Zip.dir(file)}catch(e){dialog('ZIPを開けませんでした','ファイルが壊れているか、対応していない形式のZIPです。');return null}
+  const files=ents.filter(z=>!z.name.endsWith('/'));
+  if(files.some(z=>z.fl&1)&&files.every(z=>z.fl&1)){dialog('パスワード付きのZIPです','パスワード付きのZIPは開けません。展開してからフォルダごと取り込んでください。');return null}
+  if(typeof DecompressionStream==='undefined'&&files.some(z=>z.m===8)){dialog('このZIPは開けません','この端末のブラウザでは圧縮されたZIPを展開できません。OSとブラウザを最新にするか、フォルダのまま取り込んでください。');return null}
+  let name=file.name.replace(/\.zip$/i,''),strip='';
+  // one folder at the top of the ZIP: that folder is the library
+  const tops=new Set(files.map(z=>z.name.split('/')[0]));
+  if(tops.size===1&&files.every(z=>z.name.includes('/'))){const t=[...tops][0];strip=t+'/';if(!/^(新しいフォルダー?|new folder|folder|data)$/i.test(t))name=t}
+  return libQueue(()=>libImport(name,'zip',files.filter(z=>!(z.fl&1)).map(z=>({path:z.name.slice(strip.length),size:z.us,z})),file));
+}
+// the folder picker (webkitdirectory); phones without folder picking hand back plain files
+async function importPicked(list){
+  const files=Array.from(list||[]);if(!files.length)return;
+  const withPath=files.filter(f=>f.webkitRelativePath&&f.webkitRelativePath.includes('/'));
+  if(!withPath.length){
+    const sfc=files.filter(f=>SFC_RE.test(f.name)),zips=files.filter(f=>ZIP_RE.test(f.name));
+    for(const z of zips)await libImportZip(z);
+    if(sfc.length>1){const d=new Date();await libQueue(()=>libImport('選んだ図面 '+(d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'),'files',sfc.map(f=>({path:f.name,file:f,size:f.size,mt:f.lastModified}))))}
+    else if(sfc.length===1){closeSheets();openFiles(sfc)}
+    else if(!zips.length)dialog('図面が見つかりません','SFCの図面（.sfc）が入ったフォルダか、ZIPを選んでください。');
+    return;
+  }
+  const groups=new Map();
+  for(const f of withPath){const p=f.webkitRelativePath.replace(/\\/g,'/'),i=p.indexOf('/'),root=p.slice(0,i);let g=groups.get(root);if(!g)groups.set(root,g=[]);g.push({path:p.slice(i+1),file:f,size:f.size,mt:f.lastModified})}
+  for(const[root,ents]of groups)await libQueue(()=>libImport(root,'folder',ents));
+}
+// files from the ordinary picker: drawings open at once, ZIPs go into the library
+async function handlePicked(list){
+  const files=Array.from(list||[]);if(!files.length)return;
+  const zips=files.filter(f=>ZIP_RE.test(f.name)),rest=files.filter(f=>!ZIP_RE.test(f.name));
+  if(rest.length){closeSheets();await openFiles(rest)}
+  for(const z of zips)await libImportZip(z);
+}
+async function walkEntry(dir,pre){
+  const out=[],rd=dir.createReader();
+  for(;;){
+    const batch=await new Promise((res,rej)=>rd.readEntries(res,rej));if(!batch.length)break;
+    for(const en of batch){const p=pre?pre+'/'+en.name:en.name;if(en.isDirectory)out.push(...await walkEntry(en,p));else{try{const f=await new Promise((res,rej)=>en.file(res,rej));out.push({path:p,file:f,size:f.size,mt:f.lastModified})}catch(e){}}}
+  }
+  return out;
+}
+// drag and drop on a computer: folders, ZIPs and drawings
+document.addEventListener('dragover',e=>{if(e.dataTransfer&&Array.from(e.dataTransfer.types||[]).includes('Files')){e.preventDefault();e.dataTransfer.dropEffect='copy'}});
+document.addEventListener('drop',e=>{
+  if(!e.dataTransfer)return;e.preventDefault();audioWake();
+  const entries=Array.from(e.dataTransfer.items||[]).map(i=>i.webkitGetAsEntry?i.webkitGetAsEntry():null).filter(Boolean),files=Array.from(e.dataTransfer.files||[]);
+  const dirs=entries.filter(x=>x.isDirectory);
+  (async()=>{
+    for(const d of dirs){const ents=await walkEntry(d,'');await libQueue(()=>libImport(d.name,'folder',ents))}
+    const loose=files.filter(f=>!dirs.some(d=>d.name===f.name));if(loose.length)handlePicked(loose);
+  })();
+});
+
+/* ---------- thumbnails: drawn in a worker of their own, kept on this device ---------- */
+const Thumbs={
+  urls:new Map(),q:[],busy:null,w:null,bad:false,cb:null,
+  async get(key){
+    const u=this.urls.get(key);if(u!==undefined)return u;
+    const r=await Cache.req(['lthumbs'],'readonly',t=>t.objectStore('lthumbs').get(key));
+    if(r&&r.b){const url=URL.createObjectURL(r.b);this.urls.set(key,url);return url}
+    if(r&&r.none){this.urls.set(key,'');return''}
+    return null;
+  },
+  async put(key,blob){
+    await Cache.req(['lthumbs'],'readwrite',t=>t.objectStore('lthumbs').put(blob?{k:key,b:blob}:{k:key,none:1}));
+    const old=this.urls.get(key);if(old)URL.revokeObjectURL(old);
+    const url=blob?URL.createObjectURL(blob):'';this.urls.set(key,url);if(url)paintThumb(key,url);
+  },
+  want(r){
+    if(this.bad||!r||r.p21||(r.z?r.z.us:r.size)>6e6)return;   // big drawings get theirs when first opened
+    if((this.busy&&this.busy.k===r.k)||this.q.some(x=>x.k===r.k))return;
+    this.q.push(r);if(this.q.length>80)this.q.shift();this.pump();
+  },
+  spawn(){
+    try{
+      if(typeof OffscreenCanvas==='undefined'){this.bad=true;return}
+      const src='"use strict";const PARSER='+PARSER.toString()+';('+THUMBW.toString()+')();';
+      this.w=new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})));
+      this.w.onmessage=e=>{const f=this.cb;this.cb=null;if(f)f(e.data||{})};
+      this.w.onerror=e=>{try{e.preventDefault()}catch(_){}const f=this.cb;this.cb=null;if(f)f({ok:false,err:'WORKER'})};
+    }catch(e){this.bad=true}
+  },
+  async pump(){
+    if(this.busy||!this.q.length||this.bad)return;
+    if($('#libSheet').hidden){this.q.length=0;return}
+    const r=this.q.pop();this.busy=r;   // the last one asked for is the one on screen
+    try{
+      if((await this.get(r.k))!==null)return;
+      if(!this.w)this.spawn();if(!this.w)return;
+      let buf=null;try{buf=await Lib.buf(r)}catch(e){}
+      if(!buf){await this.put(r.k,null);return}
+      const res=await new Promise(res=>{const tm=setTimeout(()=>{this.cb=null;res({ok:false,err:'TIMEOUT'})},25000);this.cb=m=>{clearTimeout(tm);res(m)};this.w.postMessage({buf,w:320,h:226},[buf])});
+      if(res.ok&&res.blob)await this.put(r.k,res.blob);
+      else if(res.err==='NOOC')this.bad=true;
+      else if(res.err==='TIMEOUT'||res.err==='WORKER'){try{this.w.terminate()}catch(e){}this.w=null}
+      else await this.put(r.k,null);
+    }catch(e){}
+    finally{this.busy=null;setTimeout(()=>this.pump(),20)}
+  }
+};
+function paintThumb(key,u){$$('#libBody .dwg').forEach(c=>{if((c.dataset.k||('h:'+c.dataset.h))!==key)return;const img=c.querySelector('img');if(img&&img.getAttribute('src')!==u){img.onload=()=>img.classList.add('on');img.src=u}})}
+// a drawing opened on screen gives its thumbnail from the picture already drawn (big drawings too)
+let thumbCap=null;
+function wantCapture(doc){if(!doc||doc.sample||!doc.hash)return;const key=doc.lk||('h:'+doc.hash);Thumbs.get(key).then(u=>{if(u===null&&CUR===doc&&D){thumbCap={doc,key};requestFrame()}})}
+function captureThumb(){
+  const c=thumbCap;if(!c)return;if(CUR!==c.doc||!D){thumbCap=null;return}if(!snapView)return;
+  const f=D.fit,a=toScreen(f[0],f[3],snapView),b=toScreen(f[2],f[1],snapView),x0=a[0]*dpr,y0=a[1]*dpr,cw=(b[0]-a[0])*dpr,ch=(b[1]-a[1])*dpr;
+  if(!(cw>60&&ch>40))return;
+  const vis=Math.max(0,Math.min(x0+cw,base.width)-Math.max(x0,0))*Math.max(0,Math.min(y0+ch,base.height)-Math.max(y0,0))/(cw*ch);if(vis<.9)return;   // the whole drawing must be on screen
+  thumbCap=null;
+  const TW=320,TH=226,t=document.createElement('canvas');t.width=TW;t.height=TH;const g=t.getContext('2d');g.fillStyle=THEME[settings.theme].bg;g.fillRect(0,0,TW,TH);
+  const k=Math.min((TW-6)/cw,(TH-6)/ch);try{g.drawImage(base,x0,y0,cw,ch,(TW-cw*k)/2,(TH-ch*k)/2,cw*k,ch*k)}catch(e){return}
+  try{t.toBlob(bl=>{if(bl)Thumbs.put(c.key,bl)},'image/jpeg',.72)}catch(e){}
+}
+
+/* ---------- the library sheet ---------- */
+const LibUI={loc:Object.assign({lib:null,dir:''},LS.get('libLoc',{})),q:'',io:null,t:0,qt:0};
+function libLocOf(doc){if(!doc||!doc.lk)return null;const i=doc.lk.indexOf(':'),path=doc.lk.slice(i+1),j=path.lastIndexOf('/');return{lib:doc.lk.slice(0,i),dir:j>=0?path.slice(0,j):''}}
+async function openLib(at){
+  if(at)LibUI.loc={lib:at.lib||null,dir:at.dir||''};
+  LibUI.q='';$('#libQ').value='';$('#libQx').hidden=true;
+  const wasHidden=$('#libSheet').hidden;
+  await renderLib();
+  if(wasHidden){openSheet('libSheet');sfx('tap')}
+  const cur=$('#libBody .dwg.cur');if(cur)try{cur.scrollIntoView({block:'center'})}catch(e){}
+}
+function renderLibSoon(){if($('#libSheet').hidden||LibUI.t)return;LibUI.t=setTimeout(()=>{LibUI.t=0;renderLib()},450)}
+function libProgress(){
+  const el=$('#libBody .lprog');if(!el||!Lib.job){renderLibSoon();return}
+  const j=Lib.job,pct=j.phase==='save'&&j.total?Math.round(j.done/j.total*100):100;
+  el.querySelector('b').textContent=j.phase==='save'?'端末に保存しています… '+pct+'%':'図面名を読み取っています…';el.querySelector('.bar i').style.width=pct+'%';
+}
+function progHtml(id){
+  const j=Lib.job;if(!j||(id&&j.id!==id))return'';
+  const pct=j.phase==='save'&&j.total?Math.round(j.done/j.total*100):100;
+  return'<div class="lprog"><span>「'+esc(j.name)+'」を取り込み中 · <b>'+(j.phase==='save'?'端末に保存しています… '+pct+'%':'図面名を読み取っています…')+'</b></span><span class="bar"><i style="width:'+pct+'%"></i></span></div>';
+}
+function cardHtml(r,o={}){
+  const u=Thumbs.urls.get(r.k),open=!o.cur&&DOCS.some(x=>x.lk===r.k||(r.hash&&x.hash===r.hash)),nc=r.hash?(o.nc[r.hash]||0):0;
+  const lib=o.path?Lib.byId(r.lib):null,sub=o.path?((lib?lib.name:'')+(r.dir?' › '+r.dir.split('/').join(' › '):'')):recSub(r);
+  return'<button class="dwg'+(o.cur?' cur':'')+(r.p21?' p21':'')+'" type="button" data-k="'+esc(r.k)+'"><span class="dth">'+(r.p21?'<span class="dph txt">P21<small>未対応</small></span>':'<img alt=""'+(u?' src="'+u+'" class="on"':'')+'>'+THUMB_PH)+
+    '<span class="dbad">'+(o.cur?'<i>表示中</i>':open?'<i class="o">タブ</i>':'')+(nc?'<i class="m">メモ'+nc+'</i>':'')+'</span></span><span class="dtt">'+esc(recTitle(r))+'</span><span class="dsub">'+esc(sub)+'</span></button>';
+}
+function cacheCardHtml(m,o){
+  const key='h:'+m.hash,u=Thumbs.urls.get(key),nc=o.nc[m.hash]||0,cur=CUR&&CUR.hash===m.hash;
+  return'<button class="dwg'+(cur?' cur':'')+'" type="button" data-h="'+esc(m.hash)+'"><span class="dth"><img alt=""'+(u?' src="'+u+'" class="on"':'')+'>'+THUMB_PH+'<span class="dbad">'+(cur?'<i>表示中</i>':'')+(nc?'<i class="m">メモ'+nc+'</i>':'')+'</span></span><span class="dtt">'+esc((m.name||'図面').replace(/\.(sfc|sfz)$/i,''))+'</span><span class="dsub">個別に開いたファイル</span></button>';
+}
+async function renderLib(){
+  clearTimeout(LibUI.t);LibUI.t=0;
+  const body=$('#libBody'),libs=await Lib.list(),loc=LibUI.loc;
+  let lib=loc.lib?libs.find(l=>l.id===loc.lib):null;if(loc.lib&&!lib){loc.lib=null;loc.dir=''}
+  if(lib&&loc.dir&&!(await Lib.tree(lib.id)).has(loc.dir))loc.dir='';
+  LS.set('libLoc',loc);
+  const q=LibUI.q.trim(),view=q?'q:'+q:(loc.lib||'')+'|'+loc.dir,same=body.dataset.view===view,st=body.scrollTop,nc=noteCounts();
+  // where we are
+  let cr='<button class="crumb'+(lib||q?'':' cur')+'" data-go="" type="button">'+ICON_STACK+'図面</button>';
+  if(q)cr+='<span class="csep">›</span><span class="crumb cur">検索</span>';
+  else if(lib){
+    cr+='<span class="csep">›</span><button class="crumb'+(loc.dir?'':' cur')+'" data-go="'+esc(lib.id)+'|" type="button">'+esc(lib.name)+'</button>';
+    let acc='';for(const seg of loc.dir?loc.dir.split('/'):[]){acc=acc?acc+'/'+seg:seg;cr+='<span class="csep">›</span><button class="crumb'+(acc===loc.dir?' cur':'')+'" data-go="'+esc(lib.id+'|'+acc)+'" type="button">'+esc(seg)+'</button>'}
+  }
+  const crumbs=$('#libCrumbs');crumbs.innerHTML=cr;crumbs.scrollLeft=crumbs.scrollWidth;
+  let h='';
+  if(q){
+    const toks=q.normalize('NFKC').toLowerCase().split(/\s+/).filter(Boolean),hits=[];
+    for(const l of libs)for(const r of await Lib.files(l.id)){if(!r._h)r._h=(recTitle(r)+' '+r.path+' '+l.name+' '+(r.dn||'')+' '+(r.sc||'')+' '+(r.ts||'')).normalize('NFKC').toLowerCase();if(toks.every(t=>r._h.includes(t)))hits.push(r)}
+    hits.sort((a,b)=>jaCmp(a.path,b.path));
+    h=hits.length?'<p class="note" style="margin:0">'+hits.length+' 件'+(hits.length>200?'（先頭の200件）':'')+'</p><div class="dgrid">'+hits.slice(0,200).map(r=>cardHtml(r,{path:true,nc,cur:CUR&&CUR.lk===r.k})).join('')+'</div>'
+      :'<div class="empty">「'+esc(q)+'」に合う図面はありません。<br>図面名・ファイル名・フォルダ名で探せます。</div>';
+  }else if(!lib){
+    h='<div class="lacts"><button class="btn primary" type="button" data-act="dir">'+ICON_FOLDER+'フォルダを取り込む</button><button class="btn" type="button" data-act="file">ファイル・ZIP</button></div>'+progHtml(null);
+    const recent=[];for(const l of libs)for(const r of await Lib.files(l.id))if(r.at)recent.push({at:r.at,r});
+    const seen=new Set(recent.map(x=>x.r.hash).filter(Boolean));
+    for(const m of await Cache.list())if(m&&m.hash&&m.hash!=='sample-v1'&&!seen.has(m.hash))recent.push({at:m.at||0,m});
+    recent.sort((a,b)=>b.at-a.at);
+    if(recent.length)h+='<div class="sect">最近見た図面</div><div class="dgrid">'+recent.slice(0,6).map(x=>x.r?cardHtml(x.r,{path:true,nc,cur:CUR&&CUR.lk===x.r.k}):cacheCardHtml(x.m,{nc})).join('')+'</div>';
+    if(libs.length){
+      h+='<div class="sect">取り込んだフォルダ</div><div class="list">'+libs.map(l=>'<div class="lrow" data-lib="'+esc(l.id)+'"><button class="lmain" type="button" data-go="'+esc(l.id)+'|">'+ICON_STACK+'<span class="fn">'+esc(l.name)+'<small>図面 '+l.n+'枚 · '+fmtMB(l.bytes||0)+' · '+fmtMD(l.at)+' 取り込み'+(l.kind==='zip'?'（ZIP）':'')+(l.mem?' · この画面だけ':l.part?' · 一部未保存':'')+'</small></span>'+ICON_CHEV+'</button><button class="ibtn lmore" type="button" data-act="more" aria-label="「'+esc(l.name)+'」の操作"><svg class="i" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="18" cy="12" r="1.4" fill="currentColor"/></svg></button></div>').join('')+'</div>';
+      h+='<p class="note" style="margin:0">取り込んだ図面はこの端末だけに保存されます（合計 '+fmtMB(libs.reduce((a,l)=>a+(l.bytes||0),0))+'）。図面に書いたメモは、フォルダを削除しても残ります。</p>';
+    }else h+='<div class="lempty"><b>フォルダごと取り込めます</b><span>「横断図」「構造図」などのフォルダや、工区のフォルダ（中にフォルダがあってもOK）を選ぶと、そのままの形で一覧から探せます。図面は開いたときに読み込むので、枚数が多くても軽快です。</span><span class="note" style="margin:0">iPhone（iOS 18.4以降）とAndroidのChromeは「フォルダを取り込む」でフォルダを選べます。選べないときは、フォルダをZIPにして「ファイル・ZIP」から選んでください（iPhoneはファイルAppでフォルダを長押し →「圧縮」）。</span></div>';
+  }else{
+    const T=await Lib.tree(lib.id),node=T.get(loc.dir)||T.get('');
+    const subs=[...node.sub.values()].sort((a,b)=>jaCmp(a.dir,b.dir)),files=node.files.slice().sort((a,b)=>jaCmp(a.name,b.name)),openable=files.filter(r=>!r.p21);
+    h=progHtml(lib.id);
+    if(openable.length>1)h+='<div class="lacts"><button class="btn small" type="button" data-act="all">'+ICON_STACK+'この中の'+(openable.length>40?'先頭40枚':openable.length+'枚')+'をタブでまとめて開く</button></div>';
+    if(subs.length)h+='<div class="list">'+subs.map(s=>'<button class="frow" type="button" data-go="'+esc(lib.id+'|'+s.dir)+'">'+ICON_FOLDER+'<span class="fn">'+esc(s.dir.split('/').pop())+'</span><span class="fcount">'+(s.count||!s.p21?s.count+'枚':'P21 '+s.p21+'件')+'</span>'+ICON_CHEV+'</button>').join('')+'</div>';
+    if(files.length)h+='<div class="dgrid">'+files.slice(0,600).map(r=>cardHtml(r,{nc,cur:CUR&&CUR.lk===r.k})).join('')+'</div>'+(files.length>600?'<p class="note">ほか '+(files.length-600)+' 枚（検索で探せます）</p>':'');
+    if(!subs.length&&!files.length)h+='<div class="empty">このフォルダには図面がありません。</div>';
+  }
+  body.innerHTML=h;body.dataset.view=view;body.scrollTop=same?st:0;
+  libObserve();
+}
+function libObserve(){
+  if(!LibUI.io&&window.IntersectionObserver)LibUI.io=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){LibUI.io.unobserve(e.target);thumbFor(e.target)}},{root:$('#libBody'),rootMargin:'300px 0px'});
+  $$('#libBody .dwg').forEach(c=>{const img=c.querySelector('img');if(!img||img.classList.contains('on'))return;if(LibUI.io)LibUI.io.observe(c);else thumbFor(c)});
+}
+async function thumbFor(card){
+  const k=card.dataset.k,key=k||('h:'+card.dataset.h),u=await Thumbs.get(key);
+  if(u){paintThumb(key,u);return}if(u===''||!k)return;
+  const r=await Lib.rec(k);if(r)Thumbs.want(r);
+}
+// open a drawing of the library (or put it in a tab in the background)
+async function libOpen(rec,opt={}){
+  if(rec.p21){if(!opt.bg){const[t,b]=errText('P21');dialog(t,b)}return false}
+  let doc=DOCS.find(x=>x.lk===rec.k)||(rec.hash?DOCS.find(x=>x.hash===rec.hash):null),buf=null;
+  if(!doc){
+    if(!(opt.bg&&rec.hash)){
+      try{buf=await Lib.buf(rec)}catch(e){}
+      if(!buf){if(!opt.bg)dialog('開けませんでした','この端末に図面のデータがありません。フォルダをもう一度取り込んでください。');return false}
+      const sn=Parser.sniff(buf);if(sn!=='ok'){if(!opt.bg){const[t,b]=errText(sn);dialog(t,b)}return false}
+      const hash=await hashBytes(buf);if(rec.hash!==hash){rec.hash=hash;rec._h=undefined}
+      doc=DOCS.find(x=>x.hash===hash);
+    }
+    if(!doc)doc=addDoc({name:rec.name,hash:rec.hash,size:rec.size||(buf?buf.byteLength:0),buf:opt.bg?null:buf,cached:true,lk:rec.k});
+  }
+  if(!doc.lk)doc.lk=rec.k;
+  const t=recTitle(rec);if(!doc.title&&t!==recBase(rec))doc.title=t;
+  rec.at=Date.now();Lib.save(rec);
+  if(opt.bg){renderTabs();return true}
+  closeSheets();$('#welcome').hidden=true;
+  const ok=await activate(doc);if(ok)dropSample(doc);saveTabs();
+  if(ok&&CUR===doc){sfx('done');if(doc.loadP)await doc.loadP;toast((S.notes.length?'メモ '+S.notes.length+' 件 · ':'')+t,2000)}
+  return ok;
+}
+async function libOpenAll(recs){
+  recs=recs.filter(r=>!r.p21);if(!recs.length)return;
+  const list=recs.slice(0,40);
+  if(!await libOpen(list[0]))return;
+  let n=1;for(const r of list.slice(1))if(await libOpen(r,{bg:true}))n++;
+  saveTabs();renderTabs();schedulePreload(300);
+  toast(n+'枚の図面をタブで開きました（上のタブで切り替え）',2800);
+}
+function pickDir(){const f=$('#dirIn');f.value='';f.click()}
+$('#dirIn').addEventListener('change',e=>{const fs=e.target.files;if(fs&&fs.length)importPicked(fs)});
+$('#libQ').addEventListener('input',()=>{LibUI.q=$('#libQ').value;$('#libQx').hidden=!LibUI.q;clearTimeout(LibUI.qt);LibUI.qt=setTimeout(renderLib,140)});
+$('#libQ').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.target.blur()}});
+$('#libQx').addEventListener('click',()=>{$('#libQ').value='';LibUI.q='';$('#libQx').hidden=true;renderLib()});
+$('#libSheet').addEventListener('click',async e=>{
+  audioWake();
+  const g=e.target.closest('[data-go]');
+  if(g){const v=g.dataset.go,i=v.indexOf('|');LibUI.loc=i<0?{lib:null,dir:''}:{lib:v.slice(0,i),dir:v.slice(i+1)};LibUI.q='';$('#libQ').value='';$('#libQx').hidden=true;await renderLib();sfx('tap');return}
+  const a=e.target.closest('[data-act]');
+  if(a){
+    const act=a.dataset.act,row=a.closest('.lrow');
+    if(act==='dir')pickDir();
+    else if(act==='file')pickFile();
+    else if(act==='all'){const T=await Lib.tree(LibUI.loc.lib),node=T.get(LibUI.loc.dir);if(node)libOpenAll(node.files.slice().sort((x,y)=>jaCmp(x.name,y.name)))}
+    else if(act==='more'&&row){
+      const nx=row.nextElementSibling;if(nx&&nx.classList.contains('lconf')){nx.remove();return}
+      const l=Lib.byId(row.dataset.lib);if(!l)return;
+      const c=document.createElement('div');c.className='lconf';c.dataset.lib=l.id;
+      c.innerHTML='<span>「'+esc(l.name)+'」をこの端末から削除しますか？（図面に書いたメモは残ります）</span><span class="row" style="flex-wrap:nowrap"><button class="btn small" type="button" data-act="nodel">やめる</button><button class="btn small danger" type="button" data-act="del">削除</button></span>';
+      row.after(c);sfx('tap');
+    }
+    else if(act==='nodel'){const c=a.closest('.lconf');if(c)c.remove()}
+    else if(act==='del'){const c=a.closest('.lconf');if(!c)return;const l=Lib.byId(c.dataset.lib);await Lib.remove(c.dataset.lib);if(LibUI.loc.lib===c.dataset.lib)LibUI.loc={lib:null,dir:''};await renderLib();sfx('erase');toast('「'+(l?l.name:'フォルダ')+'」を削除しました')}
+    return;
+  }
+  const c=e.target.closest('.dwg');
+  if(c){if(c.dataset.k){const r=await Lib.rec(c.dataset.k);if(r)libOpen(r)}else if(c.dataset.h){closeSheets();openCached(c.dataset.h)}}
+});
+
 /* ---------- welcome + recents ---------- */
 // recent drawings: files kept on this device plus drawings with saved notes
 async function recentList(){
@@ -3171,6 +3751,7 @@ async function recentList(){
 }
 async function showWelcome(){
   const w=$('#welcome');w.hidden=false;
+  Lib.list().then(l=>{const b=$('#wLib');b.hidden=!l.length;b.textContent='図面ライブラリ（'+l.length+'フォルダ）'});
   $('#wTabsRow').hidden=DOCS.filter(x=>!x.sample).length<2;
   const list=(await recentList()).filter(r=>!DOCS.some(x=>x.hash===r.hash));
   const wrap=$('#wRecentWrap'),box=$('#wRecent');
@@ -3181,7 +3762,7 @@ async function showWelcome(){
   $$('.rec',box).forEach(b=>b.onclick=async()=>{audioWake();w.hidden=true;const ok=await openCached(b.dataset.h);if(ok===false&&!DOCS.some(x=>x.hash===b.dataset.h)){toast('同じファイルを選ぶとメモが戻ります',2600);pickFile()}});
 }
 function pickFile(){const f=$('#file');f.value='';f.click()}
-$('#file').addEventListener('change',e=>{const fs=e.target.files;if(fs&&fs.length)openFiles(fs)});
+$('#file').addEventListener('change',e=>{const fs=e.target.files;if(fs&&fs.length)handlePicked(fs)});
 
 /* ---------- wiring ---------- */
 $$('.tool').forEach(b=>b.addEventListener('click',()=>{audioWake();setTool(b.dataset.tool);$('#welcome').hidden=true}));
@@ -3191,7 +3772,10 @@ $('#areaDone').addEventListener('click',finishArea);
 $('#undoBtn').addEventListener('click',()=>{audioWake();undo()});
 $('#fitBtn').addEventListener('click',()=>{audioWake();fitView(null,true);sfx('tap')});
 $('#themeBtn').addEventListener('click',()=>{audioWake();settings.theme=settings.theme==='dark'?'light':'dark';LS.set('themeChosen',true);saveSettings();colCache.clear();clearSnaps();invalidateAll();toast(settings.theme==='dark'?'背景：黒':'背景：白');sfx('tap')});
-$('#openBtn').addEventListener('click',async()=>{audioWake();if(DOCS.filter(x=>!x.sample).length>=2||(await recentList()).some(r=>!DOCS.some(x=>x.hash===r.hash)))showWelcome();else pickFile()});
+$('#openBtn').addEventListener('click',()=>{audioWake();$('#welcome').hidden=true;openLib(libLocOf(CUR))});
+$('.toprow .file').addEventListener('click',()=>{audioWake();$('#welcome').hidden=true;openLib(libLocOf(CUR))});
+$('#wDir').addEventListener('click',()=>{audioWake();pickDir()});
+$('#wLib').addEventListener('click',()=>{audioWake();$('#welcome').hidden=true;openLib()});
 $('#wClose').addEventListener('click',()=>{$('#welcome').hidden=true;sfx('tap')});
 $('#wOpen').addEventListener('click',()=>{audioWake();pickFile()});
 $('#wCloseAll').addEventListener('click',()=>{audioWake();closeAll();sfx('erase')});
@@ -3236,7 +3820,7 @@ async function boot(){
   const tabs=LS.get('tabs',null);const has=await wait(Cache.has(),1500);
   if(Array.isArray(tabs)&&tabs.length&&has){
     // reopen the tabs from last time; only the active one is parsed now, the rest follow in the background
-    for(const t of tabs)if(t&&t.hash&&has.has(t.hash)&&!DOCS.some(x=>x.hash===t.hash))DOCS.push(newDoc({name:t.name,hash:t.hash,size:t.size,cached:true}));
+    for(const t of tabs)if(t&&t.hash&&(t.lk||has.has(t.hash))&&!DOCS.some(x=>x.hash===t.hash))DOCS.push(newDoc({name:t.name,hash:t.hash,size:t.size,cached:true,lk:t.lk,title:t.title}));
     const want=LS.get('activeTab','');
     while(DOCS.length){
       const d=DOCS.find(x=>x.hash===want)||DOCS[0];
@@ -3251,7 +3835,7 @@ async function boot(){
 }
 // start a parsing worker while idle so the first real file opens without delay
 function warm(){setTimeout(()=>{if(PW.ok!==false&&!PW.pool.length)PW.spawn()},1200)}
-window.__zs={get D(){return D},get CUR(){return CUR},DOCS,activate,openFiles,openCached,closeDoc,closeAll,get perf(){return{lastBaseMs,job:!!job,needBase}},S,V,RC,select,viewChanged,openBuffer,openSample,setTool,placePoint,currentTarget,snapAt,toScreen,toSheet,measure,parseSFC:Parser.parseSFC,buildModel:Parser.buildModel,flatten:Parser.flatten,Parser,PW,sampleSFC,finishArea,settings,Store,Cache,clProject,staPointOf,GPS,gpsOnFix,gpsLocate,llToXY,chainFrom,staAt,staPoint,clGeom,clGeomOf,staLabels,staFit,setCoordMode,fmtSta,coordRows,primAt,get coordMode(){return S.coordMode}};
+window.__zs={get D(){return D},get CUR(){return CUR},DOCS,activate,openFiles,openCached,closeDoc,closeAll,get perf(){return{lastBaseMs,job:!!job,needBase}},S,V,RC,select,viewChanged,openBuffer,openSample,setTool,placePoint,currentTarget,snapAt,toScreen,toSheet,measure,parseSFC:Parser.parseSFC,buildModel:Parser.buildModel,flatten:Parser.flatten,Parser,PW,sampleSFC,finishArea,settings,Store,Cache,Lib,Zip,Thumbs,openLib,renderLib,libOpen,importPicked,handlePicked,recTitle,clProject,staPointOf,GPS,gpsOnFix,gpsLocate,llToXY,chainFrom,staAt,staPoint,clGeom,clGeomOf,staLabels,staFit,setCoordMode,fmtSta,coordRows,primAt,get coordMode(){return S.coordMode}};
 boot();
 if('serviceWorker' in navigator&&!window.claude&&/^https?:$/.test(location.protocol)){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
 })();
