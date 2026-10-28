@@ -894,25 +894,27 @@ function index(G,M){
   const SX=G.snap.x,SY=G.snap.y,ns=SX.length,sk=new Float64Array(ns);
   for(let i=0;i<ns;i++)sk[i]=key(SX[i],SY[i]);
   const gpts=buckets(sk,null,ns);
-  let totalSegs=0;for(let i=0;i<np;i++)if(!(P.fl[i]&4))totalSegs+=P.n[i]-1+(P.fl[i]&1);
-  let segs=null,segP=null,segA=null,segB=null;
-  if(totalSegs<=900000){
-    const pts=G.pts,sP=new I32(),sA=new I32(),sB=new I32(),pk=new F64(),pi=new I32();const step=cs*.5;
+  const RUN=8;let totalRuns=0;for(let i=0;i<np;i++)if(!(P.fl[i]&4))totalRuns+=Math.ceil((P.n[i]-1+(P.fl[i]&1))/RUN);
+  let segs=null,runA=null,runP=null;
+  if(totalRuns<=2500000){
+    const pts=G.pts,rA=new I32(),rP=new I32(),pk=new F64(),pi=new I32(),ks=[];const step=cs*.5;
     for(let i=0;i<np;i++){
-      if(P.fl[i]&4)continue;const o=P.off[i],n=P.n[i],cl=P.fl[i]&1;const cnt=n-1+cl;
-      for(let j=0;j<cnt;j++){
-        const a=o+j,b=o+((j+1)%n);const ax=pts[2*a],ay=pts[2*a+1],bx=pts[2*b],by=pts[2*b+1];
-        const id=sP.n;sP.push(i);sA.push(a);sB.push(b);
-        const len=Math.hypot(bx-ax,by-ay);const k=Math.min(4000,Math.ceil(len/step));let last=-1;
-        for(let t=0;t<=k;t++){const f=k?t/k:0;const kk=key(ax+(bx-ax)*f,ay+(by-ay)*f);if(kk!==last){pk.push(kk);pi.push(id);last=kk}}
+      if(P.fl[i]&4)continue;const o=P.off[i],n=P.n[i],cnt=n-1+(P.fl[i]&1);
+      for(let j0=0;j0<cnt;j0+=RUN){
+        const id=rA.n;rA.push(o+j0);rP.push(i);ks.length=0;let last=-1;
+        for(let j=j0,je=Math.min(cnt,j0+RUN);j<je;j++){
+          const a=o+j,b=o+((j+1)%n);const ax=pts[2*a],ay=pts[2*a+1],bx=pts[2*b],by=pts[2*b+1];
+          const len=Math.hypot(bx-ax,by-ay);const k=Math.min(4000,Math.ceil(len/step));
+          for(let t=0;t<=k;t++){const f=k?t/k:0;const kk=key(ax+(bx-ax)*f,ay+(by-ay)*f);if(kk!==last&&(ks.length>16||ks.indexOf(kk)<0)){ks.push(kk);pk.push(kk);pi.push(id)}last=kk}
+        }
       }
     }
-    segP=sP.done();segA=sA.done();segB=sB.done();
+    runA=rA.done();runP=rP.done();
     segs=buckets(pk.a,pi.a,pk.n);
   }
   const layers=M.layers.map((l,i)=>({name:l.name,count:G.lcount[i]||0,visible:!!l.visible}));
   return{sheet:{w:sw,h:sh,label:slabel,name:s.name||''},pts:G.pts,P,np,styles:G.styles,batches,bStart,bItems,bOf,texts:G.texts,marks:G.marks,arrows:G.arrows,fills:G.fills,xfs:G.xfs,regions:G.regions,
-    snap:G.snap,grid:{cs,gx0,gy0,pts:gpts,segs,segP,segA,segB},layers,fit,info:M.info,bg:M.bg,skipped:G.skipped};
+    snap:G.snap,grid:{cs,gx0,gy0,pts:gpts,segs,runA,runP,run:RUN},layers,fit,info:M.info,bg:M.bg,skipped:G.skipped};
 }
 function run(buf){
   const t0=performance.now();const feats=parseSFC(decodeBytes(buf));const M=buildModel(feats);const G=flatten(M);
@@ -923,7 +925,7 @@ function run(buf){
 function transfers(R){
   const set=new Set();const add=a=>{if(a&&a.buffer instanceof ArrayBuffer)set.add(a.buffer)};
   add(R.pts);for(const k in R.P)add(R.P[k]);for(const k in R.snap)add(R.snap[k]);add(R.bStart);add(R.bItems);add(R.bOf);
-  const g=R.grid;[g.pts,g.segs].forEach(b=>{if(b){add(b.keys);add(b.start);add(b.items)}});add(g.segP);add(g.segA);add(g.segB);
+  const g=R.grid;[g.pts,g.segs].forEach(b=>{if(b){add(b.keys);add(b.start);add(b.items)}});add(g.runA);add(g.runP);
   for(const f of R.fills)for(const r of f.rings)add(r);
   return[...set];
 }
@@ -1391,50 +1393,77 @@ function stepAnim(){
 /* =========================================================
    snapping
    ========================================================= */
+// What the aim snaps to. The line the aim sits on comes first: a point that is not on that line (the end of a
+// nearby dimension line, a corner of the next shape, a circle centre) only wins when the aim is on it as much as
+// on the line. Points on that line (its ends, where other lines cross it) still win within the reticle circle.
+const SNAP_ON=6,SNAP_OFF=3,SNAP_LB_ON=13;
 function snapAt(sx,sy,rpx){
   if(!D)return null;const g=D.grid,z=V.z;const q=toSheet(sx,sy);const x=q[0],y=q[1],r=rpx/z;
   const cx0=Math.floor((x-r-g.gx0)/g.cs)-1,cx1=Math.floor((x+r-g.gx0)/g.cs)+1,cy0=Math.floor((y-r-g.gy0)/g.cs)-1,cy1=Math.floor((y+r-g.gy0)/g.cs)+1;
   const ncell=(cx1-cx0+1)*(cy1-cy0+1);if(ncell>5000)return null;
   const vis=D.vis,SX=D.snap.x,SY=D.snap.y,SK=D.snap.k,SL=D.snap.L,SR=D.snap.rx,SPI=D.snap.p,HID=D.hid;let best=null,bs=Infinity;
+  // lines near the aim, and the ones it is on (within a few px)
+  const cand=ncell<=1200?collectSegs(x,y,r,64):[];
+  let dL=Infinity;for(const c of cand)if(c.d<dL)dL=c.d;dL*=z;
+  const under=dL<=SNAP_ON?cand.filter(c=>c.d*z<=Math.min(SNAP_ON,dL+1.5)).slice(0,6):null,tol=1/z,LB=under?SNAP_LB_ON:KBIAS[6];
+  const onSeg=(px,py,c)=>{const vx=c.bx-c.ax,vy=c.by-c.ay,ll=vx*vx+vy*vy;let t=ll?((px-c.ax)*vx+(py-c.ay)*vy)/ll:0;t=clamp(t,0,1);return Math.hypot(c.ax+vx*t-px,c.ay+vy*t-py)<=tol};
+  // may a point at dpx px from the aim take the snap? (pi: its own line, k: its kind)
+  const ok=(px,py,dpx,pi,k)=>{if(!under||dpx<=Math.max(SNAP_OFF,dL))return true;for(const c of under){if(c.p===pi&&pi>=0&&k!==3&&(D.P.fl[pi]&2))return true;if(onSeg(px,py,c))return true}return false};
+  // the nearest line first: a point has to beat it (and wins a tie)
+  for(const c of cand){const s=c.d*z+LB;if(s<bs){bs=s;best={x:c.px,y:c.py,kind:6,rx:c.rx}}}
+  const beats=s=>s<bs||(s===bs&&best.kind===6);
   const ck=(cx,cy)=>(clamp(cx,-30000,30000)+32768)*65536+(clamp(cy,-30000,30000)+32768);
   const GP=g.pts,GS=GP.start,GI=GP.items;
-  for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const q=bfind(GP,ck(cx,cy));if(q<0)continue;for(let j=GS[q],e=GS[q+1];j<e;j++){const i=GI[j];if(!vis[SL[i]]||(SPI[i]>=0&&HID[SPI[i]]))continue;const d=Math.hypot(SX[i]-x,SY[i]-y);if(d>r)continue;const s=d*z+KBIAS[SK[i]];if(s<bs){bs=s;best={x:SX[i],y:SY[i],kind:SK[i],rx:SR[i]}}}}
+  for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const q=bfind(GP,ck(cx,cy));if(q<0)continue;for(let j=GS[q],e=GS[q+1];j<e;j++){const i=GI[j];if(!vis[SL[i]]||(SPI[i]>=0&&HID[SPI[i]]))continue;const d=Math.hypot(SX[i]-x,SY[i]-y);if(d>r)continue;const dp=d*z,s=dp+KBIAS[SK[i]];if(beats(s)&&ok(SX[i],SY[i],dp,SPI[i],SK[i])){bs=s;best={x:SX[i],y:SY[i],kind:SK[i],rx:SR[i]}}}}
   // points of what the viewer has drawn (lines, circles, tapes, areas)
-  const tryPt=(px,py,k,rxv)=>{const d=Math.hypot(px-x,py-y);if(d>r)return;const s=d*z+KBIAS[k];if(s<bs){bs=s;best={x:px,y:py,kind:k,rx:rxv}}};
-  for(const n of S.notes){
-    if(n.t==='line'||n.t==='dist'){const rxv=n.rx!=null?n.rx:-1;tryPt(n.a[0],n.a[1],1,rxv);tryPt(n.b[0],n.b[1],1,rxv);tryPt((n.a[0]+n.b[0])/2,(n.a[1]+n.b[1])/2,2,rxv)}
+  const tryPt=(px,py,k,rxv,pi)=>{const d=Math.hypot(px-x,py-y);if(d>r)return;const dp=d*z,s=dp+KBIAS[k];if(beats(s)&&ok(px,py,dp,pi==null?-1:pi,k)){bs=s;best={x:px,y:py,kind:k,rx:rxv}}};
+  S.notes.forEach((n,ni)=>{
+    if(n.t==='line'||n.t==='dist'){const rxv=n.rx!=null?n.rx:-1,pi=n.t==='line'?-(ni+2):-1;tryPt(n.a[0],n.a[1],1,rxv,pi);tryPt(n.b[0],n.b[1],1,rxv,pi);tryPt((n.a[0]+n.b[0])/2,(n.a[1]+n.b[1])/2,2,rxv,pi)}
     else if(n.t==='circle'){const rxv=n.rx!=null?n.rx:-1;tryPt(n.c[0],n.c[1],3,rxv);[[1,0],[-1,0],[0,1],[0,-1]].forEach(([u,w])=>tryPt(n.c[0]+u*n.r,n.c[1]+w*n.r,4,rxv));
-      const dc=Math.hypot(x-n.c[0],y-n.c[1]);if(dc>1e-9&&Math.abs(dc-n.r)<=r){const k=n.r/dc;const s=Math.abs(dc-n.r)*z+KBIAS[6];if(s<bs){bs=s;best={x:n.c[0]+(x-n.c[0])*k,y:n.c[1]+(y-n.c[1])*k,kind:6,rx:rxv}}}}
+      const dc=Math.hypot(x-n.c[0],y-n.c[1]);if(dc>1e-9&&Math.abs(dc-n.r)<=r){const k=n.r/dc;const s=Math.abs(dc-n.r)*z+LB;if(s<bs){bs=s;best={x:n.c[0]+(x-n.c[0])*k,y:n.c[1]+(y-n.c[1])*k,kind:6,rx:rxv}}}}
     else if(n.t==='area'){const q=n.pts;for(let i=0;i<q.length;i+=2)tryPt(q[i],q[i+1],1,-1)}
     else if(n.t==='coord'||n.t==='elev'||n.t==='sta')tryPt(n.x,n.y,1,n.rx!=null?n.rx:-1);
-  }
-  if(ncell<=1200){
-    const P=D.P,cand=collectSegs(x,y,r);
-    for(const c of cand){const s=c.d*z+KBIAS[6];if(s<bs){bs=s;best={x:c.px,y:c.py,kind:6,rx:c.rx}}}
-    cand.sort((u,w)=>u.d-w.d);const m=Math.min(cand.length,48);
+  });
+  if(cand.length){
+    const P=D.P,m=Math.min(cand.length,48);   // cand is nearest first
     for(let i=0;i<m;i++)for(let j=0;j<i;j++){
       const A=cand[i],B=cand[j];if(A.p===B.p&&A.p>=0&&((P.fl[A.p]&2)||Math.abs(A.a-B.a)<=1||Math.abs(A.a-B.a)===P.n[A.p]-1))continue;
       const rx=A.bx-A.ax,ry=A.by-A.ay,sx2=B.bx-B.ax,sy2=B.by-B.ay,den=rx*sy2-ry*sx2;if(Math.abs(den)<1e-12)continue;
       const t=((B.ax-A.ax)*sy2-(B.ay-A.ay)*sx2)/den,u=((B.ax-A.ax)*ry-(B.ay-A.ay)*rx)/den;if(t<-1e-9||t>1+1e-9||u<-1e-9||u>1+1e-9)continue;
-      const ix=A.ax+t*rx,iy=A.ay+t*ry,d=Math.hypot(ix-x,iy-y);if(d>r)continue;const s=d*z+KBIAS[5];if(s<bs){bs=s;best={x:ix,y:iy,kind:5,rx:A.rx>=0?A.rx:B.rx}}
+      const ix=A.ax+t*rx,iy=A.ay+t*ry,d=Math.hypot(ix-x,iy-y);if(d>r)continue;const dp=d*z,s=dp+KBIAS[5];
+      // a crossing counts as on the line under the aim when one of its two lines is that line
+      if(s<bs&&(!under||dp<=Math.max(SNAP_OFF,dL)||under.includes(A)||under.includes(B))){bs=s;best={x:ix,y:iy,kind:5,rx:A.rx>=0?A.rx:B.rx}}
     }
   }
   return best;
 }
-// segments near (x,y) in sheet mm: drawing lines plus lines the viewer has drawn
-function collectSegs(x,y,r){
-  const out=[];if(!D)return out;const g=D.grid,P=D.P,pts=D.pts,vis=D.vis;
-  const ck=(cx,cy)=>(clamp(cx,-30000,30000)+32768)*65536+(clamp(cy,-30000,30000)+32768);
-  const near=(ax,ay,bx,by)=>{const vx=bx-ax,vy=by-ay,ll=vx*vx+vy*vy;let t=ll?((x-ax)*vx+(y-ay)*vy)/ll:0;t=clamp(t,0,1);const px=ax+vx*t,py=ay+vy*t;return[px,py,Math.hypot(px-x,py-y)]};
+// segments near (x,y) in sheet mm: drawing lines plus lines the viewer has drawn.
+// With K, only the K nearest (nearest first) are kept, so a dense plan seen from far stays quick to aim over.
+function collectSegs(x,y,r,K=Infinity){
+  const out=[];if(!D)return out;const g=D.grid,P=D.P,pts=D.pts,vis=D.vis;let lim=r;
+  const seg=(ax,ay,bx,by,p,a,rx)=>{
+    const vx=bx-ax,vy=by-ay,ll=vx*vx+vy*vy;let t=ll?((x-ax)*vx+(y-ay)*vy)/ll:0;if(t<0)t=0;else if(t>1)t=1;
+    const px=ax+vx*t,py=ay+vy*t,d=Math.hypot(px-x,py-y);if(d>lim)return;
+    const o={d,px,py,p,a,ax,ay,bx,by,rx};if(K===Infinity){out.push(o);return}
+    let i=out.length;while(i>0&&out[i-1].d>d)i--;out.splice(i,0,o);if(out.length>K)out.pop();if(out.length===K)lim=out[K-1].d;
+  };
   if(g.segs){
     const cx0=Math.floor((x-r-g.gx0)/g.cs)-1,cx1=Math.floor((x+r-g.gx0)/g.cs)+1,cy0=Math.floor((y-r-g.gy0)/g.cs)-1,cy1=Math.floor((y+r-g.gy0)/g.cs)+1;
-    if((cx1-cx0+1)*(cy1-cy0+1)<=1200){const seen=new Set();const GS=g.segs,SS=GS.start,SI=GS.items;
-      for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const q=bfind(GS,ck(cx,cy));if(q<0)continue;for(let j=SS[q],e=SS[q+1];j<e;j++){const id=SI[j];if(seen.has(id))continue;seen.add(id);const p=g.segP[id];if(!vis[P.L[p]]||D.hid[p])continue;const a=g.segA[id],b=g.segB[id];const ax=pts[2*a],ay=pts[2*a+1],bx=pts[2*b],by=pts[2*b+1];const q=near(ax,ay,bx,by);if(q[2]<=r)out.push({d:q[2],px:q[0],py:q[1],p,a,ax,ay,bx,by,rx:P.rx[p]})}}}
+    if((cx1-cx0+1)*(cy1-cy0+1)<=1200){
+      const ck=(cx,cy)=>(clamp(cx,-30000,30000)+32768)*65536+(clamp(cy,-30000,30000)+32768);
+      const GS=g.segs,SS=GS.start,SI=GS.items,RA=g.runA,RP=g.runP,RUN=g.run||8;
+      const mark=g.mark||(g.mark=new Int32Array(RA.length)),gen=g.gen=(g.gen||0)+1;   // runs already looked at in this call
+      for(let cx=cx0;cx<=cx1;cx++)for(let cy=cy0;cy<=cy1;cy++){const q=bfind(GS,ck(cx,cy));if(q<0)continue;for(let j=SS[q],e=SS[q+1];j<e;j++){
+        const id=SI[j];if(mark[id]===gen)continue;mark[id]=gen;const p=RP[id];if(!vis[P.L[p]]||D.hid[p])continue;
+        const o=P.off[p],n=P.n[p],j0=RA[id]-o,je=Math.min(n-1+(P.fl[p]&1),j0+RUN),rx=P.rx[p];
+        for(let k=j0;k<je;k++){const a=o+k,b=o+((k+1)%n);seg(pts[2*a],pts[2*a+1],pts[2*b],pts[2*b+1],p,a,rx)}
+      }}
+    }
   }
-  S.notes.forEach((n,i)=>{if(n.t!=='line')return;const q=near(n.a[0],n.a[1],n.b[0],n.b[1]);if(q[2]<=r)out.push({d:q[2],px:q[0],py:q[1],p:-(i+2),a:-(i+2)*10,ax:n.a[0],ay:n.a[1],bx:n.b[0],by:n.b[1],rx:n.rx!=null?n.rx:-1})});
+  S.notes.forEach((n,i)=>{if(n.t==='line')seg(n.a[0],n.a[1],n.b[0],n.b[1],-(i+2),-(i+2)*10,n.rx!=null?n.rx:-1)});
   return out;
 }
-function segAt(sx,sy,rpx){const q=toSheet(sx,sy);const c=collectSegs(q[0],q[1],rpx/V.z);if(!c.length)return null;c.sort((u,w)=>u.d-w.d);const s=c[0];return{ax:s.ax,ay:s.ay,bx:s.bx,by:s.by,rx:s.rx}}
+function segAt(sx,sy,rpx){const q=toSheet(sx,sy);const c=collectSegs(q[0],q[1],rpx/V.z,1);if(!c.length)return null;c.sort((u,w)=>u.d-w.d);const s=c[0];return{ax:s.ax,ay:s.ay,bx:s.bx,by:s.by,rx:s.rx}}
 
 /* ---------- drafting: line / horizontal / vertical / perpendicular / circle ---------- */
 function perpFoot(sg,x,y){const vx=sg.bx-sg.ax,vy=sg.by-sg.ay,l=vx*vx+vy*vy;if(!l)return[sg.ax,sg.ay];const t=((x-sg.ax)*vx+(y-sg.ay)*vy)/l;return[sg.ax+vx*t,sg.ay+vy*t]}
@@ -1518,14 +1547,21 @@ function updateNumBtn(){
 function draftTarget(){
   const tg=currentTarget();const p={x:tg.x,y:tg.y,kind:tg.kind,rx:tg.rx,t0:tg.t0};
   if(S.dA&&S.dLen&&S.draftMode!=='circle'){if(S.draftMode==='line')orthoFix(S.dA,p);const e=lenEnd(S.dA,p,S.dLen);if(e){p.x=e.x;p.y=e.y;p.kind=0;p.fixed=true}return p}
-  if(S.dA){if(S.draftMode==='h')p.y=S.dA.y;else if(S.draftMode==='v')p.x=S.dA.x;else if(S.draftMode==='grade'&&S.grade){const e=gradeEnd(S.dA,p);p.x=e.x;p.y=e.y;p.kind=e.kind}else orthoFix(S.dA,p)}
+  if(S.dA){if(S.draftMode==='h'||S.draftMode==='v'){const e=axisEnd(S.dA,p,S.draftMode);p.x=e.x;p.y=e.y;p.kind=e.kind}else if(S.draftMode==='grade'&&S.grade){const e=gradeEnd(S.dA,p);p.x=e.x;p.y=e.y;p.kind=e.kind}else orthoFix(S.dA,p)}
   return p;
 }
-function primAt(sx,sy,rpx){const q=toSheet(sx,sy);const c=collectSegs(q[0],q[1],rpx/V.z).filter(u=>u.p>=0);if(!c.length)return-1;c.sort((u,w)=>u.d-w.d);return c[0].p}
+function primAt(sx,sy,rpx){const q=toSheet(sx,sy);const c=collectSegs(q[0],q[1],rpx/V.z,16).filter(u=>u.p>=0);if(!c.length)return-1;c.sort((u,w)=>u.d-w.d);return c[0].p}
 function setHidden(i,on){D.hid[i]=on?1:0;dirtyPrim(D,i);invalidateAll();if(aiming())updateSnap()}
 function hiddenCount(){let n=0;for(let i=0;i<D.hid.length;i++)n+=D.hid[i];return n}
 // keep a straight line exactly horizontal/vertical when it is drawn within 3 degrees of it
-function orthoFix(a,p){if(!a||S.draftMode!=='line'||(p.kind&&p.kind!==6))return p;const dx=p.x-a.x,dy=p.y-a.y,t=Math.tan(3*D2R);if(Math.abs(dy)<=Math.abs(dx)*t){p.y=a.y;p.ortho='水平'}else if(Math.abs(dx)<=Math.abs(dy)*t){p.x=a.x;p.ortho='垂直'}return p}
+function orthoFix(a,p){
+  if(!a||S.draftMode!=='line'||(p.kind&&p.kind!==6))return p;const dx=p.x-a.x,dy=p.y-a.y,t=Math.tan(3*D2R);let u=null;
+  if(Math.abs(dy)<=Math.abs(dx)*t){u=[dx<0?-1:1,0];p.ortho='水平'}else if(Math.abs(dx)<=Math.abs(dy)*t){u=[0,dy<0?-1:1];p.ortho='垂直'}
+  if(!u)return p;
+  const h=p.kind===6?rayHit(a,u,p,30):null;   // on a line: stay on it
+  if(h){p.x=h.x;p.y=h.y}else if(u[0])p.y=a.y;else p.x=a.x;
+  return p;
+}
 function draftPlace(p,sx,sy){
   const m=S.draftMode,col=S.draftColor;
   if(m==='hide'){const i=primAt(sx!=null?sx:RC.x,sy!=null?sy:RC.y,26);if(i<0){toast('隠したい線に照準を合わせてください');return}setHidden(i,true);pushUndo({op:'hide',i});scheduleSave();sfx('erase');buzz(10);toast('線を隠しました（↶で戻せます）');return}
@@ -1559,7 +1595,7 @@ function draftPlace(p,sx,sy){
     const mm=measure(S.dA,{x:p.x,y:p.y,rx:S.dA.rx});
     addNote({id:uid(),t:'circle',c:[S.dA.x,S.dA.y],r,v:mm.real,sc:mm.sc,rx:S.dA.rx,col:col,ts:Date.now()});S.dA=null;sfx('done');buzz([10,40,16]);return;
   }
-  const b={x:p.x,y:p.y,rx:S.dA.rx};if(m==='h')b.y=S.dA.y;else if(m==='v')b.x=S.dA.x;
+  const b={x:p.x,y:p.y,rx:S.dA.rx};if(m==='h'||m==='v'){const e=axisEnd(S.dA,p,m);b.x=e.x;b.y=e.y}
   const mm=measure(S.dA,b);if(mm.paper*V.z<1.5){toast('始点と同じ位置です');return}
   addNote({id:uid(),t:'line',k:m,a:[S.dA.x,S.dA.y],b:[b.x,b.y],v:mm.real,sc:mm.sc,rx:S.dA.rx,c:col,ts:Date.now()});
   effects.push({x:b.x,y:b.y,t0:now(),c:inkColor(col)});S.dA=null;sfx('done');buzz([10,40,16]);
@@ -1596,7 +1632,7 @@ function draftReadout(ro,rv,rs){
   if(!S.dA){rv.className='rv small';rv.textContent=what+'に照準を合わせる';rs.textContent=nm+' · 「置く」で'+what+'を決定';return}
   const t=draftTarget();const mm=measure(S.dA,{x:t.x,y:t.y,rx:S.dA.rx});rv.className='rv';
   if(m==='circle'){rv.textContent='R '+fmtLen(mm.real);rs.textContent='直径 '+fmtLen(mm.real*2)+' · '+mm.sc}
-  else{rv.textContent=fmtLen(mm.real);rs.textContent=(t.ortho||nm)+' · '+mm.sc}
+  else{rv.textContent=fmtLen(mm.real);rs.textContent=(t.ortho||nm)+((m==='h'||m==='v')&&t.kind===5?' · 線との交点':'')+' · '+mm.sc}
   if(mm.unscaled&&!S.manual){rs.textContent='図上の長さです（縮尺を指定できます）';ro.classList.add('warn')}
 }
 function rightAngle(ctx,fx,fy,ux,uy,nx,ny,s){ctx.beginPath();ctx.moveTo(fx+ux*s,fy+uy*s);ctx.lineTo(fx+ux*s+nx*s,fy+uy*s+ny*s);ctx.lineTo(fx+nx*s,fy+ny*s);ctx.stroke()}
@@ -1623,6 +1659,7 @@ function drawDraftLive(ctx,tp){
     const uy=-u[1];ctx.save();ctx.globalAlpha=.45;ctx.setLineDash([8,6]);ctx.lineWidth=1.5;ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(a[0]+u[0]*E,a[1]+uy*E);ctx.stroke();ctx.restore();
     if(tp[2]===5){ctx.lineWidth=2;ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(tp[0]-6,tp[1]-6);ctx.lineTo(tp[0]+6,tp[1]+6);ctx.moveTo(tp[0]+6,tp[1]-6);ctx.lineTo(tp[0]-6,tp[1]+6);ctx.stroke()}
   }
+  if((S.draftMode==='h'||S.draftMode==='v')&&tp[2]===5){ctx.lineWidth=2;ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(tp[0]-6,tp[1]-6);ctx.lineTo(tp[0]+6,tp[1]+6);ctx.moveTo(tp[0]+6,tp[1]-6);ctx.lineTo(tp[0]-6,tp[1]+6);ctx.stroke()}
   if(S.draftMode==='circle'){const R=Math.hypot(tp[0]-a[0],tp[1]-a[1]);ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=5;ctx.beginPath();ctx.arc(a[0],a[1],R,0,Math.PI*2);ctx.stroke();ctx.strokeStyle=col;ctx.lineWidth=2.4;ctx.beginPath();ctx.arc(a[0],a[1],R,0,Math.PI*2);ctx.stroke();ctx.setLineDash([5,4]);ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(tp[0],tp[1]);ctx.stroke();ctx.setLineDash([]);dot(a[0],a[1]);return}
   ctx.strokeStyle='rgba(0,0,0,.55)';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(tp[0],tp[1]);ctx.stroke();ctx.strokeStyle=col;ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(tp[0],tp[1]);ctx.stroke();dot(a[0],a[1]);
 }
@@ -1863,18 +1900,28 @@ function gradeDir(a,t){
   const{hk,vk}=realScales(a.rx),g=gradeValue();const sx=t.x<a.x?-1:1,sy=t.y<a.y?-1:1;
   const ux=sx/hk,uy=sy*g/vk,L=Math.hypot(ux,uy)||1;return[ux/L,uy/L];
 }
-// end of a slope line: on the slope under the reticle, or where it meets a nearby line (e.g. the ground)
-function gradeEnd(a,t){
-  const u=gradeDir(a,t);let s=(t.x-a.x)*u[0]+(t.y-a.y)*u[1];if(s<0)s=0;
-  let best={x:a.x+u[0]*s,y:a.y+u[1]*s,kind:0,rx:a.rx};
-  const r=30/V.z;let bd=Infinity;
-  for(const c of collectSegs(t.x,t.y,r)){
+// where a line from a in direction u meets a line near t (within rpx on screen); null when none does there
+function rayHit(a,u,t,rpx){
+  const r=rpx/V.z;let best=null,bd=Infinity;
+  for(const c of collectSegs(t.x,t.y,r,256)){
     const ex=c.bx-c.ax,ey=c.by-c.ay,den=u[0]*ey-u[1]*ex;if(Math.abs(den)<1e-12)continue;
     const qx=c.ax-a.x,qy=c.ay-a.y,tt=(qx*ey-qy*ex)/den,ss=(qx*u[1]-qy*u[0])/den;
     if(tt<=1e-9||ss<-1e-9||ss>1+1e-9)continue;
-    const ix=a.x+u[0]*tt,iy=a.y+u[1]*tt,d=Math.hypot(ix-t.x,iy-t.y);if(d<=r&&d<bd){bd=d;best={x:ix,y:iy,kind:5,rx:a.rx}}
+    const ix=a.x+u[0]*tt,iy=a.y+u[1]*tt,d=Math.hypot(ix-t.x,iy-t.y);if(d<=r&&d<bd){bd=d;best={x:ix,y:iy}}
   }
   return best;
+}
+// end of a slope line: on the slope under the reticle, or where it meets a nearby line (e.g. the ground)
+function gradeEnd(a,t){
+  const u=gradeDir(a,t);let s=(t.x-a.x)*u[0]+(t.y-a.y)*u[1];if(s<0)s=0;
+  const h=rayHit(a,u,t,30);if(h)return{x:h.x,y:h.y,kind:5,rx:a.rx};
+  return{x:a.x+u[0]*s,y:a.y+u[1]*s,kind:0,rx:a.rx};
+}
+// end of a horizontal / vertical line: below the aim, or where it meets the line the aim is on
+function axisEnd(a,p,m){
+  const u=m==='h'?[p.x<a.x?-1:1,0]:[0,p.y<a.y?-1:1];
+  if(!p.kind||p.kind===6){const h=rayHit(a,u,p,30);if(h)return{x:h.x,y:h.y,kind:5}}
+  return m==='h'?{x:p.x,y:a.y,kind:0}:{x:a.x,y:p.y,kind:0};
 }
 function gradeParts(a,b){const{hk,vk}=realScales(a.rx);const dx=Math.abs(b.x-a.x)*hk,dy=Math.abs(b.y-a.y)*vk;return{len:Math.hypot(dx,dy),dx,dy}}
 function parseGrade(t,kind){
@@ -3835,7 +3882,7 @@ async function boot(){
 }
 // start a parsing worker while idle so the first real file opens without delay
 function warm(){setTimeout(()=>{if(PW.ok!==false&&!PW.pool.length)PW.spawn()},1200)}
-window.__zs={get D(){return D},get CUR(){return CUR},DOCS,activate,openFiles,openCached,closeDoc,closeAll,get perf(){return{lastBaseMs,job:!!job,needBase}},S,V,RC,select,viewChanged,openBuffer,openSample,setTool,placePoint,currentTarget,snapAt,toScreen,toSheet,measure,parseSFC:Parser.parseSFC,buildModel:Parser.buildModel,flatten:Parser.flatten,Parser,PW,sampleSFC,finishArea,settings,Store,Cache,Lib,Zip,Thumbs,openLib,renderLib,libOpen,importPicked,handlePicked,recTitle,clProject,staPointOf,GPS,gpsOnFix,gpsLocate,llToXY,chainFrom,staAt,staPoint,clGeom,clGeomOf,staLabels,staFit,setCoordMode,fmtSta,coordRows,primAt,get coordMode(){return S.coordMode}};
+window.__zs={get D(){return D},get CUR(){return CUR},DOCS,activate,openFiles,openCached,closeDoc,closeAll,get perf(){return{lastBaseMs,job:!!job,needBase}},S,V,RC,select,viewChanged,openBuffer,openSample,setTool,placePoint,currentTarget,draftTarget,snapAt,toScreen,toSheet,measure,parseSFC:Parser.parseSFC,buildModel:Parser.buildModel,flatten:Parser.flatten,Parser,PW,sampleSFC,finishArea,settings,Store,Cache,Lib,Zip,Thumbs,openLib,renderLib,libOpen,importPicked,handlePicked,recTitle,clProject,staPointOf,GPS,gpsOnFix,gpsLocate,llToXY,chainFrom,staAt,staPoint,clGeom,clGeomOf,staLabels,staFit,setCoordMode,fmtSta,coordRows,primAt,get coordMode(){return S.coordMode}};
 boot();
 if('serviceWorker' in navigator&&!window.claude&&/^https?:$/.test(location.protocol)){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
 })();
