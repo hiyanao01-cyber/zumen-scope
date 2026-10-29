@@ -1532,7 +1532,7 @@ function openLenInput(){
     if(S.dA){
       if(!scaleKnown(S.dA.rx)){noScaleToast();return}
       if(circ){if(addCircleNote(S.dA,spec.R))S.dA=null;readoutSoon();requestFrame();return}
-      const t=draftTarget(),e=lenEnd(S.dA,t,spec);
+      const t=draftTarget();if(m==='line')orthoFix(S.dA,t,true);const e=lenEnd(S.dA,t,spec);
       if(e){if(tooBig(Math.hypot(e.x-S.dA.x,e.y-S.dA.y))){toast('長すぎます（単位は m です）',2600);return}addLineNote(m,S.dA,e,m==='grade'?null:spec.L);S.dA=null;readoutSoon();requestFrame();return}
     }
     S.dLen=spec;toast(lenLabel(spec)+' で'+(circ?'描きます。「置く」で中心を決めてください':S.dA?'引きます。照準で向きを決めて「置く」':'引きます。始点で「置く」'),3000);readoutSoon();requestFrame();sfx('tap');
@@ -1546,7 +1546,7 @@ function updateNumBtn(){
 }
 function draftTarget(){
   const tg=currentTarget();const p={x:tg.x,y:tg.y,kind:tg.kind,rx:tg.rx,t0:tg.t0};
-  if(S.dA&&S.dLen&&S.draftMode!=='circle'){if(S.draftMode==='line')orthoFix(S.dA,p);const e=lenEnd(S.dA,p,S.dLen);if(e){p.x=e.x;p.y=e.y;p.kind=0;p.fixed=true}return p}
+  if(S.dA&&S.dLen&&S.draftMode!=='circle'){if(S.draftMode==='line')orthoFix(S.dA,p,true);const e=lenEnd(S.dA,p,S.dLen);if(e){p.x=e.x;p.y=e.y;p.kind=0;p.fixed=true}return p}
   if(S.dA){if(S.draftMode==='h'||S.draftMode==='v'){const e=axisEnd(S.dA,p,S.draftMode);p.x=e.x;p.y=e.y;p.kind=e.kind}else if(S.draftMode==='grade'&&S.grade){const e=gradeEnd(S.dA,p);p.x=e.x;p.y=e.y;p.kind=e.kind}else orthoFix(S.dA,p)}
   return p;
 }
@@ -1554,12 +1554,16 @@ function primAt(sx,sy,rpx){const q=toSheet(sx,sy);const c=collectSegs(q[0],q[1],
 function setHidden(i,on){D.hid[i]=on?1:0;dirtyPrim(D,i);invalidateAll();if(aiming())updateSnap()}
 function hiddenCount(){let n=0;for(let i=0;i<D.hid.length;i++)n+=D.hid[i];return n}
 // keep a straight line exactly horizontal/vertical when it is drawn within 3 degrees of it
-function orthoFix(a,p){
-  if(!a||S.draftMode!=='line'||(p.kind&&p.kind!==6))return p;const dx=p.x-a.x,dy=p.y-a.y,t=Math.tan(3*D2R);let u=null;
-  if(Math.abs(dy)<=Math.abs(dx)*t){u=[dx<0?-1:1,0];p.ortho='水平'}else if(Math.abs(dx)<=Math.abs(dy)*t){u=[0,dy<0?-1:1];p.ortho='垂直'}
+function orthoFix(a,p,dirOnly){
+  if(!a||S.draftMode!=='line'||(p.kind&&p.kind!==6))return p;const dx=p.x-a.x,dy=p.y-a.y,t=Math.tan(3*D2R);let u=null,o='';
+  if(Math.abs(dy)<=Math.abs(dx)*t){u=[dx<0?-1:1,0];o='水平'}else if(Math.abs(dx)<=Math.abs(dy)*t){u=[0,dy<0?-1:1];o='垂直'}
   if(!u)return p;
-  const h=p.kind===6?rayHit(a,u,p,30):null;   // on a line: stay on it
-  if(h){p.x=h.x;p.y=h.y}else if(u[0])p.y=a.y;else p.x=a.x;
+  // the end itself: made level / plumb only when the guide passes within the reticle circle, so a long line seen up close does not jump away
+  if(!dirOnly&&(u[0]?Math.abs(dy):Math.abs(dx))*V.z>13)return p;
+  // aimed on a line: the end stays on that line. Level / plumb only where it meets the line near the aim;
+  // a line running almost level meets it far away, so then the line is drawn as aimed (a typed length only needs the direction)
+  if(p.kind===6&&!dirOnly){const h=rayHit(a,u,p,30);if(!h)return p;p.x=h.x;p.y=h.y;p.ortho=o;return p}
+  if(u[0])p.y=a.y;else p.x=a.x;p.ortho=o;
   return p;
 }
 function draftPlace(p,sx,sy){
@@ -1575,7 +1579,7 @@ function draftPlace(p,sx,sy){
   if(S.dLen&&m==='circle'){if(!scaleKnown(p.rx)){noScaleToast();return}addCircleNote(p,S.dLen.R);return}
   if(S.dLen&&S.dA&&LEN_MODES.includes(m)){
     if(!scaleKnown(S.dA.rx)){noScaleToast();return}
-    if(m==='line')orthoFix(S.dA,p);const e=lenEnd(S.dA,p,S.dLen);
+    if(m==='line')orthoFix(S.dA,p,true);const e=lenEnd(S.dA,p,S.dLen);
     if(!e){toast('照準を動かして線の向きを決めてください');return}
     if(tooBig(Math.hypot(e.x-S.dA.x,e.y-S.dA.y))){toast('長すぎます（単位は m です）',2600);return}
     addLineNote(m,S.dA,e,m==='grade'?null:S.dLen.L);S.dA=null;return;
